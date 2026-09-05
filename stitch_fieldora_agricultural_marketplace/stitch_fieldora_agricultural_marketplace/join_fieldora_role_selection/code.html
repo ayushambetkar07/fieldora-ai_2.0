@@ -1,0 +1,153 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Fieldora - Select Your Role</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#4ae176",
+                        "tertiary-container": "#004dcd",
+                        "primary": "#004c22",
+                        "on-tertiary-fixed-variant": "#003ea8",
+                        "surface-tint": "#1f6c3a",
+                        "inverse-primary": "#8bd79b",
+                        "secondary-fixed": "#6bff8f",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#bfcdff",
+                        "surface-container-highest": "#dae5dc",
+                        "secondary-container": "#6bff8f",
+                        "on-secondary-fixed": "#002109",
+                        "surface-container-low": "#ebf7ed",
+                        "primary-fixed": "#a6f4b5",
+                        "on-surface": "#141e18",
+                        "surface-bright": "#f1fcf2",
+                        "on-background": "#141e18",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#dbe1ff",
+                        "on-secondary-container": "#007432",
+                        "on-primary-fixed": "#00210b",
+                        "secondary": "#006e2f",
+                        "inverse-surface": "#28332c",
+                        "primary-fixed-dim": "#8bd79b",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#e5f1e7",
+                        "surface-dim": "#d1ddd3",
+                        "background": "#f1fcf2",
+                        "surface": "#f1fcf2",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#bfc9bd",
+                        "outline": "#707a6f",
+                        "primary-container": "#166534",
+                        "on-primary-fixed-variant": "#005226",
+                        "surface-container-high": "#e0ebe1",
+                        "on-primary-container": "#93e0a2",
+                        "inverse-on-surface": "#e8f4ea",
+                        "tertiary": "#00389b",
+                        "error": "#ba1a1a",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#005321",
+                        "surface-variant": "#dae5dc",
+                        "on-tertiary-fixed": "#00174b",
+                        "on-surface-variant": "#404940"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "xl": "32px",
+                        "2xl": "48px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "section-title": ["Inter", "sans-serif"],
+                        "impact-price": ["Inter", "sans-serif"],
+                        "body-secondary": ["Inter", "sans-serif"],
+                        "page-title-mobile": ["Inter", "sans-serif"],
+                        "page-title": ["Inter", "sans-serif"],
+                        "label-caps": ["Inter", "sans-serif"],
+                        "body-main": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background: linear-gradient(135deg, #f1fcf2 0%, #e0ebe1 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(0, 76, 34, 0.05);
+        }
+        .glass-card:hover {
+            box-shadow: 0 12px 48px 0 rgba(0, 76, 34, 0.1);
+            transform: translateY(-4px);
+            border: 1px solid rgba(139, 215, 155, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center text-on-surface antialiased p-margin-mobile md:p-margin-desktop relative overflow-hidden">
+<!-- Decorative background elements -->
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-fixed/20 blur-3xl pointer-events-none"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary-fixed/15 blur-3xl pointer-events-none"></div>
+<main class="w-full max-w-5xl mx-auto flex flex-col items-center relative z-10">
+<header class="mb-2xl flex flex-col items-center text-center">
+<img alt="Fieldora Logo" class="h-20 w-auto mb-lg object-contain drop-shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-ZV7XxjIGfDGD01FGbm9l87yAON7ER6FCAGcrCLIM0-sgs5dOVjGpPNw916s0q6hkA1SsAGFft22HWY12evLIgqiCpoOl6QIxwCvlw5r9Iu8mxsOqvTBI6kFvXqQrPn8mFSXnuXQcp6VxVBAceG6tPIMmmWeo3SEEi5MpDtEdotCgkQIzSkt8Q0eWDshZ_xB6H2M0ee35j8fYYmEUhbn75eWS9Ue5lYIBx-NHTgTmoVexUA7j8dgvOA">
+<h1 class="font-page-title-mobile text-[36px] leading-[44px] md:font-page-title md:text-[48px] md:leading-[56px] font-bold text-primary tracking-tight">Join Fieldora as a...</h1>
+<p class="font-body-main text-[18px] text-on-surface-variant mt-md font-light max-w-lg">Select your primary role to customize your experience and access tailored tools.</p>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl w-full max-w-4xl px-4">
+<a class="group relative glass-card rounded-3xl p-xl flex flex-col items-center text-center transition-all duration-300" href="#">
+<div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-surface-container-low to-surface-container-highest shadow-inner flex items-center justify-center mb-lg group-hover:from-primary-fixed group-hover:to-secondary-fixed-dim transition-all duration-300">
+<span class="material-symbols-outlined text-primary text-5xl font-light" data-icon="agriculture">agriculture</span>
+</div>
+<h2 class="font-section-title text-[24px] font-semibold text-primary mb-sm">Farmer / FPO</h2>
+<p class="font-body-secondary text-[15px] leading-relaxed text-on-surface-variant flex-grow px-4">List produce, check market prices, and connect with buyers directly through our streamlined platform.</p>
+<div class="mt-lg flex items-center justify-center w-full">
+<span class="inline-flex items-center justify-center h-[48px] px-8 rounded-full bg-surface-container-highest text-primary font-semibold text-[14px] tracking-wide uppercase group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 shadow-sm group-hover:shadow-md">Select Role <span class="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span></span>
+</div>
+</a>
+<a class="group relative glass-card rounded-3xl p-xl flex flex-col items-center text-center transition-all duration-300" href="#">
+<div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-surface-container-low to-surface-container-highest shadow-inner flex items-center justify-center mb-lg group-hover:from-primary-fixed group-hover:to-secondary-fixed-dim transition-all duration-300">
+<span class="material-symbols-outlined text-primary text-5xl font-light" data-icon="storefront">storefront</span>
+</div>
+<h2 class="font-section-title text-[24px] font-semibold text-primary mb-sm">Buyer</h2>
+<p class="font-body-secondary text-[15px] leading-relaxed text-on-surface-variant flex-grow px-4">Source quality produce directly from verified farmers and FPOs with transparent pricing and logistics.</p>
+<div class="mt-lg flex items-center justify-center w-full">
+<span class="inline-flex items-center justify-center h-[48px] px-8 rounded-full bg-surface-container-highest text-primary font-semibold text-[14px] tracking-wide uppercase group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 shadow-sm group-hover:shadow-md">Select Role <span class="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span></span>
+</div>
+</a>
+</div>
+<div class="mt-2xl text-center glass-card px-8 py-4 rounded-full inline-block">
+<p class="font-body-secondary text-[15px] text-on-surface-variant">
+                Already have an account? <a class="text-primary hover:text-secondary font-semibold transition-colors duration-200" href="#">Log in here</a>
+</p>
+</div>
+</main>
+</body></html>

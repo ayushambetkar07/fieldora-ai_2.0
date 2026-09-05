@@ -1,0 +1,406 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Fieldora Platinum Elite - Produce</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#aad0b1",
+                      "deep-forest": "#0B2B16",
+                      "outline-variant": "#bfc9bd",
+                      "background": "#f8faf9",
+                      "tertiary-fixed": "#c5eccc",
+                      "on-secondary": "#ffffff",
+                      "glass-stroke": "rgba(255, 255, 255, 0.4)",
+                      "secondary-container": "#c2e9ce",
+                      "on-tertiary-fixed": "#00210e",
+                      "surface-container-low": "#f2f4f3",
+                      "surface-tint": "#1f6c3a",
+                      "on-primary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "secondary-fixed-dim": "#a9cfb5",
+                      "primary": "#004c22",
+                      "primary-fixed-dim": "#8bd79b",
+                      "on-tertiary-container": "#b2d9b9",
+                      "on-secondary-container": "#476a55",
+                      "tertiary-container": "#3e6047",
+                      "on-secondary-fixed": "#002111",
+                      "on-surface": "#191c1c",
+                      "on-error-container": "#93000a",
+                      "surface-dim": "#d8dada",
+                      "high-contrast-white": "#FFFFFF",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-container": "#93e0a2",
+                      "outline": "#707a6f",
+                      "surface-container": "#eceeed",
+                      "secondary-fixed": "#c5ecd1",
+                      "primary-fixed": "#a6f4b5",
+                      "primary-container": "#166534",
+                      "surface": "#f8faf9",
+                      "on-surface-variant": "#404940",
+                      "inverse-on-surface": "#eff1f0",
+                      "tertiary": "#264831",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#f8faf9",
+                      "soft-sage": "#DAE5DC",
+                      "surface-variant": "#e1e3e2",
+                      "on-background": "#191c1c",
+                      "surface-container-highest": "#e1e3e2",
+                      "surface-container-high": "#e6e9e8",
+                      "on-primary-fixed-variant": "#005226",
+                      "on-primary-fixed": "#00210b",
+                      "on-secondary-fixed-variant": "#2c4e3a",
+                      "inverse-surface": "#2e3131",
+                      "error": "#ba1a1a",
+                      "inverse-primary": "#8bd79b",
+                      "error-container": "#ffdad6",
+                      "secondary": "#436650",
+                      "on-tertiary-fixed-variant": "#2c4e36"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "unit": "8px",
+                      "container-padding-desktop": "40px",
+                      "container-padding-mobile": "20px",
+                      "section-gap": "64px"
+              },
+              "fontFamily": {
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "title-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "26px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "title-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "34px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "22px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.06em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #f8faf9; /* background */
+            color: #191c1c; /* on-background */
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4); /* glass-stroke */
+            box-shadow: 0 8px 32px 0 rgba(11, 43, 22, 0.08);
+            border-radius: 24px;
+        }
+
+        .primary-btn {
+            background: linear-gradient(180deg, #166534 0%, #004c22 100%);
+            box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.2), 0px 4px 12px rgba(0, 76, 34, 0.2);
+            transition: all 0.2s ease-in-out;
+        }
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.2), 0px 6px 16px rgba(0, 76, 34, 0.3);
+        }
+        .primary-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex antialiased selection:bg-primary-fixed selection:text-on-primary-fixed relative overflow-x-hidden">
+<!-- TopNavBar (Mobile Only) -->
+<nav class="md:hidden bg-surface/70 backdrop-blur-xl dark:bg-deep-forest/70 text-primary dark:text-primary-fixed font-body-md text-body-md fixed top-0 w-full z-50 border-b border-glass-stroke shadow-[0_8px_32px_0_rgba(11,43,22,0.08)] flex items-center justify-between px-gutter h-20 w-full">
+<div class="font-headline-md text-headline-md font-bold text-deep-forest dark:text-primary-fixed">Fieldora Platinum Elite</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant">grade</span>
+</div>
+</nav>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex flex-col py-8 px-4 space-y-4 bg-surface-container-low/80 backdrop-blur-xl dark:bg-deep-forest/90 text-primary dark:text-primary-fixed-dim font-title-md text-title-md fixed left-0 top-0 h-full w-72 border-r border-glass-stroke shadow-lg z-40">
+<div class="px-4 mb-8">
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed tracking-tight">Fieldora</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Platinum Elite</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-soft-sage/20 rounded-xl hover:translate-x-1 transition-transform active:scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-soft-sage/20 rounded-xl hover:translate-x-1 transition-transform active:scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<span>Marketplace</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-soft-sage/20 rounded-xl hover:translate-x-1 transition-transform active:scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined">assignment_late</span>
+<span>Requirements</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-soft-sage/20 rounded-xl hover:translate-x-1 transition-transform active:scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span>Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-xl font-semibold hover:translate-x-1 transition-transform active:scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined">psychology_alt</span>
+<span>Produce</span>
+</a>
+</nav>
+<div class="mt-auto space-y-2 pt-4 border-t border-glass-stroke">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-soft-sage/20 rounded-xl hover:translate-x-1 transition-transform active:scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-soft-sage/20 rounded-xl hover:translate-x-1 transition-transform active:scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+<button class="w-full mt-4 py-3 rounded-xl border border-primary text-primary font-title-md text-title-md hover:bg-primary/5 transition-colors">
+                Upgrade Plan
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 mt-20 md:mt-0 p-container-padding-mobile md:p-container-padding-desktop bg-surface-bright relative min-h-screen">
+<!-- Header Section -->
+<header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-section-gap gap-6">
+<div>
+<h2 class="font-display-lg text-display-lg text-deep-forest mb-2">My Produce</h2>
+<p class="font-body-lg text-body-lg text-outline">Manage your elite agricultural inventory and market presence.</p>
+</div>
+<button class="primary-btn px-6 py-3 rounded-xl text-on-primary font-title-md text-title-md flex items-center gap-2">
+<span class="material-symbols-outlined">add</span>
+                Add New Listing
+            </button>
+</header>
+<!-- Metrics Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-section-gap">
+<div class="glass-card p-6 flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'wght' 200;">inventory_2</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 bg-primary/10 text-primary rounded-full">+12% this month</span>
+</div>
+<div>
+<h3 class="font-body-md text-body-md text-outline mb-1">Active Listings</h3>
+<p class="font-headline-lg text-headline-lg text-deep-forest">42 Items</p>
+</div>
+</div>
+<div class="glass-card p-6 flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'wght' 200;">monitoring</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 bg-primary/10 text-primary rounded-full">Est. $1.2M</span>
+</div>
+<div>
+<h3 class="font-body-md text-body-md text-outline mb-1">Total Yield Projections</h3>
+<p class="font-headline-lg text-headline-lg text-deep-forest">1,250 Tons</p>
+</div>
+</div>
+<div class="glass-card p-6 flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="p-3 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'wght' 200;">public</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 bg-surface-container-high text-on-surface-variant rounded-full">Global Reach</span>
+</div>
+<div class="relative z-10">
+<h3 class="font-body-md text-body-md text-outline mb-1">Market Exposure</h3>
+<p class="font-headline-lg text-headline-lg text-deep-forest">High Demand</p>
+</div>
+</div>
+</section>
+<!-- Produce Grid -->
+<section>
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-md text-headline-md text-deep-forest">Current Inventory</h3>
+<div class="flex gap-2">
+<button class="p-2 border border-glass-stroke rounded-lg bg-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">filter_list</span>
+</button>
+<button class="p-2 border border-glass-stroke rounded-lg bg-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">sort</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Produce Card 1 -->
+<article class="glass-card p-0 overflow-hidden flex flex-col group cursor-pointer hover:border-primary-fixed-dim transition-colors">
+<div class="h-48 bg-surface-container-low relative" data-alt="Close up high quality photo of golden premium wheat fields ready for harvest, bright sunny day, modern agriculture, selective focus, bright light-mode aesthetic, lush greens and golds." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDImPIqKGvZvwnoPEiSY3EFBNhjTQyaW8kCliFuXcMP7_A8Q5XPCsCWTWVM8sHOYroy8MSahvofVPZJd9rzSbh7kzqM7VjYv6LYNP-0Jf2F75KvCAQQFl0h7rz76ESpbdgfh1SXbE6ubzj2TQVb05Y_UsV4RFIsw1Lb5P5O02fhkg7NJXRj_hJDfnhw3w5uS0P25VP_Q8NjUraURzJk3GB8yGGE2zJFK57Hm5EVohdDtiDAiOPPG04d8Q')">
+<div class="absolute top-4 right-4 font-label-sm text-label-sm px-3 py-1 bg-surface-container-highest/90 backdrop-blur-md text-deep-forest rounded-full border border-glass-stroke">Grade A+</div>
+</div>
+<div class="p-6 flex-1 flex flex-col">
+<h4 class="font-title-md text-title-md text-deep-forest mb-1">Premium Hard Red Winter Wheat</h4>
+<p class="font-body-md text-body-md text-outline mb-4">Lot #WH-2023-A</p>
+<div class="mt-auto space-y-4">
+<div class="flex justify-between items-end border-b border-soft-sage pb-4">
+<div>
+<span class="font-label-sm text-label-sm text-outline block mb-1 uppercase tracking-wider">Current Stock</span>
+<span class="font-headline-md text-headline-md text-primary">500 Tons</span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline block mb-1 uppercase tracking-wider">Market Price</span>
+<span class="font-title-md text-title-md text-deep-forest">$320/t</span>
+</div>
+</div>
+</div>
+</div>
+</article>
+<!-- Produce Card 2 -->
+<article class="glass-card p-0 overflow-hidden flex flex-col group cursor-pointer hover:border-primary-fixed-dim transition-colors">
+<div class="h-48 bg-surface-container-low relative" data-alt="Macro photography of perfectly round, clean organic soybeans in a modern metallic agricultural container, soft diffused natural lighting, highly detailed, professional farming context, light clean aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBd1ibrkknAgEYHb9mqtMDAEbscHagnqeLhwnG2x7gL2qmp8UbP7-GS0xkw3XkLpsmEY0eJctbjEom0JJFZT2hehq75CcIhaPJReh2nHmV5Q2WMH_dQpwHPFy0rfrairArArjjhenA-693BP8f9bHePIYqeuNCE90TiT6NH-FZ-2BwvjWL5cmtuO5vkKYDDqOXOUORaUNI5s-JGzSCiPjVusWoHTua0tIz8_1XQgAJo7-lzMxEq9-5EKw')">
+<div class="absolute top-4 right-4 font-label-sm text-label-sm px-3 py-1 bg-surface-container-highest/90 backdrop-blur-md text-deep-forest rounded-full border border-glass-stroke">Grade A</div>
+</div>
+<div class="p-6 flex-1 flex flex-col">
+<h4 class="font-title-md text-title-md text-deep-forest mb-1">Certified Organic Soybeans</h4>
+<p class="font-body-md text-body-md text-outline mb-4">Lot #SY-2023-B</p>
+<div class="mt-auto space-y-4">
+<div class="flex justify-between items-end border-b border-soft-sage pb-4">
+<div>
+<span class="font-label-sm text-label-sm text-outline block mb-1 uppercase tracking-wider">Current Stock</span>
+<span class="font-headline-md text-headline-md text-primary">250 Tons</span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline block mb-1 uppercase tracking-wider">Market Price</span>
+<span class="font-title-md text-title-md text-deep-forest">$580/t</span>
+</div>
+</div>
+</div>
+</div>
+</article>
+</div>
+</section>
+</main>
+<!-- NavigationDrawer (Sparkles AI Assistant) -->
+<aside class="hidden xl:flex flex-col p-6 space-y-6 bg-surface-container-highest/90 backdrop-blur-2xl dark:bg-tertiary-container/90 text-primary dark:text-tertiary-fixed font-label-sm text-label-sm uppercase tracking-wider fixed right-0 top-0 h-full w-80 z-[60] border-l border-glass-stroke shadow-2xl duration-300 ease-in-out">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md font-black text-primary dark:text-tertiary-fixed normal-case">Sparkles AI</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant dark:text-outline-variant normal-case">Contextual Assistant</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 border-b border-glass-stroke pb-6">
+<a class="flex items-center gap-3 px-4 py-3 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed rounded-full" href="#">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+<span>Contextual Insights</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-on-tertiary-container opacity-70 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined">trending_up</span>
+<span>Market Trends</span>
+</a>
+</nav>
+<div class="flex-1 overflow-y-auto pt-4 space-y-4">
+<h4 class="font-title-md text-title-md text-deep-forest normal-case mb-2">Listing Optimizations</h4>
+<div class="bg-surface p-4 rounded-xl border border-glass-stroke shadow-sm">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container mt-1">lightbulb</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface normal-case leading-snug">Demand for Organic Soybeans is up 8% in European markets. Consider allocating 50 tons for export.</p>
+<button class="mt-2 text-primary font-title-md text-title-md normal-case hover:underline">Apply Strategy</button>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</body></html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Fieldora Buyer Marketplace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#8bd79b",
+                        "surface-tint": "#1f6c3a",
+                        "surface-dim": "#d1ddd3",
+                        "on-secondary-fixed-variant": "#005321",
+                        "on-secondary-container": "#007432",
+                        "secondary-fixed-dim": "#4ae176",
+                        "inverse-primary": "#8bd79b",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#6bff8f",
+                        "outline": "#707a6f",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#141e18",
+                        "on-background": "#141e18",
+                        "primary-fixed": "#a6f4b5",
+                        "surface": "#f1fcf2",
+                        "secondary-container": "#6bff8f",
+                        "inverse-on-surface": "#e8f4ea",
+                        "on-primary-fixed": "#00210b",
+                        "tertiary": "#00389b",
+                        "inverse-surface": "#28332c",
+                        "on-surface-variant": "#404940",
+                        "on-tertiary-fixed": "#00174b",
+                        "surface-bright": "#f1fcf2",
+                        "surface-container-high": "#e0ebe1",
+                        "tertiary-container": "#004dcd",
+                        "on-tertiary-container": "#bfcdff",
+                        "surface-container-highest": "#dae5dc",
+                        "tertiary-fixed": "#dbe1ff",
+                        "on-primary-container": "#93e0a2",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#005226",
+                        "outline-variant": "#bfc9bd",
+                        "primary-container": "#166534",
+                        "on-tertiary-fixed-variant": "#003ea8",
+                        "on-secondary-fixed": "#002109",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "secondary": "#006e2f",
+                        "on-primary": "#ffffff",
+                        "primary": "#004c22",
+                        "surface-container": "#e5f1e7",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#dae5dc",
+                        "background": "#f1fcf2",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "surface-container-low": "#ebf7ed"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "margin-desktop": "32px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "xl": "32px",
+                        "margin-mobile": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "body-secondary": ["Inter"],
+                        "section-title": ["Inter"],
+                        "page-title-mobile": ["Inter"],
+                        "body-main": ["Inter"],
+                        "page-title": ["Inter"],
+                        "impact-price": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-secondary": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "section-title": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "page-title-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-main": ["15px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "page-title": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "impact-price": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-main min-h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop bg-surface/80 backdrop-blur-md h-16 border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="font-page-title text-page-title font-bold text-primary">Fieldora</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="swap_horiz">swap_horiz</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[280px] pt-24 z-40 bg-surface border-r border-outline-variant">
+<div class="px-lg pb-md">
+<img alt="Fieldora Logo" class="h-12 w-auto mb-2 rounded-md object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VoKMEH4odP017-UQQRKs1wiEamCqi9N3Rp_j2tD5UUm8aioAp-0VjE6-iiBYpREuptzrZ88YLIkFYcIMixG1EI0u_GTcE_3Gr6hHBrUZSNpCfThccVLj70fTSynvxQhDqEFarEqqmVLkzHwdb5hipmR711fZoCSzkX4V0_GE-sm2YDScnFhGU6XorO7p8l9mv-OkL6px6b0iTdRdd1fyUKPQ9dD9497feWUZ2xu6Ttlf_fEiqoZgmb0zw">
+<div class="font-page-title text-page-title font-bold text-primary">Fieldora</div>
+<div class="font-body-secondary text-body-secondary text-on-surface-variant">Farmer Portal</div>
+</div>
+<ul class="flex flex-col gap-1 px-sm mt-4">
+<li><a class="text-on-surface-variant flex items-center gap-md px-md py-sm hover:bg-surface-container-low transition-all duration-200 ease-in-out rounded-lg" href="#"><span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> Dashboard</a></li>
+<li><a class="relative text-primary font-bold after:content-[''] after:absolute after:left-0 after:w-1 after:h-full after:bg-primary after:rounded-full bg-primary/10 flex items-center gap-md px-md py-sm transition-all duration-200 ease-in-out rounded-lg" href="#"><span class="material-symbols-outlined filled" data-icon="storefront">storefront</span> Marketplace</a></li>
+<li><a class="text-on-surface-variant flex items-center gap-md px-md py-sm hover:bg-surface-container-low transition-all duration-200 ease-in-out rounded-lg" href="#"><span class="material-symbols-outlined" data-icon="trending_up">trending_up</span> Market Prices</a></li>
+<li><a class="text-on-surface-variant flex items-center gap-md px-md py-sm hover:bg-surface-container-low transition-all duration-200 ease-in-out rounded-lg" href="#"><span class="material-symbols-outlined" data-icon="agriculture">agriculture</span> My Produce</a></li>
+<li><a class="text-on-surface-variant flex items-center gap-md px-md py-sm hover:bg-surface-container-low transition-all duration-200 ease-in-out rounded-lg" href="#"><span class="material-symbols-outlined" data-icon="list_alt">list_alt</span> Requirements</a></li>
+<li><a class="text-on-surface-variant flex items-center gap-md px-md py-sm hover:bg-surface-container-low transition-all duration-200 ease-in-out rounded-lg" href="#"><span class="material-symbols-outlined" data-icon="mail">mail</span> Requests</a></li>
+<li><a class="text-on-surface-variant flex items-center gap-md px-md py-sm hover:bg-surface-container-low transition-all duration-200 ease-in-out rounded-lg" href="#"><span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span> Orders</a></li>
+<li><a class="text-on-surface-variant flex items-center gap-md px-md py-sm hover:bg-surface-container-low transition-all duration-200 ease-in-out rounded-lg" href="#"><span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span> AI Assistant</a></li>
+</ul>
+<div class="mt-auto p-lg">
+<button class="w-full bg-primary-container text-on-primary text-center py-3 rounded-lg font-bold hover:bg-primary transition-colors">Post Produce</button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="lg:ml-[280px] lg:mr-[320px] pt-24 px-margin-desktop pb-24">
+<div class="mb-lg">
+<h1 class="font-page-title text-page-title text-on-surface mb-2">Find agricultural produce directly from verified farmers.</h1>
+<p class="font-body-main text-body-main text-on-surface-variant">Use natural language or strict filters to find exactly what you need.</p>
+</div>
+<!-- Smart Search Bar -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md mb-xl shadow-sm">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 transform -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 pl-12 pr-4 py-3 font-body-main text-on-surface placeholder-on-surface-variant" placeholder="Search crops, varieties or locations..." type="text" value="I need 500 kg Grade A tomatoes near Mumbai under ₹3,000/q">
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-tertiary" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Smart Interpretation Active</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<div class="bg-primary-container/10 text-primary-container border border-primary-container/20 rounded-full px-3 py-1 flex items-center gap-1 font-body-secondary text-body-secondary">
+<span class="font-bold">Crop:</span> Tomato
+                        <button class="material-symbols-outlined text-[16px] ml-1">close</button>
+</div>
+<div class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-full px-3 py-1 flex items-center gap-1 font-body-secondary text-body-secondary">
+<span class="font-bold">Qty:</span> 500 kg
+                        <button class="material-symbols-outlined text-[16px] ml-1">close</button>
+</div>
+<div class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-full px-3 py-1 flex items-center gap-1 font-body-secondary text-body-secondary">
+<span class="font-bold">Quality:</span> Grade A
+                        <button class="material-symbols-outlined text-[16px] ml-1">close</button>
+</div>
+<div class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-full px-3 py-1 flex items-center gap-1 font-body-secondary text-body-secondary">
+<span class="font-bold">Location:</span> Mumbai
+                        <button class="material-symbols-outlined text-[16px] ml-1">close</button>
+</div>
+<div class="bg-secondary/10 text-secondary border border-secondary/20 rounded-full px-3 py-1 flex items-center gap-1 font-body-secondary text-body-secondary">
+<span class="font-bold">Price:</span> ≤ ₹3,000/q
+                        <button class="material-symbols-outlined text-[16px] ml-1">close</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Filters (Top Bar for simplicity in this layout) -->
+<div class="flex flex-wrap gap-4 mb-lg pb-4 border-b border-outline-variant">
+<select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2 font-body-secondary text-on-surface focus:border-primary focus:ring-1 focus:ring-primary">
+<option>Tomato</option>
+<option>Onion</option>
+<option>Potato</option>
+</select>
+<input class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2 font-body-secondary text-on-surface focus:border-primary focus:ring-1 focus:ring-primary w-48" type="text" value="Mumbai">
+<select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2 font-body-secondary text-on-surface focus:border-primary focus:ring-1 focus:ring-primary">
+<option>Any Grade</option>
+<option selected="">Grade A</option>
+<option>Grade B</option>
+</select>
+<button class="bg-surface-container-highest text-on-surface px-4 py-2 rounded-lg font-body-secondary hover:bg-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="tune">tune</span> More Filters
+            </button>
+</div>
+<!-- Produce Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-lg">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="bg-cover bg-center w-full h-48" data-alt="A vivid, ultra-realistic close-up shot of perfectly ripe, bright red Sonalika tomatoes piled in a rustic wooden crate on a sunny agricultural farm. High-key natural lighting highlighting the fresh dew drops on the skin. Modern agritech aesthetic, rich greens and reds, clean composition." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDUWU1m6SYQ0c-oLvlAdRB82ueexzCDbBzPJCdDFCIf-LFkywMT90RxP2vfjks6jfAqYyMgsocMCCEk_Sw3bylgnlPBfblCxqXMZ_oS8T_jX4p-DUXCG3a6z2jBBCHZnXTdofTPwfSv1WhyW6sERiOJJ-cTvUNOyCpgVnMze_HXsKVr9wbwoL7-aN0byFxFneHVmyUFjEoXiJ8PW0eW-I2kL_kaC4t1T7iMh6L8muuzFS_gGNkfe-2CgQ')"></div>
+<div class="p-lg">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-section-title text-section-title text-on-surface">Premium Sonalika Tomato</h3>
+<span class="bg-secondary/10 text-secondary font-label-caps text-label-caps px-2 py-1 rounded">Grade A</span>
+</div>
+<div class="flex items-center gap-1 mb-4 text-primary font-body-secondary text-body-secondary">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Raj Farms</span>
+</div>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-body-secondary font-body-secondary">
+<span class="text-on-surface-variant">Location</span>
+<span class="text-on-surface font-medium">Nashik, Maharashtra</span>
+</div>
+<div class="flex justify-between text-body-secondary font-body-secondary">
+<span class="text-on-surface-variant">Available</span>
+<span class="text-on-surface font-medium">500 kg</span>
+</div>
+<div class="flex justify-between text-body-secondary font-body-secondary">
+<span class="text-on-surface-variant">Harvest</span>
+<span class="text-on-surface font-medium">10 Sept</span>
+</div>
+</div>
+<div class="mb-6">
+<div class="font-impact-price text-impact-price text-on-surface">₹2,800/q</div>
+<div class="font-body-secondary text-body-secondary text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">local_shipping</span> Delivery Available
+                        </div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 bg-surface-container border border-outline-variant text-on-surface py-2 rounded-lg font-bold hover:bg-surface-variant transition-colors">Details</button>
+<button class="flex-1 bg-primary-container text-on-primary py-2 rounded-lg font-bold hover:bg-primary transition-colors">Contact</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="bg-cover bg-center w-full h-48" data-alt="A vivid, high-resolution photo of fresh, firm red tomatoes arranged neatly in a modern, clean greenhouse setting. Soft, diffused daylight illuminates the scene, emphasizing the professional, commercial farming environment. Deep reds and vibrant greens dominate the palette." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDS0hgeMt9A2B13mwSsFAB7iY_S7-Mb1m7r2--l1ficbgTq_Gk6edX0WGhQTazFehprbdKiHLEphNV2Vw-iUEqdR313wgkcVfhMNGK-I4OXHmjnLa4hZlMurGGqB5zu42PSdjcFXiS0DdN-rqMjmscT0N16U0C6d7v_uMiNI4kaPs013hTBM5bTYy_s1asbDdBjCJ67K30pVc74cNyYzKAZp7Yp8VXOcr6rNzvyUTpRi-tQyLsZ3a5zvw')"></div>
+<div class="p-lg">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-section-title text-section-title text-on-surface">Hybrid Red Tomatoes</h3>
+<span class="bg-secondary/10 text-secondary font-label-caps text-label-caps px-2 py-1 rounded">Grade A</span>
+</div>
+<div class="flex items-center gap-1 mb-4 text-primary font-body-secondary text-body-secondary">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Green Valley Co.</span>
+</div>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-body-secondary font-body-secondary">
+<span class="text-on-surface-variant">Location</span>
+<span class="text-on-surface font-medium">Pune, Maharashtra</span>
+</div>
+<div class="flex justify-between text-body-secondary font-body-secondary">
+<span class="text-on-surface-variant">Available</span>
+<span class="text-on-surface font-medium">1200 kg</span>
+</div>
+<div class="flex justify-between text-body-secondary font-body-secondary">
+<span class="text-on-surface-variant">Harvest</span>
+<span class="text-on-surface font-medium">12 Sept</span>
+</div>
+</div>
+<div class="mb-6">
+<div class="font-impact-price text-impact-price text-on-surface">₹2,950/q</div>
+<div class="font-body-secondary text-body-secondary text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">local_shipping</span> Delivery Available
+                        </div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 bg-surface-container border border-outline-variant text-on-surface py-2 rounded-lg font-bold hover:bg-surface-variant transition-colors">Details</button>
+<button class="flex-1 bg-primary-container text-on-primary py-2 rounded-lg font-bold hover:bg-primary transition-colors">Contact</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- NavigationDrawer (Sparkles AI) -->
+<aside class="fixed right-0 top-0 h-full w-[320px] z-50 flex flex-col p-md bg-surface-container-low border-l border-outline-variant shadow-sm translate-x-0 transition-transform">
+<div class="flex items-center gap-3 mb-6 p-2">
+<span class="material-symbols-outlined text-tertiary text-3xl" data-icon="auto_awesome">auto_awesome</span>
+<div>
+<h2 class="font-section-title text-section-title text-tertiary">Sparkles Assistant</h2>
+<p class="font-body-secondary text-body-secondary text-on-surface-variant">Context-aware help</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 mb-4">
+<p class="font-body-secondary text-body-secondary text-on-surface mb-2">I noticed you're searching for <strong>Grade A Tomatoes</strong> near <strong>Mumbai</strong> under ₹3,000/q.</p>
+<p class="font-body-secondary text-body-secondary text-on-surface">Raj Farms in Nashik currently has the best matching inventory at ₹2,800/q. Would you like me to draft an inquiry message for them?</p>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant">
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-full pl-4 pr-10 py-2 font-body-secondary text-on-surface focus:border-tertiary focus:ring-1 focus:ring-tertiary" placeholder="Ask Sparkles..." type="text">
+<button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-tertiary p-1">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- BottomNavBar (Mobile only, hidden on lg) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface/90 border-t border-outline-variant/30 backdrop-blur-lg shadow-lg rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 scale-90 duration-75 active:bg-surface-container rounded-xl">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container p-2 scale-90 duration-75 rounded-xl">
+<span class="material-symbols-outlined mb-1 filled" data-icon="storefront">storefront</span>
+<span class="font-label-caps text-label-caps">Market</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 scale-90 duration-75 active:bg-surface-container rounded-xl">
+<span class="material-symbols-outlined mb-1" data-icon="trending_up">trending_up</span>
+<span class="font-label-caps text-label-caps">Prices</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 scale-90 duration-75 active:bg-surface-container rounded-xl">
+<span class="material-symbols-outlined mb-1" data-icon="shopping_bag">shopping_bag</span>
+<span class="font-label-caps text-label-caps">Orders</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 scale-90 duration-75 active:bg-surface-container rounded-xl">
+<span class="material-symbols-outlined mb-1" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-label-caps">AI</span>
+</button>
+</nav>
+</body></html>

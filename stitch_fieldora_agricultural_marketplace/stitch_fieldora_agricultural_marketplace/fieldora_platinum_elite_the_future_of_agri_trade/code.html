@@ -1,0 +1,496 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Fieldora | Premium Agri-Tech</title>
+<!-- Fonts and Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container-lowest": "#ffffff",
+                "on-primary-fixed-variant": "#005226",
+                "secondary": "#436650",
+                "surface-bright": "#f8faf9",
+                "on-tertiary-container": "#b2d9b9",
+                "tertiary-fixed-dim": "#aad0b1",
+                "on-secondary-fixed": "#002111",
+                "surface-container-highest": "#e1e3e2",
+                "surface-container": "#eceeed",
+                "high-contrast-white": "#FFFFFF",
+                "surface-variant": "#e1e3e2",
+                "outline-variant": "#bfc9bd",
+                "secondary-fixed-dim": "#a9cfb5",
+                "tertiary": "#264831",
+                "surface-dim": "#d8dada",
+                "on-surface": "#191c1c",
+                "on-tertiary-fixed": "#00210e",
+                "on-primary-fixed": "#00210b",
+                "primary-fixed": "#a6f4b5",
+                "primary-container": "#166534",
+                "deep-forest": "#0B2B16",
+                "inverse-surface": "#2e3131",
+                "on-secondary-container": "#476a55",
+                "on-background": "#191c1c",
+                "inverse-primary": "#8bd79b",
+                "secondary-fixed": "#c5ecd1",
+                "glass-stroke": "rgba(255, 255, 255, 0.4)",
+                "surface": "#f8faf9",
+                "on-surface-variant": "#404940",
+                "outline": "#707a6f",
+                "primary": "#004c22",
+                "on-error": "#ffffff",
+                "on-primary-container": "#93e0a2",
+                "primary-fixed-dim": "#8bd79b",
+                "inverse-on-surface": "#eff1f0",
+                "on-secondary-fixed-variant": "#2c4e3a",
+                "surface-tint": "#1f6c3a",
+                "soft-sage": "#DAE5DC",
+                "error-container": "#ffdad6",
+                "tertiary-container": "#3e6047",
+                "error": "#ba1a1a",
+                "on-tertiary": "#ffffff",
+                "tertiary-fixed": "#c5eccc",
+                "on-primary": "#ffffff",
+                "secondary-container": "#c2e9ce",
+                "on-tertiary-fixed-variant": "#2c4e36",
+                "on-error-container": "#93000a",
+                "surface-container-high": "#e6e9e8",
+                "on-secondary": "#ffffff",
+                "surface-container-low": "#f2f4f3",
+                "background": "#f8faf9"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1rem",
+                "3xl": "1.5rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "section-gap": "96px",
+                "container-padding-mobile": "24px",
+                "unit": "8px",
+                "container-padding-desktop": "64px",
+                "gutter": "32px"
+        },
+        "fontFamily": {
+                "display-lg": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Inter"
+                ],
+                "body-lg": [
+                        "Inter"
+                ],
+                "title-md": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "label-sm": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ]
+        },
+        "fontSize": {
+                "display-lg": [
+                        "64px",
+                        {
+                                "lineHeight": "72px",
+                                "letterSpacing": "-0.04em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "36px",
+                        {
+                                "lineHeight": "42px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "letterSpacing": "0.01em",
+                                "fontWeight": "400"
+                        }
+                ],
+                "title-md": [
+                        "18px",
+                        {
+                                "lineHeight": "26px",
+                                "letterSpacing": "0em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "letterSpacing": "0.01em",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "28px",
+                        {
+                                "lineHeight": "36px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-sm": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.06em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "56px",
+                                "letterSpacing": "-0.03em",
+                                "fontWeight": "700"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* High-End Glassmorphism Utilities */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 30px rgba(11, 43, 22, 0.05);
+        }
+
+        .glass-card-elite {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 249, 0.85) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid theme('colors.glass-stroke');
+            box-shadow: 0 8px 32px 0 rgba(11, 43, 22, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .glass-card-elite:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px 0 rgba(11, 43, 22, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border-color: theme('colors.primary-fixed-dim');
+        }
+
+        /* Platinum Elite Buttons */
+        .btn-elite-primary {
+            background: linear-gradient(135deg, theme('colors.primary') 0%, theme('colors.deep-forest') 100%);
+            box-shadow: 0 4px 14px 0 rgba(0, 76, 34, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-elite-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .btn-elite-primary:hover::after {
+            opacity: 1;
+        }
+        .btn-elite-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px 0 rgba(0, 76, 34, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .btn-elite-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-elite-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid theme('colors.glass-stroke');
+            box-shadow: 0 4px 14px 0 rgba(11, 43, 22, 0.05);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-elite-secondary:hover {
+            background: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px 0 rgba(11, 43, 22, 0.1);
+        }
+
+        /* Cinematic Hero */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding-top: 100px; /* offset for nav */
+        }
+        
+        .hero-bg-wrapper {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        
+        .hero-bg-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            filter: brightness(1.05) contrast(1.05);
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(248, 250, 249, 0.4) 0%, rgba(248, 250, 249, 0.8) 50%, rgba(248, 250, 249, 1) 100%);
+            backdrop-filter: blur(8px);
+        }
+        
+        .hero-glow {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80vw;
+            height: 80vw;
+            max-width: 800px;
+            max-height: 800px;
+            background: radial-gradient(circle, rgba(166, 244, 181, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Subtle text gradient for key phrases */
+        .text-gradient-elite {
+            background: linear-gradient(135deg, theme('colors.deep-forest') 0%, theme('colors.primary') 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col relative bg-background text-on-background">
+<!-- TopNavBar -->
+<nav class="glass-nav fixed top-0 w-full z-50 flex justify-between items-center px-container-padding-mobile md:px-container-padding-desktop py-4 max-w-full">
+<!-- Brand -->
+<a class="font-title-md text-title-md font-bold tracking-tight text-deep-forest hover:text-primary transition-colors flex items-center gap-2" href="#">
+<span class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-deep-forest text-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">eco</span>
+</span>
+            Fieldora
+        </a>
+<!-- Desktop Navigation -->
+<div class="hidden md:flex items-center gap-8">
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors" href="#features">Features</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors" href="#stats">Impact</a>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+<button class="hidden md:block btn-elite-primary text-white font-title-md text-title-md px-8 py-2.5 rounded-xl">
+                Login
+            </button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center w-full">
+<!-- Hero Section Cinematic -->
+<section class="hero-section w-full mb-section-gap">
+<div class="hero-bg-wrapper">
+<img alt="Lush agricultural field at sunrise" class="hero-bg-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_n5zclmrv7mv4PX9pZAzNgI5Y03FGSPI0BnQGMmrCLx95OYIH9Csq0MpXaCGhwNDytvPlnQl0jBJBkGezBYNxZzdmdzL0zSo4fS-UxPl2ZOrRDosyuxajpotA0lkf64DN5ZGPN5paQmLZ4Hpx9JBpDCf-QiyqM0W1P4-JAIcmDOy1uFKRWj908IPJ8OWvwXj__GD0pSaVfalGzQv36bNv9-NMXlOyPQz9BcVNnM1RkG3EXkzxBA4i1Q">
+<div class="hero-overlay"></div>
+</div>
+<div class="hero-glow"></div>
+<div class="relative z-10 flex flex-col items-center text-center px-container-padding-mobile md:px-container-padding-desktop max-w-5xl mx-auto w-full">
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-md border border-white/50 text-primary font-label-sm text-label-sm mb-8 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                The Standard in Agritech Excellence
+            </div>
+<h1 class="font-display-lg text-display-lg text-deep-forest mb-6 max-w-4xl mx-auto leading-tight tracking-tight">Sell Smarter. Buy Better.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-12 text-lg">
+                Experience the precision of elite software merged with the raw power of the earth. Fieldora connects high-stakes agricultural decision-makers with a reliable, transparent marketplace.
+            </p>
+<div class="flex flex-col sm:flex-row gap-6 w-full sm:w-auto mb-20">
+<button class="btn-elite-primary text-white font-title-md text-title-md px-10 py-4 rounded-xl flex items-center justify-center gap-3 shadow-2xl border-white/40 to-deep-forest group-hover:scale-105 bg-primary shadow-[0_20px_60px_-15px_rgba(0,76,34,0.4)] border-2 border-white/20">I'm a Farmer
+<span class="material-symbols-outlined text-[20px]">agriculture</span></button>
+<button class="btn-elite-secondary text-deep-forest font-title-md text-title-md px-10 py-4 rounded-xl flex items-center justify-center gap-3">
+                    I'm a Buyer
+                    <span class="material-symbols-outlined text-[20px]">storefront</span>
+</button>
+</div>
+<!-- Premium Dashboard Reveal -->
+<div class="w-full max-w-[1200px] glass-card-elite rounded-3xl p-3 md:p-6 overflow-hidden relative group shadow-2xl mx-auto">
+<div class="absolute inset-0 bg-gradient-to-tr from-white/60 to-transparent pointer-events-none rounded-3xl"></div>
+<div class="w-full h-[300px] md:h-[600px] rounded-2xl overflow-hidden relative border border-white/40 shadow-inner">
+<img class="object-cover w-full h-full transform group-hover:scale-[1.02] transition-transform duration-1000 ease-out" data-alt="A highly detailed, sophisticated UI dashboard interface displayed on a sleek screen. The interface shows complex agricultural data, market trends with elegant charts, and crisp typography. The design language of the UI is 'Sophisticated Stewardship'—clean, modern glassmorphism, using a palette of soft sage greens, deep forest greens, and pristine white. The dashboard is rendered in a high-key light mode, conveying trust, precision, and elite software capabilities." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBT5hmy6kSt7_a_SmvBb0p8sWBS_84A2rzryAsWeQ7VxaLWjsAR2hmE8PAGG7nqSLAF2NlGvgXIuK5hKmkK2E8_0ZzXd63a0XL3EvLD-veT4ctKDhvWXJoQJ93m4zaAWGy2rHENNsbl5oNA7yrwpGBottsQ7IbkU8z79d6SCbSco3zcGTnw4FwrBAgWujW_T_7DuODnfHqzSLe70xkvbNFHfF_DdDZAZn6nbzjbfpGWWi4CiPhuOxHsjQ">
+</div>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="w-full py-20 px-container-padding-mobile md:px-container-padding-desktop max-w-7xl mx-auto" id="features">
+<div class="text-center mb-20">
+<h2 class="font-headline-lg text-headline-lg text-deep-forest mb-6 tracking-tight">Command Your Harvest</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
+                Sophisticated tools designed for clarity, reliability, and modern efficiency.
+            </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Feature 1: Large Span -->
+<div class="glass-card-elite rounded-3xl p-10 md:col-span-2 flex flex-col justify-between group">
+<div class="mb-10">
+<div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-soft-sage to-white flex items-center justify-center mb-6 text-primary shadow-sm group-hover:scale-105 transition-transform border border-white/60">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: &quot;wght&quot; 200;">monitoring</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-deep-forest mb-4">Transparent Market Prices</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">Real-time data visualization ensuring you always know the true value of your produce before making a move.</p>
+</div>
+<div class="h-64 rounded-2xl overflow-hidden relative bg-gradient-to-b from-white/80 to-white/40 border border-white/50 p-4">
+<img class="w-full h-full object-cover mix-blend-multiply opacity-90 rounded-xl" data-alt="A minimalist, abstract data visualization representing real-time market trends. The chart uses sleek, thin, flowing lines in shades of deep forest green and vibrant primary green against a pristine white background. The lines suggest upward growth and stability. The overall aesthetic is clean, analytical, and highly professional, fitting a premium SaaS dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKKgH9WyTrAHYu2DwLmqaaj2XKkdibapSDtep9cKKdtGpSLxJMEIyAKXCZ7aymQLK56TVj6_VkU7bWoH14NC0xvhWTscrE_MwmaAlDGIiAmJkauiOmZ71FzW4sF06SOl0oRmbAPCZr9mqrNaYGcCGc4vOWgnYc3HPtzzsR4BwalFA1oBGA0B9i79A7b5VjCogxSjylvx_wXhoxE44N6HI1U7_POmgBzuZGunROxzbx_zrICAaVzeWrzw">
+</div>
+</div>
+<!-- Feature 2 & 3 Column -->
+<div class="flex flex-col gap-8">
+<!-- Feature 2: Standard -->
+<div class="glass-card-elite rounded-3xl p-8 flex-1 flex flex-col group">
+<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-soft-sage to-white flex items-center justify-center mb-6 text-primary shadow-sm group-hover:scale-105 transition-transform border border-white/60">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: &quot;wght&quot; 200;">handshake</span>
+</div>
+<h3 class="font-headline-md text-[24px] leading-tight text-deep-forest mb-3">Direct Buyer Access</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Bypass the middlemen. Connect directly with verified buyers eager for quality yield.</p>
+</div>
+<!-- Feature 3: Standard -->
+<div class="glass-card-elite rounded-3xl p-8 flex-1 flex flex-col group">
+<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-soft-sage to-white flex items-center justify-center mb-6 text-primary shadow-sm group-hover:scale-105 transition-transform border border-white/60">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: &quot;wght&quot; 200;">verified_user</span>
+</div>
+<h3 class="font-headline-md text-[24px] leading-tight text-deep-forest mb-3">Verified Marketplace</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Every participant is vetted, creating a high-trust environment where agreements are binding and secure.</p>
+</div>
+</div>
+<!-- Feature 4: Full Span -->
+<div class="glass-card-elite rounded-3xl p-10 md:col-span-3 flex flex-col md:flex-row gap-10 items-center group">
+<div class="flex-1">
+<div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-soft-sage to-white flex items-center justify-center mb-6 text-primary shadow-sm group-hover:scale-105 transition-transform border border-white/60">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: &quot;wght&quot; 200;">radar</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-deep-forest mb-4">Smart Discovery</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Our intelligent algorithms match supply with demand instantly, optimizing routes and reducing waste on a global scale.</p>
+</div>
+<div class="flex-1 w-full h-64 rounded-2xl overflow-hidden relative bg-gradient-to-b from-white/80 to-white/40 border border-white/50 p-4">
+<img class="w-full h-full object-cover mix-blend-multiply opacity-90 rounded-xl" data-alt="A stylized, glowing interconnected network graphic against a clean, light background. Small nodes representing farms and buyers are connected by glowing green lines, symbolizing a smart discovery algorithm at work. The visual is tech-forward, minimalist, and uses the brand's 'Sophisticated Stewardship' palette of soft greens and pristine whites to convey efficiency and intelligence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOqf45QpP3Q6GI6vrRx4UcZWBm5d9y2PCyDAboOIVuGdYVfNlxpGt-nDnn1-dfBi4NGrdhhllfrcHiFKvH8fW7Fwd1-Q50hzyWrX7ecw50keVjACZNaNduqwFbl_iZXd_ppdIk7oN3u9avo3YJUY8yQqp2tOt0FnmJtyxwaAKNTWyq4ubl-nrC3zkO44-OxGfvzqfXI4BLf1pSwhbsMVAEZCOIYdSTRzhRI5EUTeAQkOB-jQqmB3YXtg">
+</div>
+</div>
+</div>
+</section>
+<!-- Trust / Stats Section -->
+<section class="w-full py-24 relative z-10 px-container-padding-mobile md:px-container-padding-desktop max-w-7xl mx-auto" id="stats">
+<div class="glass-card-elite rounded-[40px] p-16 text-center border-t border-white/80 shadow-[0_20px_60px_-15px_rgba(11,43,22,0.1)]">
+<div class="inline-flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-[40px]" style="font-variation-settings: &quot;wght&quot; 200;">public</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-deep-forest mb-16 tracking-tight">The Scale of Stewardship</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12 divide-y md:divide-y-0 md:divide-x divide-soft-sage/60">
+<div class="flex flex-col items-center justify-center pt-8 md:pt-0">
+<div class="font-display-lg text-[72px] font-extrabold text-gradient-elite mb-4 leading-none">5B+</div>
+<div class="font-title-md text-title-md text-deep-forest font-semibold mb-2">Tons Traded</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Across global markets</div>
+</div>
+<div class="flex flex-col items-center justify-center pt-12 md:pt-0">
+<div class="font-display-lg text-[72px] font-extrabold text-gradient-elite mb-4 leading-none">10K+</div>
+<div class="font-title-md text-title-md text-deep-forest font-semibold mb-2">Verified Partners</div>
+<div class="font-body-md text-body-md text-on-surface-variant">In our trusted network</div>
+</div>
+<div class="flex flex-col items-center justify-center pt-12 md:pt-0">
+<div class="font-display-lg text-[72px] font-extrabold text-gradient-elite mb-4 leading-none">99.9%</div>
+<div class="font-title-md text-title-md text-deep-forest font-semibold mb-2">Platform Uptime</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Enterprise reliability</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-white w-full py-16 border-t border-soft-sage/30 relative z-20">
+<div class="px-container-padding-desktop max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<!-- Brand -->
+<div class="flex items-center gap-3 font-title-md text-title-md text-deep-forest font-bold">
+<span class="w-6 h-6 rounded-md bg-primary text-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">eco</span>
+</span>
+            Fieldora
+        </div>
+<!-- Links -->
+<div class="flex flex-wrap justify-center gap-8">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Sustainability Report</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Market Insights</a>
+</div>
+<!-- Copyright -->
+<div class="font-body-md text-body-md text-on-surface-variant/70">
+            © 2024 Fieldora. All rights reserved.
+        </div>
+</div>
+</footer>
+<script>
+        // Subtle parallax effect for hero image
+        window.addEventListener('scroll', () => {
+            const heroImg = document.querySelector('.hero-bg-img');
+            if (heroImg) {
+                const scrolled = window.pageYOffset;
+                heroImg.style.transform = `translateY(${scrolled * 0.15}px)`;
+            }
+        });
+    </script>
+
+
+</body></html>

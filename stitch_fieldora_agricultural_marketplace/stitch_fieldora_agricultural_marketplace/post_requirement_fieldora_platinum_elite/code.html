@@ -1,0 +1,429 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Fieldora Platinum Elite - Post a Requirement</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#aad0b1",
+                      "deep-forest": "#0B2B16",
+                      "outline-variant": "#bfc9bd",
+                      "background": "#f8faf9",
+                      "tertiary-fixed": "#c5eccc",
+                      "on-secondary": "#ffffff",
+                      "glass-stroke": "rgba(255, 255, 255, 0.4)",
+                      "secondary-container": "#c2e9ce",
+                      "on-tertiary-fixed": "#00210e",
+                      "surface-container-low": "#f2f4f3",
+                      "surface-tint": "#1f6c3a",
+                      "on-primary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "secondary-fixed-dim": "#a9cfb5",
+                      "primary": "#004c22",
+                      "primary-fixed-dim": "#8bd79b",
+                      "on-tertiary-container": "#b2d9b9",
+                      "on-secondary-container": "#476a55",
+                      "tertiary-container": "#3e6047",
+                      "on-secondary-fixed": "#002111",
+                      "on-surface": "#191c1c",
+                      "on-error-container": "#93000a",
+                      "surface-dim": "#d8dada",
+                      "high-contrast-white": "#FFFFFF",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-container": "#93e0a2",
+                      "outline": "#707a6f",
+                      "surface-container": "#eceeed",
+                      "secondary-fixed": "#c5ecd1",
+                      "primary-fixed": "#a6f4b5",
+                      "primary-container": "#166534",
+                      "surface": "#f8faf9",
+                      "on-surface-variant": "#404940",
+                      "inverse-on-surface": "#eff1f0",
+                      "tertiary": "#264831",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#f8faf9",
+                      "soft-sage": "#DAE5DC",
+                      "surface-variant": "#e1e3e2",
+                      "on-background": "#191c1c",
+                      "surface-container-highest": "#e1e3e2",
+                      "surface-container-high": "#e6e9e8",
+                      "on-primary-fixed-variant": "#005226",
+                      "on-primary-fixed": "#00210b",
+                      "on-secondary-fixed-variant": "#2c4e3a",
+                      "inverse-surface": "#2e3131",
+                      "error": "#ba1a1a",
+                      "inverse-primary": "#8bd79b",
+                      "error-container": "#ffdad6",
+                      "secondary": "#436650",
+                      "on-tertiary-fixed-variant": "#2c4e36"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "unit": "8px",
+                      "container-padding-desktop": "40px",
+                      "container-padding-mobile": "20px",
+                      "section-gap": "64px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "title-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "label-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                      "title-md": ["18px", {"lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "22px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "600"}]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            background-image: radial-gradient(circle at 15% 50%, rgba(218, 229, 220, 0.4), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(194, 233, 206, 0.3), transparent 25%);
+            background-attachment: fixed;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid theme('colors.glass-stroke');
+            box-shadow: 0 8px 32px 0 rgba(11, 43, 22, 0.08);
+        }
+
+        .glass-input {
+            background: rgba(218, 229, 220, 0.1);
+            border: 1px solid theme('colors.glass-stroke');
+            transition: all 0.3s ease;
+        }
+        
+        .glass-input:focus {
+            border-color: theme('colors.primary');
+            box-shadow: 0 0 0 4px rgba(0, 76, 34, 0.1);
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, theme('colors.surface-tint') 0%, theme('colors.primary') 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 76, 34, 0.15);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 6px 16px rgba(0, 76, 34, 0.2);
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .ai-pulse {
+            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: theme('colors.primary-fixed-dim'); box-shadow: 0 0 0 0 rgba(139, 215, 155, 0.4); }
+            50% { border-color: theme('colors.primary'); box-shadow: 0 0 0 4px rgba(139, 215, 155, 0); }
+        }
+        
+        /* Hidden scrollbar for clean aesthetic */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-on-surface min-h-screen flex flex-col md:flex-row overflow-x-hidden antialiased">
+<!-- SideNavBar (Hidden on Mobile) -->
+<nav class="hidden md:flex flex-col py-8 px-4 space-y-4 bg-surface-container-low/80 backdrop-blur-xl border-r border-glass-stroke shadow-lg fixed left-0 top-0 h-full w-72 z-40">
+<div class="px-4 mb-8">
+<h1 class="font-headline-md text-headline-md text-primary font-bold">Fieldora</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-1">Platinum Elite</p>
+</div>
+<div class="flex-1 space-y-2">
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-soft-sage/20 rounded-xl transition-colors font-title-md text-title-md hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-4" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-soft-sage/20 rounded-xl transition-colors font-title-md text-title-md hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-4" style="font-variation-settings: 'FILL' 0;">storefront</span>
+                Marketplace
+            </a>
+<!-- Active State -->
+<a class="flex items-center px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-semibold font-title-md text-title-md hover:translate-x-1 transition-transform duration-200 shadow-sm border border-glass-stroke" href="#">
+<span class="material-symbols-outlined mr-4 text-primary" style="font-variation-settings: 'FILL' 1;">assignment_late</span>
+                Requirements
+            </a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-soft-sage/20 rounded-xl transition-colors font-title-md text-title-md hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-4" style="font-variation-settings: 'FILL' 0;">shopping_cart</span>
+                Orders
+            </a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-soft-sage/20 rounded-xl transition-colors font-title-md text-title-md hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-4" style="font-variation-settings: 'FILL' 0;">psychology_alt</span>
+                Produce
+            </a>
+</div>
+<div class="mt-auto space-y-2 pt-6 border-t border-glass-stroke">
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-soft-sage/20 rounded-xl transition-colors font-title-md text-title-md hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-4" style="font-variation-settings: 'FILL' 0;">settings</span>
+                Settings
+            </a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-soft-sage/20 rounded-xl transition-colors font-title-md text-title-md hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-4" style="font-variation-settings: 'FILL' 0;">help</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- TopNavBar (Mobile Only for Navigation, Web uses for Actions) -->
+<header class="md:hidden fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-glass-stroke shadow-[0_8px_32px_0_rgba(11,43,22,0.08)] flex items-center justify-between px-gutter h-20">
+<h1 class="font-headline-md text-headline-md font-bold text-deep-forest">Fieldora</h1>
+<div class="flex items-center space-x-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-soft-sage overflow-hidden border border-glass-stroke">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of a sophisticated agritech executive. Soft, professional lighting. High-key light mode aesthetic. Subtle hints of deep forest green in the attire, conveying trust and reliability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFDOlcH3KiJ9_1DDR5nNT-FUwzUluTctbyHamxnJ-gYbcLmZAyBQeg8esXdZ8J4_SEoX6UlAXUXEeyAula6Dvtq32vDBjS_vVUF1aFdXr7ADoWIccClh4bBcwXb9nv4myEzrKpPXUectzlLi-e1VjNeUmGWTuYWUPM4ufhd3QnBTg9edncrm_Rhjwc2joSVqUaNxXnLBuUJZoPox5omqAb0UuW8mk00PiPk5HQRoa0GVyhQLoiRInAMw">
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-72 pt-24 md:pt-12 px-container-padding-mobile md:px-container-padding-desktop pb-32 max-w-[1600px] mx-auto w-full">
+<!-- Header -->
+<div class="mb-section-gap flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-display-lg text-display-lg text-deep-forest mb-2">Post a Requirement</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Use plain language to describe your procurement needs. Our Sparkles AI will automatically extract technical parameters.</p>
+</div>
+<div class="hidden md:flex items-center space-x-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full hover:bg-soft-sage/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-soft-sage overflow-hidden border border-glass-stroke cursor-pointer shadow-sm hover:shadow-md transition-shadow">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of a sophisticated agritech executive. Soft, professional lighting. High-key light mode aesthetic. Subtle hints of deep forest green in the attire, conveying trust and reliability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAo_L4-q5_zoR_UXwBh4OcM6kbaeH0h4rFAIFv4I8dx6O9gQsKRUnoSBrYmqccMG1sjDV8HNpqb4_xzR712l_fXM6rcLohQGcfsxT7nPEaEiWnsfDaJM9Sjd6Js0si68muy871ccr6d-SfxRcTerai92STnoWRhrjzTEzRTzIU8-O5WOPG1U8qDmla4cEJ3hHyJ1o0tF_n_kv26Uwsf_ROmUNYWMicUznN7b0e2lFOjDGBMYOrBN774DA">
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column: Smart Entry & Manual Refinement (Spans 8 cols) -->
+<div class="lg:col-span-8 space-y-gutter">
+<!-- Smart Requirement Entry Card -->
+<div class="glass-panel rounded-2xl p-6 md:p-8 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-6xl text-primary" style="font-variation-settings: 'FILL' 1;">arrow_back_ios_new</span>
+</div>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary">edit_note</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-deep-forest">Smart Entry</h3>
+</div>
+<div class="relative">
+<textarea class="glass-input w-full rounded-xl p-4 min-h-[160px] font-body-lg text-body-lg text-on-surface placeholder:text-outline resize-y" id="smartInput" placeholder="e.g., I need 500 MT of Grade A Organic Soybeans delivered to Rotterdam port by November 15th. Must be non-GMO certified."></textarea>
+<!-- AI Listening Indicator (Animated via CSS) -->
+<div class="absolute bottom-4 right-4 flex items-center gap-2 bg-surface-container-low/90 backdrop-blur px-3 py-1.5 rounded-full border border-glass-stroke shadow-sm">
+<div class="w-2 h-2 rounded-full bg-primary animate-ping"></div>
+<span class="font-label-sm text-label-sm text-primary uppercase">Sparkles AI Active</span>
+</div>
+</div>
+</div>
+<!-- Manual Refinement / Extracted Data Card -->
+<div class="glass-panel rounded-2xl p-6 md:p-8">
+<div class="flex items-center justify-between mb-8 pb-4 border-b border-glass-stroke">
+<h3 class="font-headline-md text-headline-md text-deep-forest flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">tune</span>
+                            Technical Specifications
+                        </h3>
+<span class="bg-primary/10 text-primary font-label-sm text-label-sm px-3 py-1 rounded-full uppercase tracking-wide">Editable</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<!-- Commodity Field -->
+<div class="space-y-2">
+<label class="font-title-md text-title-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-outline" style="font-size: 18px;">grass</span>
+                                Commodity
+                            </label>
+<input class="glass-input w-full rounded-lg px-4 py-3 font-body-lg text-body-lg text-deep-forest" placeholder="Select commodity" type="text" value="Organic Soybeans">
+</div>
+<!-- Quantity Field -->
+<div class="space-y-2">
+<label class="font-title-md text-title-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-outline" style="font-size: 18px;">scale</span>
+                                Quantity (MT)
+                            </label>
+<input class="glass-input w-full rounded-lg px-4 py-3 font-body-lg text-body-lg text-deep-forest" placeholder="0.00" type="number" value="500">
+</div>
+<!-- Grade Field -->
+<div class="space-y-2">
+<label class="font-title-md text-title-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-outline" style="font-size: 18px;">workspace_premium</span>
+                                Quality Grade
+                            </label>
+<select class="glass-input w-full rounded-lg px-4 py-3 font-body-lg text-body-lg text-deep-forest appearance-none">
+<option>Grade A</option>
+<option>Grade B</option>
+<option>Standard</option>
+<option>Premium Feed</option>
+</select>
+</div>
+<!-- Deadline Field -->
+<div class="space-y-2">
+<label class="font-title-md text-title-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-outline" style="font-size: 18px;">calendar_today</span>
+                                Delivery Deadline
+                            </label>
+<input class="glass-input w-full rounded-lg px-4 py-3 font-body-lg text-body-lg text-deep-forest" type="date" value="2024-11-15">
+</div>
+<!-- Certifications (Full Width) -->
+<div class="md:col-span-2 space-y-3">
+<label class="font-title-md text-title-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-outline" style="font-size: 18px;">verified</span>
+                                Required Certifications
+                            </label>
+<div class="flex flex-wrap gap-2">
+<button class="flex items-center gap-1 bg-primary text-on-primary px-3 py-1.5 rounded-full font-label-sm text-label-sm transition-transform hover:scale-105 shadow-sm">
+                                    Non-GMO
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">close</span>
+</button>
+<button class="flex items-center gap-1 bg-surface-container-low border border-glass-stroke text-on-surface-variant px-3 py-1.5 rounded-full font-label-sm text-label-sm hover:bg-soft-sage/30 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 14px;">add</span>
+                                    Add Certification
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: AI Extraction & Actions (Spans 4 cols) -->
+<div class="lg:col-span-4 space-y-gutter flex flex-col">
+<!-- AI Extraction Panel -->
+<div class="glass-panel rounded-2xl p-6 flex-1 border border-primary/20 bg-gradient-to-b from-surface/80 to-secondary-container/20 ai-pulse relative overflow-hidden">
+<!-- Decorative background element -->
+<div class="absolute top-[-50px] right-[-50px] w-32 h-32 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">psychology</span>
+                            AI Extraction
+                        </h3>
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary animate-spin" style="animation-duration: 3s;">settings</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6 pb-4 border-b border-glass-stroke">
+                        Sparkles AI is reading your entry and populating technical fields in real-time.
+                    </p>
+<ul class="space-y-4">
+<li class="flex items-start gap-3 group">
+<span class="material-symbols-outlined text-primary mt-0.5">check_circle</span>
+<div>
+<p class="font-label-sm text-label-sm text-outline-variant uppercase">Detected Commodity</p>
+<p class="font-title-md text-title-md text-deep-forest group-hover:translate-x-1 transition-transform">Organic Soybeans</p>
+</div>
+</li>
+<li class="flex items-start gap-3 group">
+<span class="material-symbols-outlined text-primary mt-0.5">check_circle</span>
+<div>
+<p class="font-label-sm text-label-sm text-outline-variant uppercase">Detected Volume</p>
+<p class="font-title-md text-title-md text-deep-forest group-hover:translate-x-1 transition-transform">500 Metric Tons</p>
+</div>
+</li>
+<li class="flex items-start gap-3 group">
+<span class="material-symbols-outlined text-primary mt-0.5">check_circle</span>
+<div>
+<p class="font-label-sm text-label-sm text-outline-variant uppercase">Target Date</p>
+<p class="font-title-md text-title-md text-deep-forest group-hover:translate-x-1 transition-transform">Nov 15, 2024</p>
+</div>
+</li>
+<li class="flex items-start gap-3 group opacity-50">
+<span class="material-symbols-outlined text-outline mt-0.5">pending</span>
+<div>
+<p class="font-label-sm text-label-sm text-outline-variant uppercase">Preferred Origin</p>
+<p class="font-title-md text-title-md text-on-surface-variant italic">Waiting for input...</p>
+</div>
+</li>
+</ul>
+</div>
+<!-- Action Card -->
+<div class="glass-panel rounded-2xl p-6">
+<div class="flex justify-between items-center mb-6">
+<span class="font-title-md text-title-md text-deep-forest">Est. Platform Fee</span>
+<span class="font-headline-md text-headline-md text-primary font-bold">0.5%</span>
+</div>
+<button class="btn-primary w-full text-on-primary rounded-xl py-4 font-title-md text-title-md flex justify-center items-center gap-2 mb-3">
+<span class="material-symbols-outlined">publish</span>
+                        Publish Requirement
+                    </button>
+<button class="w-full bg-transparent border border-glass-stroke text-deep-forest rounded-xl py-3 font-title-md text-title-md hover:bg-surface-variant/50 transition-colors">
+                        Save as Draft
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface-container-low/90 backdrop-blur-xl border-t border-glass-stroke pb-safe">
+<div class="flex justify-around items-center h-16">
+<a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-sm text-[10px] mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">storefront</span>
+<span class="font-label-sm text-[10px] mt-1">Market</span>
+</a>
+<!-- Active Mobile Tab -->
+<a class="flex flex-col items-center justify-center w-full h-full text-primary relative" href="#">
+<div class="absolute top-1 w-8 h-1 bg-primary rounded-full"></div>
+<span class="material-symbols-outlined mt-2" style="font-variation-settings: 'FILL' 1;">assignment_late</span>
+<span class="font-label-sm text-[10px] mt-1 font-bold">Reqs</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">shopping_cart</span>
+<span class="font-label-sm text-[10px] mt-1">Orders</span>
+</a>
+</div>
+</nav>
+<script>
+        // Simple micro-interaction for the textarea to simulate AI typing
+        const smartInput = document.getElementById('smartInput');
+        smartInput.addEventListener('focus', function() {
+            this.parentElement.classList.add('scale-[1.01]', 'transition-transform');
+        });
+        smartInput.addEventListener('blur', function() {
+            this.parentElement.classList.remove('scale-[1.01]');
+        });
+    </script>
+</body></html>

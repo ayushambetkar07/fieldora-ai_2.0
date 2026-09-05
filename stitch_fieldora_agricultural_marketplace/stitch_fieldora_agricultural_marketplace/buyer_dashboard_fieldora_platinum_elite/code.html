@@ -1,0 +1,622 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Fieldora Platinum - Buyer Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#166534",
+                        "outline": "#707a6f",
+                        "surface-dim": "#d8dada",
+                        "secondary": "#436650",
+                        "surface-container-highest": "#e1e3e2",
+                        "background": "#f8faf9",
+                        "tertiary-container": "#3e6047",
+                        "surface-variant": "#e1e3e2",
+                        "surface-tint": "#1f6c3a",
+                        "glass-stroke": "rgba(255, 255, 255, 0.4)",
+                        "on-surface": "#191c1c",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#c5ecd1",
+                        "outline-variant": "#bfc9bd",
+                        "on-tertiary-fixed-variant": "#2c4e36",
+                        "on-tertiary-fixed": "#00210e",
+                        "on-secondary-container": "#476a55",
+                        "primary": "#004c22",
+                        "on-surface-variant": "#404940",
+                        "on-primary-container": "#93e0a2",
+                        "on-secondary-fixed-variant": "#2c4e3a",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#a9cfb5",
+                        "tertiary-fixed": "#c5eccc",
+                        "high-contrast-white": "#FFFFFF",
+                        "on-primary-fixed-variant": "#005226",
+                        "tertiary-fixed-dim": "#aad0b1",
+                        "tertiary": "#264831",
+                        "surface-container-high": "#e6e9e8",
+                        "deep-forest": "#0B2B16",
+                        "soft-sage": "#DAE5DC",
+                        "on-primary-fixed": "#00210b",
+                        "on-background": "#191c1c",
+                        "inverse-surface": "#2e3131",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f8faf9",
+                        "surface-container-low": "#f2f4f3",
+                        "surface-bright": "#f8faf9",
+                        "primary-fixed-dim": "#8bd79b",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#a6f4b5",
+                        "on-tertiary-container": "#b2d9b9",
+                        "on-secondary-fixed": "#002111",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#8bd79b",
+                        "secondary-container": "#c2e9ce",
+                        "error": "#ba1a1a",
+                        "surface-container": "#eceeed",
+                        "inverse-on-surface": "#eff1f0",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "4xl": "2rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding-mobile": "20px",
+                        "gutter": "24px",
+                        "unit": "8px",
+                        "section-gap": "48px",
+                        "container-padding-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "title-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+                        "title-md": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" }]
+                    },
+                    boxShadow: {
+                        'glass-sm': '0 4px 16px rgba(0, 0, 0, 0.04)',
+                        'glass': '0 8px 32px rgba(0, 0, 0, 0.06)',
+                        'glass-lg': '0 16px 48px rgba(0, 0, 0, 0.08)',
+                        'inner-light': 'inset 0 1px 0 rgba(255,255,255,0.6)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f0f3f1;
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(22, 101, 52, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 90%, rgba(22, 101, 52, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255,255,255,0.8);
+            border-radius: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.8);
+            transform: translateY(-2px);
+        }
+
+        .premium-btn {
+            background: linear-gradient(135deg, #166534 0%, #004c22 100%);
+            box-shadow: 0 4px 12px rgba(22, 101, 52, 0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .premium-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-20deg);
+            transition: all 0.5s ease;
+        }
+        
+        .premium-btn:hover::after {
+            left: 150%;
+        }
+
+        .premium-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(22, 101, 52, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .premium-btn:active {
+            transform: scale(0.98);
+        }
+
+        .thin-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .thin-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .thin-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(22, 101, 52, 0.15);
+            border-radius: 10px;
+        }
+        
+        /* Sparkles AI Animation */
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(0.98); }
+        }
+        .ai-pulse {
+            animation: subtle-pulse 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased overflow-x-hidden selection:bg-primary-container selection:text-white">
+<!-- TopNavBar -->
+<header class="bg-white/70 dark:bg-surface-container-high/70 backdrop-blur-2xl docked full-width top-0 z-40 shadow-sm border-b border-white fixed w-full">
+<div class="flex justify-between items-center w-full px-container-padding-desktop py-3 max-w-[1920px] mx-auto">
+<div class="flex items-center gap-4">
+<span class="font-display-lg text-[32px] font-bold text-[#004c22] leading-none tracking-tight">Fieldora</span>
+<span class="font-label-sm text-xs text-on-surface-variant uppercase tracking-[0.2em] mt-1 border-l border-glass-stroke pl-4">Platinum</span>
+</div>
+<div class="hidden md:flex flex-1 max-w-lg mx-8">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="w-full bg-white/60 hover:bg-white border border-white/80 shadow-inner-light rounded-full py-2.5 pl-12 pr-4 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all" placeholder="Search orders, crops, suppliers..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-5">
+<button class="text-on-surface-variant hover:bg-white/80 hover:shadow-sm rounded-full p-2.5 transition-all duration-200 relative border border-transparent hover:border-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-white"></span>
+</button>
+<button class="text-on-surface-variant hover:bg-white/80 hover:shadow-sm rounded-full p-2.5 transition-all duration-200 border border-transparent hover:border-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+</button>
+<div class="h-6 w-px bg-glass-stroke mx-1 hidden sm:block"></div>
+<button class="hidden sm:flex items-center gap-2 text-primary font-medium text-sm px-4 py-2 rounded-full hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">help</span>
+                    Support
+                </button>
+<div class="relative group">
+<img alt="Buyer Profile" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm group-hover:ring-2 ring-primary/20 transition-all cursor-pointer" data-alt="A highly detailed close-up portrait of a professional agricultural buyer in a modern, brightly lit office environment. The lighting is soft and premium, casting subtle highlights on their face, conveying a sense of sophisticated stewardship and trust. The overall aesthetic is clean, bright, and aligns with a high-end agritech platform's light mode UI. The color palette features natural skin tones with subtle green accents in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOPz2ZYPm720W-05fUFOyfx9f0X_vMOkYcqpH6AEuAlcjF8OouwouhhMuPsubapzHARPH9D0ygA6WPW6hi3dQaJKYTybb7pBGPuyv6GzFQmNP49YFPq4OwwQbaaPi2NQYklKUBJRLUG-dYnyjIM9Sx6pS4At5P-9H05NAPlc6dYR7L2gSbmYSDBhIz57AlIy3OmYli5Uv5pFt6aTFqeqK2lqrndCqCWYzmMy1XZGXpYzaAUtxTp71zYw">
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+</div>
+</div>
+</div>
+</header>
+<div class="flex pt-[72px] min-h-screen max-w-[1920px] mx-auto">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col bg-white/60 dark:bg-surface-container/70 backdrop-blur-2xl docked left-0 h-full w-[260px] z-30 border-r border-white/80 fixed py-6 gap-2 top-[72px]">
+<div class="flex flex-col gap-1.5 mt-4 px-4">
+<a class="flex items-center gap-3 p-3.5 text-primary dark:text-primary-fixed font-semibold bg-primary/10 rounded-2xl transition-all shadow-sm border border-primary/5" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-body-md text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 p-3.5 text-on-surface-variant font-medium hover:bg-white/80 rounded-2xl hover:shadow-sm border border-transparent hover:border-white transition-all group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">storefront</span>
+<span class="font-body-md text-sm group-hover:text-primary transition-colors">Marketplace</span>
+</a>
+<a class="flex items-center gap-3 p-3.5 text-on-surface-variant font-medium hover:bg-white/80 rounded-2xl hover:shadow-sm border border-transparent hover:border-white transition-all group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">assignment</span>
+<span class="font-body-md text-sm group-hover:text-primary transition-colors">My Requirements</span>
+</a>
+<a class="flex items-center gap-3 p-3.5 text-on-surface-variant font-medium hover:bg-white/80 rounded-2xl hover:shadow-sm border border-transparent hover:border-white transition-all group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">shopping_cart</span>
+<span class="font-body-md text-sm group-hover:text-primary transition-colors">Orders</span>
+</a>
+</div>
+<div class="mt-auto mb-24 px-4">
+<button class="w-full premium-btn text-white font-medium text-sm py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined group-hover:rotate-90 transition-transform duration-300" style="font-variation-settings: 'FILL' 0;">add</span>
+                    New Requirement
+                </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[260px] lg:mr-[340px] p-container-padding-mobile md:p-8 lg:p-10 pb-32">
+<!-- Header -->
+<div class="mb-10">
+<h1 class="text-[36px] font-bold text-on-surface mb-2 tracking-tight">Good morning, <span class="text-primary-container">Arjun</span>.</h1>
+<p class="text-[16px] text-on-surface-variant font-medium">Here is your procurement overview for today.</p>
+</div>
+<!-- Stats Grid (Bento style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+<!-- Stat Card 1 -->
+<div class="glass-card p-6 flex flex-col justify-between h-[170px] relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-[80px]">assignment_ind</span>
+</div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-medium text-[15px] text-on-surface-variant">Active Requirements</span>
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/10">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">assignment_ind</span>
+</div>
+</div>
+<div class="relative z-10 mt-auto">
+<div class="flex items-baseline gap-3">
+<span class="font-bold text-[40px] text-on-surface leading-none">12</span>
+<div class="flex items-center gap-1 text-[#166534] bg-[#166534]/10 px-2 py-1 rounded-md">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span class="font-medium text-[12px]">+2 this week</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="glass-card p-6 flex flex-col justify-between h-[170px] relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-[80px]">local_shipping</span>
+</div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-medium text-[15px] text-on-surface-variant">Pending Orders</span>
+<div class="w-10 h-10 rounded-full bg-[#f59e0b]/10 flex items-center justify-center text-[#d97706] border border-[#f59e0b]/20">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+</div>
+<div class="relative z-10 mt-auto">
+<div class="flex items-baseline gap-3">
+<span class="font-bold text-[40px] text-on-surface leading-none">5</span>
+<div class="flex items-center gap-1 text-on-surface-variant bg-white/50 border border-white px-2 py-1 rounded-md shadow-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span class="font-medium text-[12px]">3 expected today</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="glass-card p-6 flex flex-col justify-between h-[170px] relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-[80px]">account_balance_wallet</span>
+</div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-medium text-[15px] text-on-surface-variant">Total Purchases</span>
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/10">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+</div>
+</div>
+<div class="relative z-10 mt-auto">
+<span class="font-bold text-[32px] text-on-surface leading-none block mb-1">₹12.5L</span>
+<span class="font-medium text-[13px] text-outline">MTD Volume</span>
+</div>
+</div>
+<!-- Stat Card 4 -->
+<div class="glass-card p-6 flex flex-col justify-between h-[170px] relative overflow-hidden group border-primary/20 bg-gradient-to-br from-white/90 to-primary/5">
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-primary-container/20 rounded-full blur-2xl"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-medium text-[15px] text-on-surface-variant">Savings Insight</span>
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-md">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">insights</span>
+</div>
+</div>
+<div class="relative z-10 mt-auto">
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-bold text-[40px] text-primary-container leading-none">8%</span>
+<span class="font-semibold text-[16px] text-primary">saved</span>
+</div>
+<span class="font-medium text-[13px] text-outline">vs market average</span>
+</div>
+</div>
+</div>
+<!-- Main Layout Columns -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<!-- Left Column (Wide) -->
+<div class="xl:col-span-2 flex flex-col gap-10">
+<!-- Recommended Produce -->
+<section>
+<div class="flex justify-between items-end mb-6 px-2">
+<div>
+<h2 class="text-[24px] font-bold text-on-surface">Recommended Produce</h2>
+<p class="text-[14px] text-on-surface-variant mt-1">Curated catalog based on your history</p>
+</div>
+<button class="text-primary font-semibold text-sm hover:text-primary-container flex items-center gap-1 group">
+                                View All <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Product Card 1 -->
+<div class="glass-card p-4 overflow-hidden group flex flex-col">
+<div class="h-[220px] relative overflow-hidden rounded-2xl mb-4 shadow-inner">
+<img alt="Premium Avocados" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" data-alt="A highly detailed, macro shot of premium Hass avocados arranged perfectly in a rustic wooden crate. The lighting is bright and natural, creating soft shadows that emphasize the textured dark skin and vibrant green interior of a halved avocado in the foreground. The aesthetic is clean, organic, and premium, fitting for a high-end agritech platform's light mode UI. The overall mood is fresh and high-quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIIUNTu2fWYavTgm9LVjS7fTBm-ugVEiowSuwlGsRFuGEtmf3PzcGa4GVodpA-Jfw-xA2LVpruw-XIYwH4w9DwI6fO1CkUX48QWdp5xR7M6tFJyZarsuXOztULik8HkZzN-KgAJUhpFlFMOuzH3ZOF2np0MDPJiEeUGUgFyvW3QzHZ5GdCY63daSXXhLvVkjtEXPeCadKymvQM0xCaGiePo2OK7-SLu8ZkXPkJwXsERY_U5AanGjmvQQ">
+<div class="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-md rounded-lg border border-white/50 shadow-sm">
+<span class="font-bold text-[11px] text-primary uppercase tracking-wider">Grade A</span>
+</div>
+</div>
+<div class="px-2 pb-2 flex-1 flex flex-col">
+<h3 class="text-[18px] font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">Premium Hass Avocados</h3>
+<p class="text-[14px] text-on-surface-variant mb-4">Nashik, MH • Yield: High</p>
+<div class="flex items-center justify-between mt-auto pt-4 border-t border-black/5">
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-outline uppercase tracking-wider mb-0.5">Est. Price</span>
+<span class="text-[20px] font-bold text-on-surface">₹120<span class="text-[14px] text-outline font-normal">/kg</span></span>
+</div>
+<button class="w-11 h-11 rounded-full bg-primary/5 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="glass-card p-4 overflow-hidden group flex flex-col">
+<div class="h-[220px] relative overflow-hidden rounded-2xl mb-4 shadow-inner">
+<img alt="Organic Tomatoes" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" data-alt="A highly detailed, well-lit studio shot of freshly harvested organic vine tomatoes still attached to their vibrant green stems. The tomatoes are a deep, glossy red, resting on a clean, light-colored surface. The lighting is soft and diffused, creating a premium, modern aesthetic suitable for a high-end agritech platform in light mode. The composition feels natural yet precisely curated, emphasizing freshness and quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArMLq-8vQdqkq-PKXx6MSh8mrP9SfZeYKFHrLjD6GOAGaStyGj2Q7IyQfFlFvJh1PFqY5pzPjyTynlz0CB9IdzsOq6_rhbaxaX2DcOd44-n-XqjEq56AC46xwQ1RxKBkY0NPb2ffp4J0ACvbKcSWB9xqS5ZjvuUWNm5NIrSEOWrIE5NVk-Ft4WnOW0AznsuirkxBniSip6t0m0qayyni7enSOxErgP40Kem5dILIyHOnWgyRDkxF7n8w">
+<div class="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-md rounded-lg border border-white/50 shadow-sm">
+<span class="font-bold text-[11px] text-[#b91c1c] uppercase tracking-wider">Organic</span>
+</div>
+</div>
+<div class="px-2 pb-2 flex-1 flex flex-col">
+<h3 class="text-[18px] font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">Vine-Ripened Tomatoes</h3>
+<p class="text-[14px] text-on-surface-variant mb-4">Pune, MH • Ready for transport</p>
+<div class="flex items-center justify-between mt-auto pt-4 border-t border-black/5">
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-outline uppercase tracking-wider mb-0.5">Est. Price</span>
+<span class="text-[20px] font-bold text-on-surface">₹45<span class="text-[14px] text-outline font-normal">/kg</span></span>
+</div>
+<button class="w-11 h-11 rounded-full bg-primary/5 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Orders List -->
+<section>
+<div class="flex justify-between items-end mb-6 px-2">
+<h2 class="text-[24px] font-bold text-on-surface">Recent Orders</h2>
+<button class="text-outline hover:text-primary text-sm font-medium transition-colors">View History</button>
+</div>
+<div class="glass-card p-2">
+<div class="flex flex-col gap-2">
+<!-- Order Item 1 -->
+<div class="flex items-center justify-between p-4 rounded-xl hover:bg-white/60 transition-all duration-200 group border border-transparent hover:border-white/80 hover:shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/10">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">agriculture</span>
+</div>
+<div>
+<h4 class="text-[16px] font-semibold text-on-surface mb-0.5 group-hover:text-primary transition-colors">ORD-8924 • Wheat (Lokwan)</h4>
+<p class="text-[13px] text-on-surface-variant">Green Fields Farm • <span class="font-medium">50 MT</span></p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right hidden sm:block">
+<p class="text-[16px] font-bold text-on-surface">₹12.5L</p>
+<p class="text-[12px] text-outline mt-0.5">Oct 24, 2023</p>
+</div>
+<div class="w-[120px] flex justify-end">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50/80 border border-blue-200 text-blue-700 text-[12px] font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                                Processing
+                                            </span>
+</div>
+<button class="text-outline hover:text-primary p-2 rounded-full hover:bg-white/80 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Order Item 2 -->
+<div class="flex items-center justify-between p-4 rounded-xl hover:bg-white/60 transition-all duration-200 group border border-transparent hover:border-white/80 hover:shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-[#f59e0b]/10 flex items-center justify-center text-[#d97706] shadow-inner border border-[#f59e0b]/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+<div>
+<h4 class="text-[16px] font-semibold text-on-surface mb-0.5 group-hover:text-primary transition-colors">ORD-8921 • Soya Beans</h4>
+<p class="text-[13px] text-on-surface-variant">Apex Traders • <span class="font-medium">20 MT</span></p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right hidden sm:block">
+<p class="text-[16px] font-bold text-on-surface">₹8.2L</p>
+<p class="text-[12px] text-outline mt-0.5">Oct 22, 2023</p>
+</div>
+<div class="w-[120px] flex justify-end">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50/80 border border-amber-200 text-amber-700 text-[12px] font-semibold">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                                                Shipped
+                                            </span>
+</div>
+<button class="text-outline hover:text-primary p-2 rounded-full hover:bg-white/80 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Order Item 3 -->
+<div class="flex items-center justify-between p-4 rounded-xl hover:bg-white/60 transition-all duration-200 group border border-transparent hover:border-white/80 hover:shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-[#166534]/10 flex items-center justify-center text-[#166534] shadow-inner border border-[#166534]/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<h4 class="text-[16px] font-semibold text-on-surface mb-0.5 group-hover:text-primary transition-colors">ORD-8890 • Onions (Red)</h4>
+<p class="text-[13px] text-on-surface-variant">Nashik Co-op • <span class="font-medium">100 MT</span></p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right hidden sm:block">
+<p class="text-[16px] font-bold text-on-surface">₹18.0L</p>
+<p class="text-[12px] text-outline mt-0.5">Oct 15, 2023</p>
+</div>
+<div class="w-[120px] flex justify-end">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50/80 border border-green-200 text-green-700 text-[12px] font-semibold">
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+                                                Delivered
+                                            </span>
+</div>
+<button class="text-outline hover:text-primary p-2 rounded-full hover:bg-white/80 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column (Narrow) -->
+<div class="flex flex-col gap-8">
+<!-- Market Intelligence Widget -->
+<section>
+<h2 class="text-[20px] font-bold text-on-surface mb-4 px-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary bg-primary/10 p-1.5 rounded-lg">monitoring</span>
+                            Market Intel
+                        </h2>
+<div class="glass-card p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-[16px] font-semibold text-on-surface">Watched Crops</h3>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-primary hover:bg-white transition-all"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Trend Item 1 -->
+<div class="group">
+<div class="flex justify-between items-baseline mb-2">
+<span class="text-[15px] font-bold text-on-surface group-hover:text-primary transition-colors">Wheat (Lokwan)</span>
+<span class="text-[13px] font-bold text-[#b91c1c] flex items-center gap-1 bg-[#b91c1c]/10 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                                            +2.4%
+                                        </span>
+</div>
+<div class="h-1.5 w-full bg-black/5 rounded-full overflow-hidden">
+<div class="h-full bg-[#b91c1c] rounded-full w-3/4"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[12px] font-medium text-on-surface-variant">₹25,000/MT</span>
+<span class="text-[12px] font-semibold text-[#b91c1c]">High Demand</span>
+</div>
+</div>
+<!-- Trend Item 2 -->
+<div class="group">
+<div class="flex justify-between items-baseline mb-2">
+<span class="text-[15px] font-bold text-on-surface group-hover:text-primary transition-colors">Soya Beans</span>
+<span class="text-[13px] font-bold text-primary flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+                                            -1.1%
+                                        </span>
+</div>
+<div class="h-1.5 w-full bg-black/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-1/2"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[12px] font-medium text-on-surface-variant">₹41,000/MT</span>
+<span class="text-[12px] font-semibold text-outline">Stable</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Procurement Efficiency -->
+<section>
+<div class="glass-card p-8 relative overflow-hidden text-center flex flex-col items-center">
+<div class="absolute -left-12 -top-12 w-32 h-32 bg-primary/5 rounded-full blur-xl"></div>
+<div class="absolute -right-8 -bottom-8 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
+<h3 class="text-[18px] font-bold text-on-surface mb-8 relative z-10">Efficiency Score</h3>
+<!-- Refined Gauge UI -->
+<div class="relative w-36 h-36 flex items-center justify-center mb-6 z-10">
+<svg class="w-full h-full transform -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
+<!-- Background Circle -->
+<path class="text-black/5" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="2.5"></path>
+<!-- Progress Circle -->
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="92, 100" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-[42px] font-bold text-primary leading-none tracking-tight">92</span>
+<span class="text-[11px] font-bold uppercase tracking-wider text-primary/70 mt-1">Excellent</span>
+</div>
+</div>
+<p class="text-[14px] text-on-surface-variant leading-relaxed relative z-10 font-medium">Your procurement process is highly optimized compared to industry benchmarks.</p>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- NavigationDrawer (Sparkles AI Assistant) -->
+<aside class="hidden xl:flex flex-col bg-white/90 dark:bg-surface-dim/90 backdrop-blur-3xl docked right-0 h-full w-[340px] z-30 shadow-[-8px_0_32px_rgba(0,0,0,0.04)] border-l border-white/80 fixed right-0 top-[72px] p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-tertiary-container/30 to-tertiary/10 flex items-center justify-center text-tertiary shadow-sm border border-tertiary/10 ai-pulse">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h2 class="text-[20px] text-tertiary font-bold tracking-tight">Sparkles AI</h2>
+<p class="text-[11px] font-bold text-tertiary/60 uppercase tracking-[0.15em] mt-0.5">Procurement Assistant</p>
+</div>
+</div>
+<!-- Tab Navigation internal to drawer -->
+<div class="flex gap-2 mb-6 bg-black/5 p-1 rounded-xl">
+<button class="flex-1 bg-white text-tertiary shadow-sm rounded-lg px-3 py-2 text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all">
+<span class="material-symbols-outlined text-[16px]">lightbulb</span>
+                    Contextual
+                </button>
+<button class="flex-1 text-on-surface-variant hover:text-tertiary hover:bg-white/50 rounded-lg px-3 py-2 text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+                    Market
+                </button>
+</div>
+<!-- AI Content Area -->
+<div class="flex-1 overflow-y-auto thin-scrollbar pr-2 flex flex-col gap-5">
+<div class="bg-white rounded-2xl p-5 border border-black/5 shadow-sm hover:shadow-md transition-shadow">
+<h4 class="text-[15px] font-bold text-tertiary mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary/70">summarize</span>
+                        Procurement Summary
+                    </h4>
+<p class="text-[14px] text-on-surface-variant leading-relaxed">Your current inventory of organic tomatoes is projected to run low in <span class="font-bold text-on-surface">5 days</span> based on recent fulfillment velocity.</p>
+</div>
+<div class="bg-gradient-to-br from-tertiary/5 to-transparent rounded-2xl p-5 border border-tertiary/20 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-tertiary/10 rounded-bl-full -z-10"></div>
+<h4 class="text-[15px] font-bold text-tertiary mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add_alert</span>
+                        Action Suggested
+                    </h4>
+<p class="text-[14px] text-on-surface-variant leading-relaxed mb-5">Prices in Pune are currently favorable. Recommend posting a new requirement soon to secure rates.</p>
+<button class="w-full bg-tertiary hover:bg-tertiary/90 text-white font-semibold text-[13px] py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md">
+<span class="material-symbols-outlined text-[18px]">post_add</span>
+                        Post New Requirement
+                    </button>
+</div>
+<div class="mt-auto pt-6 pb-24 text-center border-t border-black/5">
+<p class="text-[11px] font-medium text-outline flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+                        Powered by Fieldora AI Engine
+                    </p>
+</div>
+</div>
+</aside>
+</div>
+</body></html>

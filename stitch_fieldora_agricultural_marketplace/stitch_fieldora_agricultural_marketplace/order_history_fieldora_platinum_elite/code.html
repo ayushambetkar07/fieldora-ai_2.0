@@ -1,0 +1,357 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Order Management - Fieldora Platinum Elite</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eceeed",
+                        "outline-variant": "#bfc9bd",
+                        "primary-container": "#166534",
+                        "on-tertiary-fixed-variant": "#2c4e36",
+                        "secondary-container": "#c2e9ce",
+                        "tertiary-fixed": "#c5eccc",
+                        "surface-container-low": "#f2f4f3",
+                        "soft-sage": "#DAE5DC",
+                        "surface-container-high": "#e6e9e8",
+                        "tertiary-fixed-dim": "#aad0b1",
+                        "on-secondary-fixed-variant": "#2c4e3a",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8faf9",
+                        "surface-container-highest": "#e1e3e2",
+                        "on-tertiary-container": "#b2d9b9",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#1f6c3a",
+                        "secondary-fixed-dim": "#a9cfb5",
+                        "glass-stroke": "rgba(255, 255, 255, 0.4)",
+                        "on-secondary-fixed": "#002111",
+                        "tertiary-container": "#3e6047",
+                        "tertiary": "#264831",
+                        "high-contrast-white": "#FFFFFF",
+                        "secondary": "#436650",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#c5ecd1",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f8faf9",
+                        "primary": "#004c22",
+                        "on-surface-variant": "#404940",
+                        "inverse-on-surface": "#eff1f0",
+                        "background": "#f8faf9",
+                        "surface-dim": "#d8dada",
+                        "outline": "#707a6f",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e1e3e2",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#00210e",
+                        "on-secondary-container": "#476a55",
+                        "primary-fixed": "#a6f4b5",
+                        "deep-forest": "#0B2B16",
+                        "primary-fixed-dim": "#8bd79b",
+                        "on-primary-fixed": "#00210b",
+                        "on-surface": "#191c1c",
+                        "inverse-surface": "#2e3131",
+                        "on-primary-fixed-variant": "#005226",
+                        "inverse-primary": "#8bd79b",
+                        "error-container": "#ffdad6",
+                        "on-background": "#191c1c",
+                        "on-primary-container": "#93e0a2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding-desktop": "40px",
+                        "container-padding-mobile": "20px",
+                        "gutter": "24px",
+                        "section-gap": "64px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+                        "title-md": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(11, 43, 22, 0.08);
+        }
+        .btn-primary {
+            background: linear-gradient(180deg, #004c22 0%, #003819 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(11, 43, 22, 0.15);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row relative overflow-x-hidden">
+<!-- TopNavBar (Mobile Only) -->
+<nav class="md:hidden bg-white/70 backdrop-blur-xl border-b border-glass-stroke shadow-[0_8px_32px_0_rgba(11,43,22,0.08)] fixed top-0 w-full z-50 flex justify-between items-center px-container-padding-mobile h-20">
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Fieldora Platinum Elite</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+<img alt="Elite User Profile" class="w-8 h-8 rounded-full border border-glass-stroke object-cover" data-alt="A small circular profile image of a professional agritech user, sharp focus, well-lit, conveying trust and expertise within a high-end software environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaGeaaZ6GNzf47qvrqXYOt8ZNl6Gg3aLVDtO9bnODfvNUlBYmyuccVnWphu3MNQgSK2J5KSr1QX22eyyGIrcyZqYDLRtEJj4ejaRMUTacsVmhYxf-lRmCGxN9GrvbtWjgypZexHliPGVQeGBAPtB-6IikwT61TCfc14xw9e1I6UQP1iB0mu0_aZr4zOYp14KscvUOpDo3xl1rANQTu2SzVB1e0z-S3Qqzw5upiHqPum-IOTxqOL_7Dww">
+</div>
+</nav>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex bg-white/70 backdrop-blur-2xl text-primary font-body-md text-body-md fixed left-0 top-0 h-screen w-72 border-r border-glass-stroke shadow-[8px_0_32px_0_rgba(11,43,22,0.05)] flex-col p-6 gap-y-4 z-40">
+<div class="mb-8">
+<div class="font-headline-md text-headline-md font-bold text-primary">Platinum Elite</div>
+<div class="text-secondary text-sm opacity-80 mt-1">Enterprise Yield Management</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="text-secondary hover:bg-soft-sage/10 rounded-xl px-4 py-3 flex items-center gap-3 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-secondary hover:bg-soft-sage/10 rounded-xl px-4 py-3 flex items-center gap-3 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+                Marketplace
+            </a>
+<a class="text-secondary hover:bg-soft-sage/10 rounded-xl px-4 py-3 flex items-center gap-3 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="assignment_late">assignment_late</span>
+                Requirements
+            </a>
+<a class="bg-primary text-on-primary shadow-lg rounded-xl px-4 py-3 flex items-center gap-3 font-semibold transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                Orders
+            </a>
+<a class="text-secondary hover:bg-soft-sage/10 rounded-xl px-4 py-3 flex items-center gap-3 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+                AI Assistant
+            </a>
+</nav>
+<div class="mt-auto flex flex-col gap-2 border-t border-glass-stroke pt-4">
+<button class="btn-primary text-on-primary rounded-lg py-2 font-medium w-full mb-4">Upgrade Plan</button>
+<a class="text-secondary hover:bg-soft-sage/10 rounded-xl px-4 py-2 flex items-center gap-3 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                Support
+            </a>
+<a class="text-secondary hover:bg-soft-sage/10 rounded-xl px-4 py-2 flex items-center gap-3 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Sign Out
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 mt-20 md:mt-0 p-container-padding-mobile md:p-container-padding-desktop min-h-screen flex flex-col">
+<!-- Header Section -->
+<header class="mb-section-gap flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pt-4">
+<div>
+<h1 class="font-display-lg text-display-lg text-deep-forest mb-2">Order Management</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Monitor and manage your supply chain transactions across the Platinum network.</p>
+</div>
+<!-- Desktop Action Bar in Header -->
+<div class="hidden md:flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">search</span>
+<input class="bg-soft-sage/10 border border-glass-stroke rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all w-64 text-sm font-body-md" placeholder="Search orders..." type="text">
+</div>
+<button class="glass-card flex items-center gap-2 px-4 py-2 rounded-lg text-primary font-medium hover:bg-soft-sage/20 transition-colors">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+                    Advanced Filters
+                </button>
+<button class="btn-primary text-on-primary rounded-lg px-6 py-2 font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                    New Order
+                </button>
+</div>
+</header>
+<!-- Filters (Glassmorphic Bar) -->
+<div class="glass-card rounded-xl p-4 mb-8 flex flex-wrap gap-4 items-center">
+<div class="flex-1 min-w-[200px] md:hidden relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">search</span>
+<input class="w-full bg-surface-container-low border border-glass-stroke rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm" placeholder="Search orders..." type="text">
+</div>
+<div class="flex gap-3 flex-wrap">
+<select class="bg-surface border border-glass-stroke rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+<option>All Dates</option>
+<option>Last 7 Days</option>
+<option>Last 30 Days</option>
+<option>This Quarter</option>
+</select>
+<select class="bg-surface border border-glass-stroke rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+<option>All Statuses</option>
+<option>Processing</option>
+<option>Shipped</option>
+<option>Delivered</option>
+</select>
+<select class="bg-surface border border-glass-stroke rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+<option>All Commodities</option>
+<option>Wheat</option>
+<option>Soybeans</option>
+<option>Corn</option>
+</select>
+</div>
+</div>
+<!-- Orders List (Bento-style list) -->
+<div class="flex flex-col gap-4">
+<!-- Active Order Item -->
+<div class="glass-card rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between group hover:bg-white/90 transition-colors cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex flex-1 gap-6 items-start md:items-center">
+<div class="w-12 h-12 rounded-full bg-soft-sage/30 flex items-center justify-center border border-glass-stroke shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="grass" style="font-variation-settings: 'wght' 300;">grass</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Order ID</div>
+<div class="font-title-md text-title-md text-deep-forest font-semibold">ORD-8924</div>
+<div class="text-sm text-on-surface-variant mt-1">Premium Wheat</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Supplier</div>
+<div class="font-body-md text-body-md text-deep-forest">Midwest AgriCorp</div>
+<div class="text-xs text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="location_on">location_on</span> Omaha, NE
+                            </div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Quantity / Price</div>
+<div class="font-body-md text-body-md text-deep-forest">2,500 MT</div>
+<div class="text-sm font-semibold text-primary mt-1">$845,000.00</div>
+</div>
+<div class="flex flex-col items-start md:items-end justify-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                                Processing
+                            </span>
+<div class="text-xs text-on-surface-variant mt-2">Est. Delivery: Oct 12</div>
+</div>
+</div>
+</div>
+<div class="shrink-0 w-full md:w-auto mt-4 md:mt-0 flex justify-end">
+<button class="btn-primary text-on-primary rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 w-full md:w-auto justify-center">
+<span class="material-symbols-outlined text-[18px]" data-icon="local_shipping">local_shipping</span>
+                        Track Order
+                    </button>
+</div>
+</div>
+<!-- Shipped Order Item -->
+<div class="glass-card rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between group hover:bg-white/90 transition-colors cursor-pointer">
+<div class="flex flex-1 gap-6 items-start md:items-center">
+<div class="w-12 h-12 rounded-full bg-soft-sage/30 flex items-center justify-center border border-glass-stroke shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="eco" style="font-variation-settings: 'wght' 300;">eco</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Order ID</div>
+<div class="font-title-md text-title-md text-deep-forest font-semibold">ORD-8921</div>
+<div class="text-sm text-on-surface-variant mt-1">Organic Soybeans</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Supplier</div>
+<div class="font-body-md text-body-md text-deep-forest">Delta Farms Co.</div>
+<div class="text-xs text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="location_on">location_on</span> Greenville, MS
+                            </div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Quantity / Price</div>
+<div class="font-body-md text-body-md text-deep-forest">1,200 MT</div>
+<div class="text-sm font-semibold text-primary mt-1">$612,500.00</div>
+</div>
+<div class="flex flex-col items-start md:items-end justify-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e6b100]/10 text-[#a37c00] font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="flight_takeoff">flight_takeoff</span>
+                                Shipped
+                            </span>
+<div class="text-xs text-on-surface-variant mt-2">Arriving: Tomorrow</div>
+</div>
+</div>
+</div>
+<div class="shrink-0 w-full md:w-auto mt-4 md:mt-0 flex justify-end">
+<button class="bg-surface-container-high hover:bg-surface-variant border border-glass-stroke text-deep-forest rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 w-full md:w-auto justify-center transition-colors">
+                        View Details
+                    </button>
+</div>
+</div>
+<!-- Delivered Order Item -->
+<div class="glass-card rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between group hover:bg-white/90 transition-colors cursor-pointer opacity-80">
+<div class="flex flex-1 gap-6 items-start md:items-center">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-glass-stroke shrink-0">
+<span class="material-symbols-outlined text-outline-variant" data-icon="inventory_2" style="font-variation-settings: 'wght' 300;">inventory_2</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Order ID</div>
+<div class="font-title-md text-title-md text-on-surface-variant font-semibold">ORD-8915</div>
+<div class="text-sm text-outline mt-1">Yellow Corn No. 2</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Supplier</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Heartland Grain</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Quantity / Price</div>
+<div class="font-body-md text-body-md text-on-surface-variant">5,000 MT</div>
+<div class="text-sm font-semibold text-on-surface-variant mt-1">$1,120,000.00</div>
+</div>
+<div class="flex flex-col items-start md:items-end justify-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-outline font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+                                Delivered
+                            </span>
+<div class="text-xs text-outline mt-2">Oct 02, 2023</div>
+</div>
+</div>
+</div>
+<div class="shrink-0 w-full md:w-auto mt-4 md:mt-0 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-primary hover:bg-soft-sage/20 rounded-lg p-2 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-8 flex justify-center items-center gap-2">
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-soft-sage/20 text-on-surface-variant disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center bg-primary text-on-primary font-medium">1</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-soft-sage/20 text-on-surface-variant font-medium">2</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-soft-sage/20 text-on-surface-variant font-medium">3</button>
+<span class="text-on-surface-variant px-2">...</span>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-soft-sage/20 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</main>
+</body></html>
