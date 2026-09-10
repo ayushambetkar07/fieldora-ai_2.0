@@ -13,7 +13,7 @@
 
 ## 📖 Overview
 
-**Fieldora AI 2.0** is an enterprise-grade, full-stack agricultural commerce ecosystem designed to bridge the gap between farmers, institutional buyers, and logistics networks. Powered by **Google Gemini AI**, **Real-Time APMC Mandi Feeds**, and an **A\* Graph Routing Algorithm**, Fieldora eliminates predatory middlemen, enforces fair pricing, and streamlines agri-supply chain logistics.
+**Fieldora AI 2.0** is an enterprise-grade, full-stack agricultural commerce ecosystem designed to bridge the gap between farmers, institutional buyers, and logistics networks. Powered by **Google Gemini AI**, **Real-Time APMC Mandi Feeds**, and an **A\* Graph Routing Algorithm**, Fieldora eliminates predatory middlemen, enforces fair pricing, and streamlines agri-supply chain logistics
 
 ---
 
