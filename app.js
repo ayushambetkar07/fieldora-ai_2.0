@@ -1231,7 +1231,7 @@ window.toggleMobileMenu = toggleMobileMenu;
 window.closeMobileMenu = closeMobileMenu;
 window.resetMarketplaceFilters = resetMarketplaceFilters;
 window.showToast = showToast;
-\n
+
 // ==========================================
 // FIELDORA BACKEND INTEGRATION PATCH
 // ==========================================

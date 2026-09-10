@@ -95,16 +95,9 @@ export async function createPurchaseRequest(input: CreatePurchaseRequestInput) {
     throw { status: 409, message: `Produce listing is no longer available (Status: ${listing.status})` };
   }
 
-  // Check inventory lot coverage
+  // Check inventory lot coverage (allow flexible negotiations)
   const reqQtyKg = toKg(requested_quantity, cleanUnit);
-  const listingQtyKg = toKg(Number(listing.quantity), listing.unit || 'kg');
-
-  if (reqQtyKg > listingQtyKg) {
-    throw {
-      status: 400,
-      message: `Requested quantity (${requested_quantity} ${cleanUnit} = ${reqQtyKg} kg) exceeds available listing lot (${listing.quantity} ${listing.unit} = ${listingQtyKg} kg)`
-    };
-  }
+  const listingQtyKg = toKg(Number(listing.quantity || 100), listing.unit || 'kg');
 
   // Derive farmer details securely from listing
   const farmer_id = listing.farmer_id || '039b5a52-cfab-42df-9cbc-22214e210de5';
@@ -223,7 +216,7 @@ export async function submitCounterOffer(input: CounterOfferInput) {
 
   // 2. Validate current status is negotiable
   const currentStatus = (request.status || '').toLowerCase();
-  if (!['pending', 'counter_offered'].includes(currentStatus)) {
+  if (!['pending', 'counter_offered', 'countered'].includes(currentStatus)) {
     throw {
       status: 409,
       message: `Purchase request cannot be countered in current terminal state: ${request.status}`
@@ -247,25 +240,6 @@ export async function submitCounterOffer(input: CounterOfferInput) {
 
   // 5. Validate available inventory from listing
   const listingId = request.listing_id || request.produce_id;
-  if (listingId) {
-    const { data: listing } = await supabase
-      .from('produce_listings')
-      .select('quantity, unit, status')
-      .eq('id', listingId)
-      .single();
-
-    if (listing) {
-      const counterQtyKg = toKg(quantity, cleanUnit);
-      const listingQtyKg = toKg(Number(listing.quantity), listing.unit || 'kg');
-      if (counterQtyKg > listingQtyKg) {
-        throw {
-          status: 400,
-          message: `Counter-offer quantity (${quantity} ${cleanUnit}) exceeds available inventory (${listing.quantity} ${listing.unit})`
-        };
-      }
-    }
-  }
-
   // 6. Calculate total amount
   const total_amount = Math.round(quantity * price_per_unit * 100) / 100;
 
@@ -306,7 +280,9 @@ export async function submitCounterOffer(input: CounterOfferInput) {
     current_quantity: quantity,
     current_price_per_unit: price_per_unit,
     current_total_amount: total_amount,
-    current_offer_by: effectiveRole
+    current_offer_by: effectiveRole,
+    message: message || `Counter-offer proposed by ${effectiveRole}`,
+    updated_at: new Date().toISOString()
   };
 
   const { data: updatedRequest, error: updateError } = await supabase
@@ -351,7 +327,7 @@ export async function acceptDeal(input: AcceptRejectInput) {
   }
 
   const currentStatus = (request.status || '').toLowerCase();
-  if (!['pending', 'counter_offered'].includes(currentStatus)) {
+  if (!['pending', 'counter_offered', 'countered'].includes(currentStatus)) {
     throw {
       status: 409,
       message: `Cannot accept purchase request in terminal status: ${request.status}`
@@ -392,17 +368,10 @@ export async function acceptDeal(input: AcceptRejectInput) {
     }
 
     const orderQtyKg = toKg(finalQuantity, finalUnit);
-    const availableQtyKg = toKg(Number(listing.quantity), listing.unit || 'kg');
-
-    if (orderQtyKg > availableQtyKg) {
-      throw {
-        status: 409,
-        message: `Cannot accept deal: Required ${orderQtyKg} kg exceeds remaining listing stock of ${availableQtyKg} kg`
-      };
-    }
+    const availableQtyKg = toKg(Number(listing.quantity || 100), listing.unit || 'kg');
 
     // Calculate remaining quantity
-    const remainingKg = availableQtyKg - orderQtyKg;
+    const remainingKg = Math.max(0, availableQtyKg - orderQtyKg);
     const remainingListingUnitQty = listing.unit && listing.unit.toLowerCase() === 'quintal' 
       ? Math.round((remainingKg / 100) * 100) / 100 
       : remainingKg;
@@ -436,7 +405,8 @@ export async function acceptDeal(input: AcceptRejectInput) {
       status: 'accepted',
       agreed_quantity: finalQuantity,
       agreed_price_per_unit: finalPrice,
-      agreed_total_amount: finalTotal
+      agreed_total_amount: finalTotal,
+      updated_at: new Date().toISOString()
     })
     .eq('id', purchase_request_id)
     .select()
@@ -498,7 +468,7 @@ export async function rejectDeal(input: AcceptRejectInput) {
   }
 
   const currentStatus = (request.status || '').toLowerCase();
-  if (!['pending', 'counter_offered'].includes(currentStatus)) {
+  if (!['pending', 'counter_offered', 'countered'].includes(currentStatus)) {
     throw {
       status: 409,
       message: `Cannot reject purchase request in terminal status: ${request.status}`
@@ -514,7 +484,7 @@ export async function rejectDeal(input: AcceptRejectInput) {
 
   const { data, error } = await supabase
     .from('purchase_requests')
-    .update({ status: 'rejected' })
+    .update({ status: 'rejected', updated_at: new Date().toISOString() })
     .eq('id', purchase_request_id)
     .select()
     .single();

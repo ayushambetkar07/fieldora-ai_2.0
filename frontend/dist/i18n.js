@@ -349,8 +349,8 @@ const i18nTranslations = {
     "btn_delivered_completed": "✓ Delivered & Completed"
   },
   "mr": {
-    "label": "मराठी (Marathi)",
-    "flag": "🚩",
+    "label": "English",
+    "flag": "🇬🇧",
     "ecosystem_pill": "प्लॅटिनम कृषी-व्यापार परिसंस्था",
     "welcome_title": "फिल्डोरा मध्ये आपले स्वागत आहे",
     "welcome_subtitle": "कृपया आपण व्यासपीठावर कसे प्रवेश करू इच्छिता ते निवडा. त्यानुसार आम्ही आपली साधने आणि बाजारपेठ प्रवेश वैयक्तिकृत करू.",
@@ -696,8 +696,8 @@ const i18nTranslations = {
     "btn_delivered_completed": "✓ वितरित आणि पूर्ण झाले"
   },
   "hi": {
-    "label": "हिन्दी (Hindi)",
-    "flag": "🇮🇳",
+    "label": "English",
+    "flag": "🇬🇧",
     "ecosystem_pill": "प्लैटिनम कृषि-व्यापार पारिस्थितिकी तंत्र",
     "welcome_title": "फील्डोरा में आपका स्वागत है",
     "welcome_subtitle": "कृपया चुनें कि आप प्लेटफ़ॉर्म में कैसे प्रवेश करना चाहते हैं। हम आपके उपकरण और बाज़ार पहुँच को अनुकूलित करेंगे।",
@@ -1081,8 +1081,8 @@ const i18nTranslations = {
     "btn_delivered_completed": "✓ वितरित और पूर्ण हुआ"
   },
   "gu": {
-    "label": "ગુજરાતી (Gujarati)",
-    "flag": "🌾",
+    "label": "English",
+    "flag": "🇬🇧",
     "ecosystem_pill": "પ્લેટિનમ કૃષિ-વેપાર ઇકોસિસ્ટમ",
     "welcome_title": "ફિલ્ડોરામાં આપનું સ્વાગત છે",
     "welcome_subtitle": "કૃપા કરીને પસંદ કરો કે તમે પ્લેટફોર્મ પર કેવી રીતે પ્રવેશવા માંગો છો. અમે તમારા સાધનો અને માર્કેટપ્લેસ ઍક્સેસને તે મુજબ વ્યક્તિગત કરીશું.",
@@ -1466,8 +1466,8 @@ const i18nTranslations = {
     "btn_delivered_completed": "✓ ડિલિવર અને પૂર્ણ થયું"
   },
   "pa": {
-    "label": "ਪੰਜਾਬੀ (Punjabi)",
-    "flag": "🌾",
+    "label": "English",
+    "flag": "🇬🇧",
     "ecosystem_pill": "ਪਲੈਟਿਨਮ ਖੇਤੀ-ਵਪਾਰ ਈਕੋਸਿਸਟਮ",
     "welcome_title": "ਫੀਲਡੋਰਾ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ",
     "welcome_subtitle": "ਕਿਰਪਾ ਕਰਕੇ ਚੁਣੋ ਕਿ ਤੁਸੀਂ ਪਲੇਟਫਾਰਮ ਵਿੱਚ ਕਿਵੇਂ ਦਾਖਲ ਹੋਣਾ ਚਾਹੁੰਦੇ ਹੋ। ਅਸੀਂ ਤੁਹਾਡੇ ਸਾਧਨਾਂ ਅਤੇ ਮਾਰਕੀਟਪਲੇਸ ਪਹੁੰਚ ਨੂੰ ਉਸ ਅਨੁਸਾਰ ਅਨੁਕੂਲਿਤ ਕਰਾਂਗੇ।",
@@ -1851,8 +1851,8 @@ const i18nTranslations = {
     "btn_delivered_completed": "✓ ਡਿਲੀਵਰ ਅਤੇ ਮੁਕੰਮਲ ਹੋਇਆ"
   },
   "te": {
-    "label": "తెలుగు (Telugu)",
-    "flag": "🌾",
+    "label": "English",
+    "flag": "🇬🇧",
     "ecosystem_pill": "ప్లాటినం అగ్రి-ట్రేడ్ పర్యావరణ వ్యవస్థ",
     "welcome_title": "ఫీల్డోరాకు స్వాగతం",
     "welcome_subtitle": "దయచేసి మీరు ప్లాట్‌ఫారమ్‌ను ఎలా ఉపయోగించాలనుకుంటున్నారో ఎంచుకోండి. మేము మీ సాధనాలు మరియు మార్కెట్ యాక్సెస్‌ను వ్యక్తిగతీకరిస్తాము.",
@@ -2236,8 +2236,8 @@ const i18nTranslations = {
     "btn_delivered_completed": "✓ డెలివరీ చేయబడింది & పూర్తయింది"
   },
   "ta": {
-    "label": "தமிழ் (Tamil)",
-    "flag": "🌾",
+    "label": "English",
+    "flag": "🇬🇧",
     "ecosystem_pill": "பிளாட்டினம் விவசாய-வர்த்தக சூழல் அமைப்பு",
     "welcome_title": "ஃபீல்டோராவிற்கு நல்வரவு",
     "welcome_subtitle": "மேடையில் எவ்வாறு நுழைய விரும்புகிறீர்கள் என்பதைத் தேர்ந்தெடுக்கவும். உங்கள் கருவிகள் மற்றும் சந்தை அணுகலை நாங்கள் தனிப்பயனாக்குவோம்.",
@@ -2621,8 +2621,8 @@ const i18nTranslations = {
     "btn_delivered_completed": "✓ விநியோகிக்கப்பட்டு முடிக்கப்பட்டது"
   },
   "kn": {
-    "label": "ಕನ್ನಡ (Kannada)",
-    "flag": "🌾",
+    "label": "English",
+    "flag": "🇬🇧",
     "ecosystem_pill": "ಪ್ಲಾಟಿನಂ ಕೃಷಿ-ವ್ಯಾಪಾರ ಪರಿಸರ ವ್ಯವಸ್ಥೆ",
     "welcome_title": "ಫೀಲ್ಡೋರಾಗೆ ಸುಸ್ವಾಗತ",
     "welcome_subtitle": "ದಯವಿಟ್ಟು ನೀವು ಪ್ಲಾಟ್‌ಫಾರ್ಮ್‌ಗೆ ಹೇಗೆ ಪ್ರವೇಶಿಸಲು ಬಯಸುತ್ತೀರಿ ಎಂಬುದನ್ನು ಆಯ್ಕೆಮಾಡಿ. ನಿಮ್ಮ ಪರಿಕರಗಳು ಮತ್ತು ಮಾರುಕಟ್ಟೆ ಪ್ರವೇಶವನ್ನು ನಾವು ವೈಯಕ್ತೀಕರಿಸುತ್ತೇವೆ.",
@@ -3101,28 +3101,9 @@ function applyCurrentLanguage() {
   });
 
   // Update language selector dropdown label if present
-  const langDisplay = document.getElementById('active-lang-label') || document.getElementById('current-lang-label');
+  const langDisplay = document.getElementById('current-lang-label');
   if (langDisplay && i18nTranslations[currentLanguage]) {
-    langDisplay.innerText = i18nTranslations[currentLanguage].label;
-  }
-
-  // Update checkmarks in dropdown
-  const langCodes = ['en', 'hi', 'mr', 'gu', 'pa', 'te', 'ta', 'kn'];
-  langCodes.forEach(code => {
-    const chk = document.getElementById(`lang-chk-${code}`);
-    if (chk) {
-      if (code === currentLanguage) chk.classList.remove('hidden');
-      else chk.classList.add('hidden');
-    }
-  });
-
-  if (typeof closeLangMenu === 'function') {
-    closeLangMenu();
-  }
-
-  // Preserve dynamic logged-in user profile if active
-  if (typeof currentAuthUser !== 'undefined' && currentAuthUser && typeof updateUserUIElements === 'function') {
-    updateUserUIElements(currentAuthUser);
+    langDisplay.innerText = i18nTranslations[currentLanguage].flag + ' ' + i18nTranslations[currentLanguage].label;
   }
 }
 

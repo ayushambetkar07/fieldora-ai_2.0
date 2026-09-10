@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MOCK_MARKET_PRICES } from '../../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { fetchMarketPrices } from '../../services/supabaseService';
 import { MarketPricePoint } from '../../types';
 import { 
   TrendingUp, 
@@ -16,8 +16,61 @@ import { PriceChart } from '../../components/ui/PriceChart';
 import { Card, Select, Badge, cn } from '../../components/ui';
 
 export const MarketPricesPage: React.FC = () => {
+  const [marketPrices, setMarketPrices] = useState<MarketPricePoint[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCrop, setSelectedCrop] = useState<string>('Tomato');
-  const activeData = MOCK_MARKET_PRICES.find(p => p.crop.toLowerCase() === selectedCrop.toLowerCase()) || MOCK_MARKET_PRICES[0];
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadPrices = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchMarketPrices();
+        if (isMounted && data && data.length > 0) {
+          setMarketPrices(data);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(err.message || 'Failed to load APMC market prices');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    loadPrices();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const activeData = marketPrices.find(
+    p => p.crop.toLowerCase() === selectedCrop.toLowerCase() || 
+         p.id === selectedCrop
+  ) || marketPrices[0];
+
+  if (loading && !activeData) {
+    return (
+      <div className="space-y-8 animate-fade-in max-w-7xl mx-auto py-12 text-center">
+        <div className="text-secondary text-sm font-semibold">Loading official APMC market data...</div>
+      </div>
+    );
+  }
+
+  if (error && !activeData) {
+    return (
+      <div className="space-y-8 animate-fade-in max-w-7xl mx-auto py-12 text-center">
+        <div className="text-error text-sm font-semibold">Unable to load APMC market data: {error}</div>
+      </div>
+    );
+  }
+
+  if (!activeData) {
+    return null;
+  }
 
   return (
     <div className="space-y-8 animate-fade-in max-w-7xl mx-auto">
@@ -40,10 +93,20 @@ export const MarketPricesPage: React.FC = () => {
             onChange={(e) => setSelectedCrop(e.target.value)}
             className="px-3.5 py-2 bg-card border border-border rounded-input text-xs sm:text-sm font-semibold text-main focus:ring-1 focus:ring-primary"
           >
-            <option value="Tomato">Tomato (Hybrid Table)</option>
-            <option value="Onion">Onion (Red Garwa)</option>
-            <option value="Potato">Potato (Kufri Jyoti)</option>
-            <option value="Wheat">Wheat (Sharbati C-306)</option>
+            {marketPrices.length > 0 ? (
+              marketPrices.map((item) => (
+                <option key={item.id || item.crop} value={item.crop}>
+                  {item.crop} {item.variety ? `(${item.variety})` : ''}
+                </option>
+              ))
+            ) : (
+              <>
+                <option value="Tomato">Tomato (Hybrid Table)</option>
+                <option value="Onion">Onion (Red Garwa)</option>
+                <option value="Potato">Potato (Kufri Jyoti)</option>
+                <option value="Wheat">Wheat (Sharbati C-306)</option>
+              </>
+            )}
           </select>
         </div>
       </div>

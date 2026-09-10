@@ -88,7 +88,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
       }
     }
 
-    query = query.order('created_at', { ascending: false }).range(offset, offset + limitNum - 1);
+    query = query.order('updated_at', { ascending: false }).range(offset, offset + limitNum - 1);
 
     const { data, count, error } = await query;
 
