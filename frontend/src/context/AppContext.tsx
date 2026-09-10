@@ -69,6 +69,7 @@ interface AppContextType {
   sendPurchaseRequest: (request: Omit<PurchaseRequest, 'id' | 'buyerId' | 'buyerName' | 'buyerCompany' | 'isBuyerVerified' | 'createdDate' | 'status'>) => Promise<void>;
   acceptRequest: (requestId: string) => Promise<void>;
   rejectRequest: (requestId: string) => Promise<void>;
+  counterRequest: (requestId: string, counterPrice: number, counterQuantity: number, message?: string) => Promise<void>;
   
   ordersList: OrderItem[];
   
@@ -480,6 +481,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Request Declined', 'Purchase request has been rejected.', 'info');
   };
 
+  // Handler: Counter Request (Farmer proposes new price / terms)
+  const counterRequest = async (requestId: string, counterPrice: number, counterQuantity: number, message?: string) => {
+    setRequestsList(prev => prev.map(r => r.id === requestId ? {
+      ...r,
+      status: 'Countered' as const,
+      counterPrice,
+      counterQuantity,
+      counterMessage: message
+    } : r));
+
+    showToast(
+      'Counter-Offer Transmitted',
+      `Counter rate of ₹${counterPrice.toLocaleString('en-IN')}/q transmitted to buyer.`,
+      'success'
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -500,6 +518,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         sendPurchaseRequest,
         acceptRequest,
         rejectRequest,
+        counterRequest,
         ordersList,
         isAssistantOpen,
         setIsAssistantOpen,

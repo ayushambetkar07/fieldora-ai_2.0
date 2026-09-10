@@ -118,7 +118,10 @@ export interface PurchaseRequest {
   deliveryLocation: string;
   requiredDate: string;
   message?: string;
-  status: 'Pending' | 'Accepted' | 'Rejected';
+  counterPrice?: number;
+  counterQuantity?: number;
+  counterMessage?: string;
+  status: 'Pending' | 'Accepted' | 'Rejected' | 'Countered';
   createdDate: string;
 }
 

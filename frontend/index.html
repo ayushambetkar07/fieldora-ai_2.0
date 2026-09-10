@@ -17,20 +17,13 @@
   <!-- Fieldora Global API URL Resolver -->
   <script>
     window.FIELDORA_API_BASE = (function() {
-      // 1. Check if configured via window.VITE_API_URL or environment
       if (typeof window !== 'undefined' && window.VITE_API_URL) {
         return window.VITE_API_URL.replace(/\/$/, '');
       }
-      // 2. Check local environment
-      if (typeof window !== 'undefined') {
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        if (isLocal) {
-          return 'http://localhost:5000';
-        }
-        // 3. For remote / Netlify deployments: use current origin (or Netlify proxy / configured API)
+      if (typeof window !== 'undefined' && window.location && window.location.origin) {
         return window.location.origin;
       }
-      return 'http://localhost:5000';
+      return 'http://localhost:3000';
     })();
     const FIELDORA_API_BASE = window.FIELDORA_API_BASE;
   </script>
@@ -894,7 +887,7 @@
                 </div>
                 <div>
                   <label class="block font-bold text-deep-forest mb-1">Quality Grade *</label>
-                  <select class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-medium">
+                  <select id="fp-grade" class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-medium">
                     <option>Grade A+ (Export)</option>
                     <option>Grade A (Retail)</option>
                     <option>Grade B (Processing)</option>
@@ -904,7 +897,7 @@
 
               <div>
                 <label class="block font-bold text-deep-forest mb-1">Dispatch Location / Cluster *</label>
-                <input type="text" value="Nashik Cluster, Maharashtra" required class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-medium" />
+                <input type="text" id="fp-location" value="Nashik Cluster, Maharashtra" required class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-medium" />
               </div>
 
               <div class="pt-4 border-t border-[#E6ECE6] flex justify-end gap-3">
@@ -1085,9 +1078,14 @@
 
               <div class="flex sm:flex-col items-center sm:items-end justify-between gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/10">
                 <span id="f-spotlight-rate" class="text-lg font-extrabold font-mono text-[#4ade80]">₹28 / kg</span>
-                <button id="f-spotlight-accept-btn" onclick="acceptBuyerOffer('Mumbai Fresh Mart', 140000)" class="px-5 py-2.5 bg-[#22c55e] hover:bg-[#4ade80] text-[#06240f] font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap">
-                  Accept Best Match ➔
-                </button>
+                <div class="flex items-center gap-2">
+                  <button id="f-spotlight-counter-btn" onclick="openCounterOfferModal('req-101', 'Mumbai Fresh Mart Ltd', 'Tomato (Abhinav Hybrid)', 2800, 50, 'quintal', 2900, 140000, 'Bhiwandi Central Depot')" class="px-3.5 py-2.5 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap flex items-center gap-1">
+                    <span>Counter Offer ➔</span>
+                  </button>
+                  <button id="f-spotlight-accept-btn" onclick="acceptBuyerOffer('Mumbai Fresh Mart', 140000)" class="px-5 py-2.5 bg-[#22c55e] hover:bg-[#4ade80] text-[#06240f] font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap flex items-center gap-1">
+                    <span>Accept Best Match ➔</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1161,9 +1159,14 @@
                       <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-mono font-bold text-[11px]">96/100</span>
                     </td>
                     <td class="p-3 text-right">
-                      <button onclick="acceptBuyerOffer('Mumbai Fresh Mart', 140000)" class="px-3 py-1.5 bg-[#166534] hover:bg-[#14532d] text-white font-bold rounded-lg shadow-2xs">
-                        Accept
-                      </button>
+                      <div class="flex items-center justify-end gap-1.5">
+                        <button onclick="openCounterOfferModal('req-101', 'Mumbai Fresh Mart', 'Tomato (Abhinav Hybrid)', 2800, 50, 'quintal', 2900, 140000, 'Bhiwandi Central Depot')" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold rounded-lg text-xs shadow-2xs whitespace-nowrap cursor-pointer">
+                          Counter ➔
+                        </button>
+                        <button onclick="acceptBuyerOffer('Mumbai Fresh Mart', 140000)" class="px-3 py-1.5 bg-[#166534] hover:bg-[#14532d] text-white font-bold rounded-lg shadow-2xs whitespace-nowrap cursor-pointer">
+                          Accept
+                        </button>
+                      </div>
                     </td>
                   </tr>
 
@@ -1185,9 +1188,14 @@
                       <span class="px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full font-mono font-bold text-[11px]">92/100</span>
                     </td>
                     <td class="p-3 text-right">
-                      <button onclick="acceptBuyerOffer('FreshCart Wholesale', 135000)" class="px-3 py-1.5 bg-white border border-[#E6ECE6] hover:bg-[#F8FAF9] text-deep-forest font-bold rounded-lg shadow-2xs">
-                        Accept
-                      </button>
+                      <div class="flex items-center justify-end gap-1.5">
+                        <button onclick="openCounterOfferModal('req-102', 'FreshCart Wholesale', 'Tomato (Abhinav Hybrid)', 2700, 50, 'quintal', 2900, 135000, 'Kalyan Wholesale Hub')" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold rounded-lg text-xs shadow-2xs whitespace-nowrap cursor-pointer">
+                          Counter ➔
+                        </button>
+                        <button onclick="acceptBuyerOffer('FreshCart Wholesale', 135000)" class="px-3 py-1.5 bg-white border border-[#E6ECE6] hover:bg-[#F8FAF9] text-deep-forest font-bold rounded-lg shadow-2xs whitespace-nowrap cursor-pointer">
+                          Accept
+                        </button>
+                      </div>
                     </td>
                   </tr>
 
@@ -1209,9 +1217,14 @@
                       <span class="px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full font-mono font-bold text-[11px]">85/100</span>
                     </td>
                     <td class="p-3 text-right">
-                      <button onclick="acceptBuyerOffer('City Foods Enterprise', 145000)" class="px-3 py-1.5 bg-white border border-[#E6ECE6] hover:bg-[#F8FAF9] text-deep-forest font-bold rounded-lg shadow-2xs">
-                        Accept
-                      </button>
+                      <div class="flex items-center justify-end gap-1.5">
+                        <button onclick="openCounterOfferModal('req-103', 'City Foods Enterprise', 'Tomato (Abhinav Hybrid)', 2900, 50, 'quintal', 2900, 145000, 'Vashi Terminal')" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold rounded-lg text-xs shadow-2xs whitespace-nowrap cursor-pointer">
+                          Counter ➔
+                        </button>
+                        <button onclick="acceptBuyerOffer('City Foods Enterprise', 145000)" class="px-3 py-1.5 bg-white border border-[#E6ECE6] hover:bg-[#F8FAF9] text-deep-forest font-bold rounded-lg shadow-2xs whitespace-nowrap cursor-pointer">
+                          Accept
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -6398,7 +6411,8 @@
           const sScore = document.getElementById('f-spotlight-score');
           const sBadge = document.getElementById('f-spotlight-badge');
           const sSummary = document.getElementById('f-spotlight-offer-summary');
-          const sBtn = document.getElementById('f-spotlight-accept-btn');
+          const sCounterBtn = document.getElementById('f-spotlight-counter-btn');
+          const sAcceptBtn = document.getElementById('f-spotlight-accept-btn');
           const sWhyTitle = document.getElementById('f-spotlight-why-title');
 
           if (sName) sName.innerText = topOffer.buyer_company || topOffer.buyer_name || 'Verified Buyer';
@@ -6478,15 +6492,14 @@
             }
           }
 
-          if (sBtn) {
+          if (sCounterBtn) {
             if (isAccepted) {
-              sBtn.className = 'px-5 py-2.5 bg-emerald-800 text-emerald-100 font-bold text-xs rounded-xl shadow-md cursor-default whitespace-nowrap';
-              sBtn.innerText = '✓ Accepted (In Escrow)';
-              sBtn.onclick = null;
-            } else if (isLowBid) {
-              sBtn.className = 'px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap';
-              sBtn.innerText = 'Review / Counter Bid ➔';
-              sBtn.onclick = () => openCounterOfferModal(
+              sCounterBtn.style.display = 'none';
+            } else {
+              sCounterBtn.style.display = 'inline-flex';
+              sCounterBtn.className = 'px-3.5 py-2.5 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap flex items-center gap-1';
+              sCounterBtn.innerHTML = '<span>Counter Offer ➔</span>';
+              sCounterBtn.onclick = () => openCounterOfferModal(
                 topOffer.id,
                 topOffer.buyer_company || topOffer.buyer_name || 'Buyer',
                 topOffer.crop_name || 'Produce',
@@ -6497,10 +6510,18 @@
                 topOffer.totalVal,
                 topOffer.delivery_location || 'Central Depot'
               );
+            }
+          }
+
+          if (sAcceptBtn) {
+            if (isAccepted) {
+              sAcceptBtn.className = 'px-5 py-2.5 bg-emerald-800 text-emerald-100 font-bold text-xs rounded-xl shadow-md cursor-default whitespace-nowrap flex items-center gap-1';
+              sAcceptBtn.innerHTML = '<span>✓ Accepted (In Escrow)</span>';
+              sAcceptBtn.onclick = null;
             } else {
-              sBtn.className = 'px-5 py-2.5 bg-[#22c55e] hover:bg-[#4ade80] text-[#06240f] font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap';
-              sBtn.innerText = 'Accept Best Match ➔';
-              sBtn.onclick = () => acceptBuyerOffer(topOffer.id, topOffer.buyer_company || topOffer.buyer_name || 'Buyer', topOffer.totalVal);
+              sAcceptBtn.className = 'px-5 py-2.5 bg-[#22c55e] hover:bg-[#4ade80] text-[#06240f] font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap flex items-center gap-1';
+              sAcceptBtn.innerHTML = isHighMatch ? '<span>Accept Best Match ➔</span>' : '<span>Accept Offer ➔</span>';
+              sAcceptBtn.onclick = () => acceptBuyerOffer(topOffer.id, topOffer.buyer_company || topOffer.buyer_name || 'Buyer', topOffer.totalVal);
             }
           }
         }
@@ -7150,26 +7171,61 @@
     async function handleFarmerListProduce(e) {
       if (e && e.preventDefault) e.preventDefault();
       
-      const crop = document.getElementById('fp-crop')?.value || 'Soybean';
-      const variety = document.getElementById('fp-variety')?.value || (crop + ' Premium Quality');
-      const qty = document.getElementById('fp-qty')?.value || '50';
-      const price = document.getElementById('fp-price')?.value || '4500';
+      const crop = document.getElementById('fp-crop')?.value || 'Tomato';
+      const variety = document.getElementById('fp-variety')?.value || (crop + ' Hybrid Grade A');
+      const qty = Number(document.getElementById('fp-qty')?.value || 50);
+      const price = Number(document.getElementById('fp-price')?.value || 2800);
+      const grade = document.getElementById('fp-grade')?.value || 'Grade A (Retail)';
+      const location = document.getElementById('fp-location')?.value || 'Nashik Cluster, Maharashtra';
 
       let img = getProduceImage(crop);
+      const todayFormatted = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+      const newListing = {
+        id: `prod-${Date.now()}`,
+        crop: crop,
+        variety: variety,
+        price: price,
+        qty: qty,
+        unit: 'Quintals',
+        grade: grade,
+        date: todayFormatted,
+        status: 'Active on Marketplace',
+        image: img,
+        farmer: 'Raj Farms (Rajendra Patel)',
+        location: location,
+        rating: '4.9',
+        score: 95
+      };
+
+      if (!window.FIELDORA_PRODUCE_DATA) window.FIELDORA_PRODUCE_DATA = [];
+      window.FIELDORA_PRODUCE_DATA.unshift(newListing);
+      saveAndRenderProduce();
+
+      const statListings = document.getElementById('f-stat-active-listings');
+      if (statListings) {
+        statListings.innerText = `${window.FIELDORA_PRODUCE_DATA.length} Lots`;
+      }
+      const statHarvest = document.getElementById('f-stat-harvest-val');
+      if (statHarvest) {
+        const totalVal = window.FIELDORA_PRODUCE_DATA.reduce((acc, cur) => acc + ((cur.price || 0) * (cur.qty || 0)), 0);
+        statHarvest.innerText = `₹${totalVal.toLocaleString('en-IN')}`;
+      }
 
       try {
         await fetch(`${FIELDORA_API_BASE}/api/produce`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            farmer_name: 'Ayush Ambetkar',
-            farm_name: 'Ganesh Farm',
+            farmer_name: 'Raj Farms (Rajendra Patel)',
+            farm_name: 'Raj Farms',
             crop: crop,
             variety: variety,
-            quantity: Number(qty),
+            quantity: qty,
             unit: 'quintal',
-            expected_price: Number(price),
-            location: 'Nashik Cluster, Maharashtra',
+            expected_price: price,
+            quality: grade,
+            location: location,
             image_url: img
           })
         });
@@ -7177,10 +7233,8 @@
         console.warn('Produce listing API note:', err);
       }
 
-      await loadProduceListings();
-
       const alertMsg = typeof t === 'function'
-        ? t('alert_produce_published', `🎉 Produce Lot Published to Verified Marketplace!\n\nCommodity: ${crop} (${variety})\nQuantity: ${qty} Quintals\nAsking Rate: ₹${price}/quintal\nStatus: Active & Verified\n\nDirect FMCG buyers and procurement hubs have received instant match alerts.`, { crop, variety, qty, unit: 'Quintal', price, location: 'Nashik Cluster, Maharashtra' })
+        ? t('alert_produce_published', `🎉 Produce Lot Published to Verified Marketplace!\n\nCommodity: ${crop} (${variety})\nQuantity: ${qty} Quintals\nAsking Rate: ₹${price}/quintal\nStatus: Active & Verified\n\nDirect FMCG buyers and procurement hubs have received instant match alerts.`, { crop, variety, qty, unit: 'Quintal', price, location })
         : `🎉 Produce Lot Published to Verified Marketplace!\n\nCommodity: ${crop} (${variety})\nQuantity: ${qty} Quintals\nAsking Rate: ₹${price}/quintal\nStatus: Active & Verified\n\nDirect FMCG buyers and procurement hubs have received instant match alerts.`;
       alert(alertMsg);
       

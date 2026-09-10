@@ -84,10 +84,146 @@ const apmcPdfData = [
   { crop: "Wheat", variety: "Sharbati C-306 Gold", mandi: "Karnal Mandi", state: "Haryana", arrivalVolume: 5200, lowestPrice: 2600, highestPrice: 2850, averagePrice: 2720, currentPrice: 2720, previousPrice: 2680, changePercent: 1.5, priceTrend: "up", reportDate: "2026-09-05", insightSummary: "Karnal Sharbati wheat trading firm at ₹2,720/q.", recommendation: "Premium millers offering ₹2,850/q for moisture <10%." }
 ];
 
+let produceListingsData = [
+  {
+    id: "prod-1",
+    farmer_name: "Rajendra Patel",
+    farm_name: "Patel Organic Farms",
+    crop: "Tomato",
+    variety: "Abhinav Hybrid Tomato",
+    quantity: 50,
+    unit: "Quintals",
+    expected_price: 2800,
+    quality: "Grade A",
+    harvest_date: "05 Sep 2026",
+    location: "Nashik (18 km away)",
+    status: "Active on Marketplace",
+    image_url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: "prod-2",
+    farmer_name: "Green Valley Farms",
+    farm_name: "Green Valley Farms",
+    crop: "Wheat",
+    variety: "Sharbati Gold Wheat",
+    quantity: 200,
+    unit: "Quintals",
+    expected_price: 2750,
+    quality: "Grade A+ Export",
+    harvest_date: "12 Sep 2026",
+    location: "Indore, MP",
+    status: "Active on Marketplace",
+    image_url: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: "prod-3",
+    farmer_name: "Sahyadri Agro Producer",
+    farm_name: "Sahyadri Agro Producer",
+    crop: "Onion",
+    variety: "Nashik Garwa Onion",
+    quantity: 80,
+    unit: "Quintals",
+    expected_price: 2450,
+    quality: "Grade A",
+    harvest_date: "08 Sep 2026",
+    location: "Lasalgaon, Nashik",
+    status: "Under Negotiation",
+    image_url: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=80"
+  }
+];
+
+let purchaseRequestsData = [
+  {
+    id: "req-101",
+    listing_id: "prod-1",
+    crop_name: "Tomato (Abhinav Hybrid)",
+    crop: "Tomato",
+    buyer_name: "Mumbai Fresh Mart Ltd",
+    buyer_company: "Mumbai Fresh Mart",
+    is_buyer_verified: true,
+    offered_price_per_unit: 2800,
+    offered_price: 2800,
+    requested_quantity: 50,
+    quantity: 50,
+    unit: "quintal",
+    total_offer_amount: 140000,
+    delivery_location: "Bhiwandi Central Depot",
+    status: "pending",
+    current_offer_by: "buyer",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "req-102",
+    listing_id: "prod-1",
+    crop_name: "Tomato (Abhinav Hybrid)",
+    crop: "Tomato",
+    buyer_name: "FreshCart Wholesale Co",
+    buyer_company: "FreshCart Wholesale",
+    is_buyer_verified: true,
+    offered_price_per_unit: 2700,
+    offered_price: 2700,
+    requested_quantity: 50,
+    quantity: 50,
+    unit: "quintal",
+    total_offer_amount: 135000,
+    delivery_location: "Kalyan Wholesale Hub",
+    status: "pending",
+    current_offer_by: "buyer",
+    created_at: new Date(Date.now() - 3600000).toISOString()
+  },
+  {
+    id: "req-103",
+    listing_id: "prod-1",
+    crop_name: "Tomato (Abhinav Hybrid)",
+    crop: "Tomato",
+    buyer_name: "City Foods Enterprise",
+    buyer_company: "City Foods Enterprise",
+    is_buyer_verified: false,
+    offered_price_per_unit: 2900,
+    offered_price: 2900,
+    requested_quantity: 50,
+    quantity: 50,
+    unit: "quintal",
+    total_offer_amount: 145000,
+    delivery_location: "Vashi Terminal",
+    status: "pending",
+    current_offer_by: "buyer",
+    created_at: new Date(Date.now() - 7200000).toISOString()
+  }
+];
+
+let ordersData = [
+  {
+    id: "ord-1",
+    order_number: "FD-1039",
+    crop: "Tomato (Grade A Red)",
+    variety: "Abhinav Hybrid Grade A",
+    quantity: 50,
+    unit: "Quintals",
+    price_per_unit: 2800,
+    total_amount: 140000,
+    buyer_name: "Mumbai Fresh Mart",
+    buyer_company: "Mumbai Fresh Mart",
+    farmer_name: "Rajendra Patel",
+    farmer_farm: "Patel Organic Farms",
+    delivery_location: "Bhiwandi Central Hub",
+    status: "In Transit",
+    payment_status: "Escrow Locked",
+    order_date: "05 Sep 2026",
+    tracking_steps: [
+      { title: "Deal Agreed", completed: true, current: false, date: "05 Sep", description: "Terms accepted." },
+      { title: "Buyer Escrow Deposit", completed: true, current: false, date: "05 Sep", description: "₹1,40,000 Escrow Verified." },
+      { title: "Logistics & Dispatch", completed: false, current: true, date: "Active", description: "Vehicle assigned (MH-04-AB-1042)." },
+      { title: "Destination Assay", completed: false, current: false, description: "Assay verification on arrival." },
+      { title: "Smart Payout", completed: false, current: false, description: "Instant escrow disbursement." }
+    ]
+  }
+];
+
 const server = http.createServer((req, res) => {
   // Add universal CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
@@ -97,6 +233,20 @@ const server = http.createServer((req, res) => {
   }
 
   const reqUrl = req.url.split('?')[0];
+
+  // Helper to parse JSON body
+  const parseJsonBody = (callback) => {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const parsed = body ? JSON.parse(body) : {};
+        callback(null, parsed);
+      } catch (e) {
+        callback(e, null);
+      }
+    });
+  };
 
   // API Endpoint: /api/market-prices
   if (reqUrl === '/api/market-prices' || reqUrl === '/api/market-prices/') {
@@ -108,6 +258,200 @@ const server = http.createServer((req, res) => {
       success: true,
       count: apmcPdfData.length,
       data: apmcPdfData
+    }));
+    return;
+  }
+
+  // API Endpoint: /api/produce & /api/produce-listings
+  if (reqUrl === '/api/produce' || reqUrl === '/api/produce/' || reqUrl === '/api/produce-listings' || reqUrl === '/api/produce-listings/') {
+    if (req.method === 'POST') {
+      parseJsonBody((err, item) => {
+        if (err || !item) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Invalid JSON' }));
+          return;
+        }
+        item.id = item.id || `prod-${Date.now()}`;
+        item.created_at = item.created_at || new Date().toISOString();
+        item.status = item.status || 'Active on Marketplace';
+        produceListingsData.unshift(item);
+        res.writeHead(201, {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        res.end(JSON.stringify({ success: true, data: item }));
+      });
+      return;
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-cache'
+    });
+    res.end(JSON.stringify({
+      success: true,
+      count: produceListingsData.length,
+      data: produceListingsData
+    }));
+    return;
+  }
+
+  // API Endpoint: /api/purchase-requests (Incoming Offers)
+  if (reqUrl === '/api/purchase-requests' || reqUrl === '/api/purchase-requests/') {
+    if (req.method === 'POST') {
+      parseJsonBody((err, offer) => {
+        if (err || !offer) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Invalid JSON' }));
+          return;
+        }
+        offer.id = offer.id || `req-${Date.now()}`;
+        offer.created_at = offer.created_at || new Date().toISOString();
+        offer.status = offer.status || 'pending';
+        offer.current_offer_by = offer.current_offer_by || 'buyer';
+        offer.total_offer_amount = offer.total_offer_amount || (Number(offer.requested_quantity || 10) * Number(offer.offered_price_per_unit || 2800));
+        purchaseRequestsData.unshift(offer);
+        res.writeHead(201, {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        res.end(JSON.stringify({ success: true, data: offer }));
+      });
+      return;
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-cache'
+    });
+    res.end(JSON.stringify({
+      success: true,
+      count: purchaseRequestsData.length,
+      data: purchaseRequestsData
+    }));
+    return;
+  }
+
+  // API Endpoint: /api/purchase-requests/:id/counter
+  const counterMatch = reqUrl.match(/^\/api\/purchase-requests\/([^\/]+)\/counter\/?$/);
+  if (counterMatch && req.method === 'POST') {
+    const offerId = counterMatch[1];
+    parseJsonBody((err, body) => {
+      const offer = purchaseRequestsData.find(o => o.id === offerId);
+      if (offer) {
+        offer.status = 'countered';
+        offer.current_offer_by = body.role || 'farmer';
+        if (body.price_per_unit) {
+          offer.offered_price_per_unit = Number(body.price_per_unit);
+          offer.offered_price = Number(body.price_per_unit);
+        }
+        if (body.quantity) {
+          offer.requested_quantity = Number(body.quantity);
+          offer.quantity = Number(body.quantity);
+        }
+        offer.total_offer_amount = (offer.offered_price_per_unit || 2800) * (offer.requested_quantity || 1);
+        offer.counter_message = body.message || '';
+        offer.updated_at = new Date().toISOString();
+      }
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-cache'
+      });
+      res.end(JSON.stringify({ success: true, data: offer || { id: offerId, status: 'countered' } }));
+    });
+    return;
+  }
+
+  // API Endpoint: /api/purchase-requests/:id/reject
+  const rejectMatch = reqUrl.match(/^\/api\/purchase-requests\/([^\/]+)\/reject\/?$/);
+  if (rejectMatch && req.method === 'POST') {
+    const offerId = rejectMatch[1];
+    const offer = purchaseRequestsData.find(o => o.id === offerId);
+    if (offer) {
+      offer.status = 'rejected';
+      offer.updated_at = new Date().toISOString();
+    }
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-cache'
+    });
+    res.end(JSON.stringify({ success: true, message: 'Offer declined' }));
+    return;
+  }
+
+  // API Endpoint: /api/purchase-requests/:id/accept
+  const acceptMatch = reqUrl.match(/^\/api\/purchase-requests\/([^\/]+)\/accept\/?$/);
+  if (acceptMatch && req.method === 'POST') {
+    const offerId = acceptMatch[1];
+    const offer = purchaseRequestsData.find(o => o.id === offerId);
+    if (offer) {
+      offer.status = 'accepted';
+      offer.updated_at = new Date().toISOString();
+      // Auto-generate order
+      ordersData.unshift({
+        id: `ord-${Date.now()}`,
+        order_number: `FD-${Math.floor(1000 + Math.random() * 9000)}`,
+        crop: offer.crop_name || offer.crop || "Produce",
+        variety: "Grade A Harvest",
+        quantity: offer.requested_quantity || 50,
+        unit: offer.unit || "quintal",
+        price_per_unit: offer.offered_price_per_unit || 2800,
+        total_amount: offer.total_offer_amount || 140000,
+        buyer_name: offer.buyer_company || offer.buyer_name || "Verified Buyer",
+        buyer_company: offer.buyer_company || offer.buyer_name || "Verified Buyer",
+        farmer_name: "Rajendra Patel",
+        farmer_farm: "Patel Organic Farms",
+        delivery_location: offer.delivery_location || "Central Distribution Depot",
+        status: "In Transit",
+        payment_status: "Escrow Locked",
+        order_date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        tracking_steps: [
+          { title: "Deal Agreed", completed: true, current: false, date: "Just now", description: "Terms accepted." },
+          { title: "Buyer Escrow Deposit", completed: true, current: false, date: "Just now", description: "Escrow Locked." },
+          { title: "Logistics & Dispatch", completed: false, current: true, date: "Active", description: "Vehicle assigned." },
+          { title: "Destination Assay", completed: false, current: false, description: "Verification pending." },
+          { title: "Smart Payout", completed: false, current: false, description: "Payout upon arrival." }
+        ]
+      });
+    }
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-cache'
+    });
+    res.end(JSON.stringify({ success: true, message: 'Offer accepted' }));
+    return;
+  }
+
+  // API Endpoint: /api/orders
+  if (reqUrl === '/api/orders' || reqUrl === '/api/orders/') {
+    if (req.method === 'POST') {
+      parseJsonBody((err, order) => {
+        if (err || !order) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Invalid JSON' }));
+          return;
+        }
+        order.id = order.id || `ord-${Date.now()}`;
+        order.order_number = order.order_number || `FD-${Math.floor(1000 + Math.random() * 9000)}`;
+        order.order_date = order.order_date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        ordersData.unshift(order);
+        res.writeHead(201, {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        res.end(JSON.stringify({ success: true, data: order }));
+      });
+      return;
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-cache'
+    });
+    res.end(JSON.stringify({
+      success: true,
+      count: ordersData.length,
+      data: ordersData
     }));
     return;
   }
