@@ -172,6 +172,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Fieldora Central Data Store (APMC Market Prices, Ticker, Forecast) -->
+  <script src="data.js"></script>
 
   <style>
     body {
@@ -930,34 +932,7 @@
                   </tr>
                 </thead>
                 <tbody id="f-market-prices-table-body" class="divide-y divide-[#E6ECE6] font-medium text-[#17211B]">
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Tomato <span class="text-xs font-normal text-secondary-text">(Grade 1 Red Hybrid)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹2,000/q <span class="text-[11px] font-normal text-secondary-text">(₹20.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.2%</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">HIGH DEMAND</span></td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Ginger <span class="text-xs font-normal text-secondary-text">(Satara Fresh)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹10,000/q <span class="text-[11px] font-normal text-secondary-text">(₹100.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.2%</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">HIGH DEMAND</span></td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Green Peas <span class="text-xs font-normal text-secondary-text">(Fresh Green Pods)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹6,250/q <span class="text-[11px] font-normal text-secondary-text">(₹62.5/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +4.1%</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">HIGH DEMAND</span></td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Okra <span class="text-xs font-normal text-secondary-text">(Grade 1 Green Tender)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹1,800/q <span class="text-[11px] font-normal text-secondary-text">(₹18.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +2.8%</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">STEADY</span></td>
-                  </tr>
+                  <tr><td colspan="5" class="py-6 text-center text-secondary-text text-xs">Loading APMC mandi spot prices...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -2735,31 +2710,11 @@
                     <th class="py-3 px-4">Terminal Market</th>
                     <th class="py-3 px-4 font-mono">Spot Rate (₹/q)</th>
                     <th class="py-3 px-4">Weekly Trend</th>
-                    <th class="py-3 px-4">Procurement Recommendation</th>
+                    <th class="py-3 px-4">Trend Status</th>
                   </tr>
                 </thead>
                 <tbody id="b-market-prices-table-body" class="divide-y divide-[#E6ECE6] font-medium text-[#17211B]">
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Tomato <span class="text-xs font-normal text-secondary-text">(Grade 1 Red Hybrid)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹2,000/q <span class="text-[11px] font-normal text-secondary-text">(₹20.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.2%</td>
-                    <td class="py-3 px-4 text-emerald-700 font-semibold text-xs">High retail & FMCG procurement interest across Western India.</td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Ginger <span class="text-xs font-normal text-secondary-text">(Satara Fresh)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹10,000/q <span class="text-[11px] font-normal text-secondary-text">(₹100.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.2%</td>
-                    <td class="py-3 px-4 text-emerald-700 font-semibold text-xs">High grade washed Satara ginger in strong demand from spice extractors.</td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Cluster Beans <span class="text-xs font-normal text-secondary-text">(Desi Tender)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹5,500/q <span class="text-[11px] font-normal text-secondary-text">(₹55.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.7%</td>
-                    <td class="py-3 px-4 text-emerald-700 font-semibold text-xs">Top realization for fiber-free pods; procure early before price hike.</td>
-                  </tr>
+                  <tr><td colspan="5" class="py-6 text-center text-secondary-text text-xs">Loading APMC mandi spot prices...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -4800,16 +4755,16 @@
           badgeText: '🔥 Very High Demand',
           badgeClass: 'bg-red-100 text-red-700',
           score: 84,
-          changePct: 18,
+          changePct: 5.2,
           trend: 'Increasing',
-          avgPrice: 24,
-          priceTrend: '+9%',
+          avgPrice: 20,
+          priceTrend: '+5.2%',
           availableSupplyKg: '2,400 kg',
           sellerCount: 8,
-          peakWindow: 'September 5–8 (+18%)',
-          priceInsight: 'Demand and price are both showing an upward trend across APMC terminal corridors.',
-          farmerRec: 'Tomato demand in Mumbai is predicted to increase by 18% over the next 7 days. Consider prioritizing tomato harvest and scheduling direct deliveries to capture peak rates.',
-          buyerRec: 'Tomato demand is rising (+18%). 2,400 kg available across 8 verified Nashik FPOs. Plan procurement early before prices adjust upwards.',
+          peakWindow: 'September 5–8 (+5.2%)',
+          priceInsight: 'Tomato No. 1 recorded high arrival of 1,893 Qtl averaging ₹2,000/q (₹20/kg).',
+          farmerRec: 'High retail & FMCG procurement interest across Western India.',
+          buyerRec: 'High retail & FMCG procurement interest across Western India.',
           history: [
             { label: 'Aug 24', val: 720 },
             { label: 'Aug 26', val: 760 },
@@ -4842,16 +4797,16 @@
           badgeText: '🟢 High Demand',
           badgeClass: 'bg-amber-100 text-amber-800',
           score: 76,
-          changePct: 12,
+          changePct: 3.8,
           trend: 'Increasing',
-          avgPrice: 18,
-          priceTrend: '+5%',
+          avgPrice: 24.5,
+          priceTrend: '+3.8%',
           availableSupplyKg: '5,200 kg',
           sellerCount: 14,
-          peakWindow: 'September 6–10 (+12%)',
-          priceInsight: 'Steady upward momentum driven by seasonal festival procurement cycles.',
-          farmerRec: 'Onion demand is entering an active procurement cycle. Excellent window for batch dispatching Garwa variety lots.',
-          buyerRec: 'Onion forward demand is strong. 5,200 kg available with 14 verified FPOs. Forward booking recommended.',
+          peakWindow: 'September 6–10 (+3.8%)',
+          priceInsight: 'Lasalgaon benchmark is ₹2,450/q with robust 360 MT arrivals.',
+          farmerRec: 'Hold buffer stock for 10-14 days for festive premium.',
+          buyerRec: 'Hold buffer stock for 10-14 days for festive premium.',
           history: [
             { label: 'Aug 24', val: 1200 },
             { label: 'Aug 26', val: 1240 },
@@ -4884,16 +4839,16 @@
           badgeText: '🟡 Moderate-Low',
           badgeClass: 'bg-gray-100 text-gray-700',
           score: 38,
-          changePct: -5,
+          changePct: -1.8,
           trend: 'Decreasing',
-          avgPrice: 15,
-          priceTrend: '-3%',
+          avgPrice: 21.5,
+          priceTrend: '-1.8%',
           availableSupplyKg: '4,100 kg',
           sellerCount: 6,
           peakWindow: 'Stable baseline expected',
-          priceInsight: 'Abundant cold storage arrivals leading to plateaued spot rates.',
-          farmerRec: 'Potato demand is projected to soften by 5%. Consider comparing current buyer offers before delaying sales.',
-          buyerRec: 'Ample supply available (4,100 kg). Favorable buyers market for negotiating bulk spot contracts.',
+          priceInsight: 'Indore reference rate ₹2,150/q with steady cold storage releases.',
+          farmerRec: 'Lock forward farm-gate agreements.',
+          buyerRec: 'Lock forward farm-gate agreements.',
           history: [
             { label: 'Aug 24', val: 950 },
             { label: 'Aug 26', val: 940 },
@@ -4926,16 +4881,16 @@
           badgeText: '🟢 Steady Demand',
           badgeClass: 'bg-blue-100 text-blue-800',
           score: 58,
-          changePct: 3,
+          changePct: 1.5,
           trend: 'Stable',
-          avgPrice: 28,
-          priceTrend: '+2%',
+          avgPrice: 27.2,
+          priceTrend: '+1.5%',
           availableSupplyKg: '9,000 kg',
           sellerCount: 22,
           peakWindow: 'Steady regular consumption',
-          priceInsight: 'Consistent institutional and miller demand maintaining firm spot price floor.',
-          farmerRec: 'Wheat demand is stable with a slight positive bias (+3%). Good liquidity for continuous steady selling.',
-          buyerRec: 'Plentiful inventory (9,000 kg across 22 sellers). Consistent quality available for contract placement.',
+          priceInsight: 'Karnal Sharbati wheat trading firm at ₹2,720/q.',
+          farmerRec: 'Premium millers offering ₹2,850/q for moisture <10%.',
+          buyerRec: 'Premium millers offering ₹2,850/q for moisture <10%.',
           history: [
             { label: 'Aug 24', val: 2100 },
             { label: 'Aug 26', val: 2120 },
@@ -5208,10 +5163,31 @@
               DemandIntelligence.topCrops = json.data.topCrops;
             }
             renderDemandIntelligence();
+            return;
           }
         }
       } catch (err) {
         console.warn('Could not fetch dynamic demand intelligence from backend:', err);
+      }
+
+      // Fallback: Use real APMC data from data.js to update demand intelligence prices
+      if (window.FIELDORA_DATA && Array.isArray(window.FIELDORA_DATA.apmcMarketPrices)) {
+        const apmcData = window.FIELDORA_DATA.apmcMarketPrices;
+        const cropKeyMap = { 'Tomato': 'Tomato', 'Onion': 'Onion', 'Potato': 'Potato', 'Wheat': 'Wheat' };
+        Object.entries(cropKeyMap).forEach(([key, cropName]) => {
+          const rec = apmcData.find(r => r.crop === cropName && (r.variety || '').includes('Grade 1'));
+          if (rec && DemandIntelligence.crops[key]) {
+            const avgPricePerKg = Math.round(rec.averagePrice / 100);
+            DemandIntelligence.crops[key].avgPrice = avgPricePerKg;
+            DemandIntelligence.crops[key].changePct = rec.changePercent;
+            DemandIntelligence.crops[key].priceTrend = rec.changePercent >= 0 ? `+${rec.changePercent}%` : `${rec.changePercent}%`;
+            DemandIntelligence.crops[key].priceInsight = rec.insightSummary;
+            DemandIntelligence.crops[key].farmerRec = rec.recommendation;
+            DemandIntelligence.crops[key].buyerRec = rec.recommendation;
+            DemandIntelligence.crops[key].trend = rec.changePercent > 1 ? 'Increasing' : (rec.changePercent < -1 ? 'Decreasing' : 'Stable');
+          }
+        });
+        renderDemandIntelligence();
       }
     }
 
@@ -6312,14 +6288,16 @@
         if (!rawOffers || rawOffers.length === 0) {
           if (!localStorage.getItem('fieldora_offers_items')) {
             const defaultOffers = [
-              { buyer_name: 'Mumbai Fresh Mart', buyer_company: 'Mumbai Fresh Mart', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2800, total_offer_amount: 140000, status: 'pending', delivery_location: 'Bhiwandi Central Depot' },
-              { buyer_name: 'FreshCart Wholesale', buyer_company: 'FreshCart Wholesale', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2700, total_offer_amount: 135000, status: 'pending', delivery_location: 'Kalyan Wholesale Hub' },
-              { buyer_name: 'City Foods Enterprise', buyer_company: 'City Foods Enterprise', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2900, total_offer_amount: 145000, status: 'pending', delivery_location: 'Vashi Terminal' }
+              { id: 'req-101', buyer_name: 'Mumbai Fresh Mart', buyer_company: 'Mumbai Fresh Mart', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2800, total_offer_amount: 140000, status: 'pending', delivery_location: 'Bhiwandi Central Depot' },
+              { id: 'req-102', buyer_name: 'FreshCart Wholesale', buyer_company: 'FreshCart Wholesale', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2700, total_offer_amount: 135000, status: 'pending', delivery_location: 'Kalyan Wholesale Hub' },
+              { id: 'req-103', buyer_name: 'City Foods Enterprise', buyer_company: 'City Foods Enterprise', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2900, total_offer_amount: 145000, status: 'pending', delivery_location: 'Vashi Terminal' }
             ];
             window.FIELDORA_OFFERS_DATA = defaultOffers;
             localStorage.setItem('fieldora_offers_items', JSON.stringify(defaultOffers));
+            rawOffers = defaultOffers;
+          } else {
+            rawOffers = JSON.parse(localStorage.getItem('fieldora_offers_items') || '[]');
           }
-          return;
         }
 
         let produceListings = [];
@@ -6908,6 +6886,141 @@
       acceptBuyerOffer(targetOffer.id, targetOffer.buyerName, targetOffer.totalVal);
     }
 
+    // =========================================================================
+    // BUYER COUNTER-OFFER MODAL HANDLERS
+    // =========================================================================
+    let activeBuyerCounterOffer = null;
+
+    function openBuyerCounterOfferModal(offerId, farmerName, cropName, farmerPrice, reqQty, unit, yourPrice, totalVal, deliveryLoc) {
+      activeBuyerCounterOffer = {
+        id: offerId,
+        farmerName: farmerName || 'Farmer',
+        cropName: cropName || 'Produce',
+        farmerPrice: Number(farmerPrice || 2800),
+        reqQty: Number(reqQty || 50),
+        unit: unit || 'quintal',
+        yourPrice: Number(yourPrice || 2800),
+        totalVal: Number(totalVal || 140000),
+        deliveryLoc: deliveryLoc || 'Central Depot'
+      };
+
+      const modal = document.getElementById('modal-buyer-counter-offer');
+      if (!modal) return;
+
+      const nameEl = document.getElementById('bcb-farmer-name');
+      const cropEl = document.getElementById('bcb-crop-name');
+      const fPriceEl = document.getElementById('bcb-farmer-price');
+      const fTotalEl = document.getElementById('bcb-farmer-total');
+      const yPriceEl = document.getElementById('bcb-your-price');
+      const locEl = document.getElementById('bcb-delivery-location');
+
+      if (nameEl) nameEl.innerText = activeBuyerCounterOffer.farmerName;
+      if (cropEl) cropEl.innerText = `${activeBuyerCounterOffer.cropName} (${activeBuyerCounterOffer.reqQty} ${activeBuyerCounterOffer.unit})`;
+      if (fPriceEl) fPriceEl.innerText = `₹${activeBuyerCounterOffer.farmerPrice.toLocaleString('en-IN')}/${activeBuyerCounterOffer.unit}`;
+      if (fTotalEl) fTotalEl.innerText = `₹${activeBuyerCounterOffer.totalVal.toLocaleString('en-IN')} tot`;
+      if (yPriceEl) yPriceEl.innerText = `₹${activeBuyerCounterOffer.yourPrice.toLocaleString('en-IN')}/${activeBuyerCounterOffer.unit}`;
+
+      const diffPct = activeBuyerCounterOffer.yourPrice > 0 ? Math.round(((activeBuyerCounterOffer.farmerPrice - activeBuyerCounterOffer.yourPrice) / activeBuyerCounterOffer.yourPrice) * 100) : 0;
+      const diffBadge = document.getElementById('bcb-diff-badge');
+      if (diffBadge) {
+        if (diffPct > 0) {
+          diffBadge.className = 'mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 inline-block text-center whitespace-nowrap';
+          diffBadge.innerText = `⚠️ +${diffPct}% Above Your Bid`;
+        } else if (diffPct < 0) {
+          diffBadge.className = 'mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 inline-block text-center whitespace-nowrap';
+          diffBadge.innerText = `✓ ${Math.abs(diffPct)}% Below Your Bid`;
+        } else {
+          diffBadge.className = 'mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-900 border border-blue-300 inline-block text-center whitespace-nowrap';
+          diffBadge.innerText = `✓ Matches Your Bid`;
+        }
+      }
+
+      const counterPriceInput = document.getElementById('bcb-counter-price');
+      const counterQtyInput = document.getElementById('bcb-counter-qty');
+      const counterMsgInput = document.getElementById('bcb-counter-message');
+
+      if (counterPriceInput) counterPriceInput.value = activeBuyerCounterOffer.yourPrice || activeBuyerCounterOffer.farmerPrice;
+      if (counterQtyInput) counterQtyInput.value = activeBuyerCounterOffer.reqQty;
+      if (counterMsgInput) counterMsgInput.value = '';
+
+      updateBuyerCounterOfferTotal();
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeBuyerCounterOfferModal() {
+      const modal = document.getElementById('modal-buyer-counter-offer');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function updateBuyerCounterOfferTotal() {
+      const price = Number(document.getElementById('bcb-counter-price')?.value || 0);
+      const qty = Number(document.getElementById('bcb-counter-qty')?.value || 0);
+      const total = price * qty;
+      const totalEl = document.getElementById('bcb-total-display');
+      if (totalEl) totalEl.innerText = `₹${total.toLocaleString('en-IN')}`;
+    }
+
+    async function submitBuyerCounterOffer(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (!activeBuyerCounterOffer || !activeBuyerCounterOffer.id) {
+        alert('Active offer not found. Please try again.');
+        return;
+      }
+
+      const counterPrice = Number(document.getElementById('bcb-counter-price')?.value || 0);
+      const counterQty = Number(document.getElementById('bcb-counter-qty')?.value || 0);
+      const message = document.getElementById('bcb-counter-message')?.value || '';
+
+      if (counterPrice <= 0 || counterQty <= 0) {
+        alert('Please enter a valid counter rate and quantity.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${FIELDORA_API_BASE}/api/purchase-requests/${activeBuyerCounterOffer.id}/counter`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            role: 'buyer',
+            price_per_unit: counterPrice,
+            quantity: counterQty,
+            unit: activeBuyerCounterOffer.unit || 'quintal',
+            message: message
+          })
+        });
+        const json = await res.json();
+        closeBuyerCounterOfferModal();
+
+        if (json.success) {
+          alert(`🚀 Counter-Offer Sent to ${activeBuyerCounterOffer.farmerName}!\n\nProposed Rate: ₹${counterPrice.toLocaleString('en-IN')}/${activeBuyerCounterOffer.unit}\nProposed Quantity: ${counterQty} ${activeBuyerCounterOffer.unit}\nTotal: ₹${(counterPrice * counterQty).toLocaleString('en-IN')}\n\nFarmer has been notified.`);
+          await loadBuyerIncomingOffers();
+        } else {
+          alert(`⚠️ Notice: ${json.message || 'Could not submit counter offer'}`);
+        }
+      } catch (err) {
+        console.error('Buyer counter offer submit error:', err);
+        closeBuyerCounterOfferModal();
+        alert('Could not send counter offer. Please try again.');
+      }
+    }
+
+    function buyerRejectOfferFromModal() {
+      if (!activeBuyerCounterOffer || !activeBuyerCounterOffer.id) return;
+      if (!confirm(`Are you sure you want to decline this offer from ${activeBuyerCounterOffer.farmerName}?`)) return;
+      const offerId = activeBuyerCounterOffer.id;
+      const farmerName = activeBuyerCounterOffer.farmerName;
+      closeBuyerCounterOfferModal();
+      buyerRejectOffer(offerId, farmerName);
+    }
+
+    function buyerAcceptFromCounterModal() {
+      if (!activeBuyerCounterOffer) return;
+      const target = { ...activeBuyerCounterOffer };
+      closeBuyerCounterOfferModal();
+      buyerAcceptOffer(target.id, target.farmerName, target.totalVal, target.cropName, target.farmerPrice, target.reqQty, target.unit);
+    }
+
     async function loadBuyerIncomingOffers() {
       try {
         const res = await fetch(`${FIELDORA_API_BASE}/api/purchase-requests?limit=100`);
@@ -7034,6 +7147,11 @@
                   <button onclick="buyerRejectOffer('${off.id}', '${farmerName.replace(/'/g, "\\'")}')" class="px-3.5 py-2 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition-colors cursor-pointer">
                     Decline
                   </button>
+                  ${isCounterByFarmer ? `
+                    <button onclick="openBuyerCounterOfferModal('${off.id}', '${farmerName.replace(/'/g, "\\'")}', '${cropName.replace(/'/g, "\\'")}', ${currentRate}, ${currentQty}, '${unit}', ${originalRate}, ${currentTotal}, '${(off.delivery_location || 'Central Depot').replace(/'/g, "\\'")}')" class="px-3.5 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold rounded-xl transition-colors cursor-pointer">
+                      Counter ➔
+                    </button>
+                  ` : ''}
                   <button onclick="buyerAcceptOffer('${off.id}', '${farmerName.replace(/'/g, "\\'")}', ${currentTotal}, '${cropName.replace(/'/g, "\\'")}', ${currentRate}, ${currentQty}, '${unit}')" class="px-5 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button cursor-pointer flex items-center gap-1.5">
                     <span>Accept Rate & Lock Escrow (₹${currentTotal.toLocaleString('en-IN')}) ➔</span>
                   </button>
@@ -7052,36 +7170,44 @@
     async function buyerAcceptOffer(offerId, farmerName, amount, crop, rate, qty, unit) {
       try {
         if (offerId && offerId.length > 10) {
+          // Accept the offer via API (this also auto-creates an order in serve.js)
           await fetch(`${FIELDORA_API_BASE}/api/purchase-requests/${offerId}/accept`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ role: 'buyer' })
           });
+        } else {
+          // For static/fallback cards without UUID, create order directly
+          await fetch(`${FIELDORA_API_BASE}/api/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              order_number: 'FLD-' + Math.floor(100000 + Math.random() * 900000),
+              crop: crop || 'Produce',
+              variety: 'Grade A Produce',
+              quantity: Number(qty) || 50,
+              unit: unit || 'quintal',
+              price_per_unit: Number(rate) || 2800,
+              total_amount: Number(amount),
+              farmer_id: '039b5a52-cfab-42df-9cbc-22214e210de5',
+              farmer_name: farmerName || 'Ayush Ambetkar',
+              farmer_farm: 'Ganesh Farm',
+              buyer_id: '8996d084-1f18-45bd-995a-27ac039436ce',
+              buyer_name: 'FreshMart Agro Corp',
+              buyer_company: 'FreshMart Supermarkets Ltd',
+              delivery_location: 'Central Mandi Distribution Hub',
+              status: 'In Transit',
+              payment_status: 'Escrow Locked',
+              tracking_steps: [
+                { title: 'Deal Agreed', completed: true, current: false, date: 'Just now', description: 'Terms accepted.' },
+                { title: 'Buyer Escrow Deposit', completed: true, current: false, date: 'Just now', description: 'Funds deposited in escrow.' },
+                { title: 'Logistics & Dispatch', completed: false, current: true, date: 'Active', description: 'Vehicle assigned for dispatch.' },
+                { title: 'Destination Quality & Weighment', completed: false, current: false, description: 'Destination assay verification.' },
+                { title: 'Smart Escrow Released', completed: false, current: false, description: 'Bank payout upon delivery.' }
+              ]
+            })
+          });
         }
-
-        // Direct order creation in orders
-        await fetch(`${FIELDORA_API_BASE}/api/orders`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            order_number: 'FLD-' + Math.floor(100000 + Math.random() * 900000),
-            crop: crop || 'Produce',
-            variety: 'Grade A Produce',
-            quantity: Number(qty) || 50,
-            unit: unit || 'quintal',
-            price_per_unit: Number(rate) || 2800,
-            total_amount: Number(amount),
-            farmer_id: '039b5a52-cfab-42df-9cbc-22214e210de5',
-            farmer_name: farmerName || 'Ayush Ambetkar',
-            farmer_farm: 'Ganesh Farm',
-            buyer_id: '8996d084-1f18-45bd-995a-27ac039436ce',
-            buyer_name: 'FreshMart Agro Corp',
-            buyer_company: 'FreshMart Supermarkets Ltd',
-            delivery_location: 'Central Mandi Distribution Hub',
-            status: 'In Transit',
-            payment_status: 'Escrow Locked'
-          })
-        });
       } catch (e) {
         console.warn('Buyer accept deal error:', e);
       }
@@ -7119,6 +7245,7 @@
       let offerId = null;
       let buyerName = 'Buyer';
       let amount = 140000;
+      let offerData = null;
 
       if (typeof buyerNameOrAmount === 'number') {
         buyerName = offerIdOrBuyerName || 'Mumbai Fresh Mart';
@@ -7129,6 +7256,10 @@
         amount = maybeAmount || 140000;
       }
 
+      // Try to find offer details from the stored data
+      const allOffers = window.FIELDORA_OFFERS_DATA || [];
+      offerData = allOffers.find(o => o.id === offerId);
+
       try {
         if (offerId && offerId.length > 10) {
           await fetch(`${FIELDORA_API_BASE}/api/purchase-requests/${offerId}/accept`, {
@@ -7136,38 +7267,46 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ role: 'farmer' })
           });
-        } else {
-          // If fallback static card with no UUID was clicked, persist directly to orders
-          await fetch(`${FIELDORA_API_BASE}/api/orders`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              order_number: 'FLD-' + Math.floor(100000 + Math.random() * 900000),
-              crop: 'Tomato',
-              variety: 'Grade A Produce',
-              quantity: 50,
-              unit: 'quintal',
-              price_per_unit: Math.round(Number(amount) / 50),
-              total_amount: Number(amount),
-              farmer_id: '039b5a52-cfab-42df-9cbc-22214e210de5',
-              farmer_name: 'Ayush Ambetkar',
-              farmer_farm: 'Ganesh Farm',
-              buyer_id: '8996d084-1f18-45bd-995a-27ac039436ce',
-              buyer_name: buyerName,
-              buyer_company: buyerName,
-              delivery_location: 'Central Mandi Distribution Hub',
-              status: 'In Transit',
-              payment_status: 'Escrow Locked',
-              tracking_steps: [
-                { title: 'Deal Agreed', completed: true, current: false, date: 'Just now', description: 'Terms accepted.' },
-                { title: 'Buyer Escrow Deposit', completed: true, current: false, date: 'Just now', description: 'Funds deposited in escrow.' },
-                { title: 'Logistics & Dispatch', completed: false, current: true, date: 'Active', description: 'Vehicle assigned for dispatch.' },
-                { title: 'Destination Quality & Weighment', completed: false, current: false, description: 'Destination assay verification.' },
-                { title: 'Smart Escrow Released', completed: false, current: false, description: 'Bank payout upon delivery.' }
-              ]
-            })
-          });
         }
+
+        // Create order with proper offer data
+        const cropName = offerData ? (offerData.crop_name || offerData.crop || 'Tomato') : 'Tomato';
+        const offerRate = offerData ? Number(offerData.offered_price_per_unit || offerData.offered_price || Math.round(Number(amount) / (offerData.requested_quantity || 50))) : Math.round(Number(amount) / 50);
+        const offerQty = offerData ? Number(offerData.requested_quantity || offerData.quantity || 50) : 50;
+        const offerUnit = offerData ? (offerData.unit || 'quintal') : 'quintal';
+        const offerLocation = offerData ? (offerData.delivery_location || 'Central Mandi Distribution Hub') : 'Central Mandi Distribution Hub';
+        const buyerCompany = offerData ? (offerData.buyer_company || offerData.buyer_name || buyerName) : buyerName;
+        const offerBuyerId = offerData ? (offerData.buyer_id || '8996d084-1f18-45bd-995a-27ac039436ce') : '8996d084-1f18-45bd-995a-27ac039436ce';
+
+        await fetch(`${FIELDORA_API_BASE}/api/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_number: 'FLD-' + Math.floor(100000 + Math.random() * 900000),
+            crop: cropName,
+            variety: 'Grade A Produce',
+            quantity: offerQty,
+            unit: offerUnit,
+            price_per_unit: offerRate,
+            total_amount: Number(amount),
+            farmer_id: '039b5a52-cfab-42df-9cbc-22214e210de5',
+            farmer_name: 'Ayush Ambetkar',
+            farmer_farm: 'Ganesh Farm',
+            buyer_id: offerBuyerId,
+            buyer_name: buyerName,
+            buyer_company: buyerCompany,
+            delivery_location: offerLocation,
+            status: 'In Transit',
+            payment_status: 'Escrow Locked',
+            tracking_steps: [
+              { title: 'Deal Agreed', completed: true, current: false, date: 'Just now', description: 'Terms accepted.' },
+              { title: 'Buyer Escrow Deposit', completed: true, current: false, date: 'Just now', description: 'Funds deposited in escrow.' },
+              { title: 'Logistics & Dispatch', completed: false, current: true, date: 'Active', description: 'Vehicle assigned for dispatch.' },
+              { title: 'Destination Quality & Weighment', completed: false, current: false, description: 'Destination assay verification.' },
+              { title: 'Smart Escrow Released', completed: false, current: false, description: 'Bank payout upon delivery.' }
+            ]
+          })
+        });
       } catch (err) {
         console.warn('Accept deal API note:', err);
       }
@@ -7881,6 +8020,153 @@
     </div>
   </div>
 
+  <!-- BUYER COUNTER-OFFER MODAL -->
+  <div id="modal-buyer-counter-offer" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-[#E6ECE6] animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-[#E6ECE6] pb-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg font-bold shadow-2xs">
+            🤝
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-base sm:text-lg text-deep-forest">Counter Farmer's Offer</h3>
+            <p class="text-xs text-secondary-text">Propose adjusted rate & terms to the farmer</p>
+          </div>
+        </div>
+        <button onclick="closeBuyerCounterOfferModal()" class="text-gray-400 hover:text-black p-1.5 rounded-xl hover:bg-gray-100 text-lg font-bold cursor-pointer">✕</button>
+      </div>
+
+      <!-- Current Offer Breakdown Card -->
+      <div class="p-4 bg-[#F8FAF9] rounded-2xl border border-[#E6ECE6] space-y-3">
+        <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#E6ECE6] pb-2.5">
+          <div>
+            <span class="text-[10px] uppercase font-extrabold text-gray-400 tracking-wider block">Farmer / Producer</span>
+            <span id="bcb-farmer-name" class="font-bold text-deep-forest text-sm">Rajendra Patel</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-extrabold text-gray-400 tracking-wider block text-right">Produce Lot</span>
+            <span id="bcb-crop-name" class="font-bold text-deep-forest text-sm">Tomato (50 quintal)</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+          <div class="p-2.5 bg-white rounded-xl border border-[#E6ECE6]">
+            <span class="text-[10px] text-gray-500 block">Farmer's Rate</span>
+            <span id="bcb-farmer-price" class="font-mono font-extrabold text-sm text-amber-700">₹2,900/q</span>
+            <span id="bcb-farmer-total" class="text-[10px] text-gray-400 block font-mono">₹1,45,000 tot</span>
+          </div>
+          <div class="p-2.5 bg-white rounded-xl border border-[#E6ECE6]">
+            <span class="text-[10px] text-gray-500 block">Your Original Bid</span>
+            <span id="bcb-your-price" class="font-mono font-extrabold text-sm text-deep-forest">₹2,800/q</span>
+            <span class="text-[10px] text-secondary-text block font-semibold">Initial Offer</span>
+          </div>
+          <div class="col-span-2 sm:col-span-1 p-2.5 bg-white rounded-xl border border-[#E6ECE6] flex flex-col justify-center">
+            <span class="text-[10px] text-gray-500 block">Price Variance</span>
+            <div id="bcb-diff-badge" class="mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 inline-block text-center whitespace-nowrap">
+              ⚠️ Above Your Bid
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Counter Offer Inputs Form -->
+      <form onsubmit="submitBuyerCounterOffer(event)" class="space-y-4 text-xs">
+        <div class="border-t border-[#E6ECE6] pt-3">
+          <h4 class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest mb-2.5">
+            Your Counter-Proposal Terms
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-deep-forest mb-1">Your Counter Price (₹ / Quintal) *</label>
+              <input 
+                type="number" 
+                id="bcb-counter-price" 
+                required 
+                min="1" 
+                value="2800" 
+                oninput="updateBuyerCounterOfferTotal()" 
+                class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-mono font-bold text-sm focus:outline-none focus:border-deep-forest"
+              />
+            </div>
+            <div>
+              <label class="block font-bold text-deep-forest mb-1">Required Quantity (Quintals) *</label>
+              <input 
+                type="number" 
+                id="bcb-counter-qty" 
+                required 
+                min="1" 
+                value="50" 
+                oninput="updateBuyerCounterOfferTotal()" 
+                class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-mono font-bold text-sm focus:outline-none focus:border-deep-forest"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3.5 bg-[#dcfce7]/60 border border-[#86efac] rounded-2xl flex items-center justify-between">
+          <div>
+            <span class="font-bold text-[#166534] block">Counter Contract Total:</span>
+            <span class="text-[10px] text-emerald-800">100% Escrow deposit locked upon farmer acceptance</span>
+          </div>
+          <span id="bcb-total-display" class="font-mono font-extrabold text-lg text-[#166534]">
+            ₹1,40,000
+          </span>
+        </div>
+
+        <div>
+          <label class="block font-bold text-deep-forest mb-1">Message / Terms (Optional)</label>
+          <textarea 
+            id="bcb-counter-message" 
+            rows="2" 
+            placeholder="e.g. Volume discount available for immediate dispatch. Payment within 24 hrs via escrow."
+            class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl focus:outline-none focus:border-deep-forest"
+          ></textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 border-t border-[#E6ECE6] flex flex-col sm:flex-row items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button 
+              type="button" 
+              onclick="buyerRejectOfferFromModal()" 
+              class="flex-1 sm:flex-none px-3.5 py-2.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl transition-colors cursor-pointer"
+            >
+              Decline
+            </button>
+            <button 
+              type="button" 
+              onclick="buyerAcceptFromCounterModal()" 
+              class="flex-1 sm:flex-none px-3.5 py-2.5 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-bold rounded-xl transition-colors cursor-pointer text-center"
+            >
+              Accept As-Is
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button 
+              type="button" 
+              onclick="closeBuyerCounterOfferModal()" 
+              class="px-3.5 py-2.5 text-gray-500 hover:text-black font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="flex-1 sm:flex-none px-5 py-2.5 bg-[#166534] hover:bg-[#14532d] text-white font-bold rounded-xl shadow-button transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <i data-lucide="send" class="w-3.5 h-3.5 text-[#86efac]"></i>
+              <span>Send Counter Bid ➔</span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
   <!-- VERIFIED TRADE RATING & TRUST REVIEW MODAL (TASK 6) -->
   <div id="modal-review" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-[#E6ECE6] animate-in fade-in zoom-in duration-200">
@@ -8359,10 +8645,8 @@
             const isUp = priceTrend === 'up' || (changePercent > 0);
             const trendClass = isUp ? 'text-emerald-600' : (changePercent < 0 ? 'text-rose-600' : 'text-slate-500');
             const trendIcon = isUp ? '▲ +' : (changePercent < 0 ? '▼ ' : '');
-            let rec = 'Steady procurement';
-            if (isUp) rec = 'Procure before expected rate hike';
-            else if (changePercent < 0) rec = 'Spot buying opportunity / Lock escrow';
-            if (item.recommendation) rec = item.recommendation;
+            const badgeBg = isUp ? 'bg-[#dcfce7] text-[#166534]' : (changePercent < 0 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700');
+            const statusText = priceTrend ? priceTrend.toUpperCase() : (isUp ? 'HIGH DEMAND' : 'STABLE');
 
             return `
               <tr class="hover:bg-slate-50 transition-colors">
@@ -8373,7 +8657,7 @@
                 <td class="py-3 px-4 text-secondary-text">${item.mandi || 'Mumbai APMC (Vashi)'}</td>
                 <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹${currentPrice.toLocaleString('en-IN')}/q <span class="text-[11px] font-normal text-secondary-text font-sans">(₹${(currentPrice/100).toFixed(1)}/kg)</span></td>
                 <td class="py-3 px-4 ${trendClass} font-bold">${trendIcon}${changePercent}%</td>
-                <td class="py-3 px-4 text-emerald-700 font-semibold text-xs">${rec}</td>
+                <td class="py-3 px-4"><span class="px-2.5 py-0.5 ${badgeBg} text-[10px] font-bold rounded-full">${statusText}</span></td>
               </tr>
             `;
           }).join('');

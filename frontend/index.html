@@ -172,6 +172,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Fieldora Central Data Store (APMC Market Prices, Ticker, Forecast) -->
+  <script src="data.js"></script>
 
   <style>
     body {
@@ -930,34 +932,7 @@
                   </tr>
                 </thead>
                 <tbody id="f-market-prices-table-body" class="divide-y divide-[#E6ECE6] font-medium text-[#17211B]">
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Tomato <span class="text-xs font-normal text-secondary-text">(Grade 1 Red Hybrid)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹2,000/q <span class="text-[11px] font-normal text-secondary-text">(₹20.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.2%</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">HIGH DEMAND</span></td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Ginger <span class="text-xs font-normal text-secondary-text">(Satara Fresh)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹10,000/q <span class="text-[11px] font-normal text-secondary-text">(₹100.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.2%</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">HIGH DEMAND</span></td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Green Peas <span class="text-xs font-normal text-secondary-text">(Fresh Green Pods)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹6,250/q <span class="text-[11px] font-normal text-secondary-text">(₹62.5/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +4.1%</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">HIGH DEMAND</span></td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Okra <span class="text-xs font-normal text-secondary-text">(Grade 1 Green Tender)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹1,800/q <span class="text-[11px] font-normal text-secondary-text">(₹18.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +2.8%</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">STEADY</span></td>
-                  </tr>
+                  <tr><td colspan="5" class="py-6 text-center text-secondary-text text-xs">Loading APMC mandi spot prices...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -2739,27 +2714,7 @@
                   </tr>
                 </thead>
                 <tbody id="b-market-prices-table-body" class="divide-y divide-[#E6ECE6] font-medium text-[#17211B]">
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Tomato <span class="text-xs font-normal text-secondary-text">(Grade 1 Red Hybrid)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹2,000/q <span class="text-[11px] font-normal text-secondary-text">(₹20.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.2%</td>
-                    <td class="py-3 px-4 text-emerald-700 font-semibold text-xs">High retail & FMCG procurement interest across Western India.</td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Ginger <span class="text-xs font-normal text-secondary-text">(Satara Fresh)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹10,000/q <span class="text-[11px] font-normal text-secondary-text">(₹100.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.2%</td>
-                    <td class="py-3 px-4 text-emerald-700 font-semibold text-xs">High grade washed Satara ginger in strong demand from spice extractors.</td>
-                  </tr>
-                  <tr>
-                    <td class="py-3 px-4 font-bold">Cluster Beans <span class="text-xs font-normal text-secondary-text">(Desi Tender)</span></td>
-                    <td class="py-3 px-4 text-secondary-text">Mumbai APMC (Vashi)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-deep-forest">₹5,500/q <span class="text-[11px] font-normal text-secondary-text">(₹55.0/kg)</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">▲ +5.7%</td>
-                    <td class="py-3 px-4 text-emerald-700 font-semibold text-xs">Top realization for fiber-free pods; procure early before price hike.</td>
-                  </tr>
+                  <tr><td colspan="5" class="py-6 text-center text-secondary-text text-xs">Loading APMC mandi spot prices...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -4800,16 +4755,16 @@
           badgeText: '🔥 Very High Demand',
           badgeClass: 'bg-red-100 text-red-700',
           score: 84,
-          changePct: 18,
+          changePct: 5.2,
           trend: 'Increasing',
-          avgPrice: 24,
-          priceTrend: '+9%',
+          avgPrice: 20,
+          priceTrend: '+5.2%',
           availableSupplyKg: '2,400 kg',
           sellerCount: 8,
-          peakWindow: 'September 5–8 (+18%)',
-          priceInsight: 'Demand and price are both showing an upward trend across APMC terminal corridors.',
-          farmerRec: 'Tomato demand in Mumbai is predicted to increase by 18% over the next 7 days. Consider prioritizing tomato harvest and scheduling direct deliveries to capture peak rates.',
-          buyerRec: 'Tomato demand is rising (+18%). 2,400 kg available across 8 verified Nashik FPOs. Plan procurement early before prices adjust upwards.',
+          peakWindow: 'September 5–8 (+5.2%)',
+          priceInsight: 'Tomato No. 1 recorded high arrival of 1,893 Qtl averaging ₹2,000/q (₹20/kg).',
+          farmerRec: 'High retail & FMCG procurement interest across Western India.',
+          buyerRec: 'High retail & FMCG procurement interest across Western India.',
           history: [
             { label: 'Aug 24', val: 720 },
             { label: 'Aug 26', val: 760 },
@@ -4842,16 +4797,16 @@
           badgeText: '🟢 High Demand',
           badgeClass: 'bg-amber-100 text-amber-800',
           score: 76,
-          changePct: 12,
+          changePct: 3.8,
           trend: 'Increasing',
-          avgPrice: 18,
-          priceTrend: '+5%',
+          avgPrice: 24.5,
+          priceTrend: '+3.8%',
           availableSupplyKg: '5,200 kg',
           sellerCount: 14,
-          peakWindow: 'September 6–10 (+12%)',
-          priceInsight: 'Steady upward momentum driven by seasonal festival procurement cycles.',
-          farmerRec: 'Onion demand is entering an active procurement cycle. Excellent window for batch dispatching Garwa variety lots.',
-          buyerRec: 'Onion forward demand is strong. 5,200 kg available with 14 verified FPOs. Forward booking recommended.',
+          peakWindow: 'September 6–10 (+3.8%)',
+          priceInsight: 'Lasalgaon benchmark is ₹2,450/q with robust 360 MT arrivals.',
+          farmerRec: 'Hold buffer stock for 10-14 days for festive premium.',
+          buyerRec: 'Hold buffer stock for 10-14 days for festive premium.',
           history: [
             { label: 'Aug 24', val: 1200 },
             { label: 'Aug 26', val: 1240 },
@@ -4884,16 +4839,16 @@
           badgeText: '🟡 Moderate-Low',
           badgeClass: 'bg-gray-100 text-gray-700',
           score: 38,
-          changePct: -5,
+          changePct: -1.8,
           trend: 'Decreasing',
-          avgPrice: 15,
-          priceTrend: '-3%',
+          avgPrice: 21.5,
+          priceTrend: '-1.8%',
           availableSupplyKg: '4,100 kg',
           sellerCount: 6,
           peakWindow: 'Stable baseline expected',
-          priceInsight: 'Abundant cold storage arrivals leading to plateaued spot rates.',
-          farmerRec: 'Potato demand is projected to soften by 5%. Consider comparing current buyer offers before delaying sales.',
-          buyerRec: 'Ample supply available (4,100 kg). Favorable buyers market for negotiating bulk spot contracts.',
+          priceInsight: 'Indore reference rate ₹2,150/q with steady cold storage releases.',
+          farmerRec: 'Lock forward farm-gate agreements.',
+          buyerRec: 'Lock forward farm-gate agreements.',
           history: [
             { label: 'Aug 24', val: 950 },
             { label: 'Aug 26', val: 940 },
@@ -4926,16 +4881,16 @@
           badgeText: '🟢 Steady Demand',
           badgeClass: 'bg-blue-100 text-blue-800',
           score: 58,
-          changePct: 3,
+          changePct: 1.5,
           trend: 'Stable',
-          avgPrice: 28,
-          priceTrend: '+2%',
+          avgPrice: 27.2,
+          priceTrend: '+1.5%',
           availableSupplyKg: '9,000 kg',
           sellerCount: 22,
           peakWindow: 'Steady regular consumption',
-          priceInsight: 'Consistent institutional and miller demand maintaining firm spot price floor.',
-          farmerRec: 'Wheat demand is stable with a slight positive bias (+3%). Good liquidity for continuous steady selling.',
-          buyerRec: 'Plentiful inventory (9,000 kg across 22 sellers). Consistent quality available for contract placement.',
+          priceInsight: 'Karnal Sharbati wheat trading firm at ₹2,720/q.',
+          farmerRec: 'Premium millers offering ₹2,850/q for moisture <10%.',
+          buyerRec: 'Premium millers offering ₹2,850/q for moisture <10%.',
           history: [
             { label: 'Aug 24', val: 2100 },
             { label: 'Aug 26', val: 2120 },
@@ -5208,10 +5163,31 @@
               DemandIntelligence.topCrops = json.data.topCrops;
             }
             renderDemandIntelligence();
+            return;
           }
         }
       } catch (err) {
         console.warn('Could not fetch dynamic demand intelligence from backend:', err);
+      }
+
+      // Fallback: Use real APMC data from data.js to update demand intelligence prices
+      if (window.FIELDORA_DATA && Array.isArray(window.FIELDORA_DATA.apmcMarketPrices)) {
+        const apmcData = window.FIELDORA_DATA.apmcMarketPrices;
+        const cropKeyMap = { 'Tomato': 'Tomato', 'Onion': 'Onion', 'Potato': 'Potato', 'Wheat': 'Wheat' };
+        Object.entries(cropKeyMap).forEach(([key, cropName]) => {
+          const rec = apmcData.find(r => r.crop === cropName && (r.variety || '').includes('Grade 1'));
+          if (rec && DemandIntelligence.crops[key]) {
+            const avgPricePerKg = Math.round(rec.averagePrice / 100);
+            DemandIntelligence.crops[key].avgPrice = avgPricePerKg;
+            DemandIntelligence.crops[key].changePct = rec.changePercent;
+            DemandIntelligence.crops[key].priceTrend = rec.changePercent >= 0 ? `+${rec.changePercent}%` : `${rec.changePercent}%`;
+            DemandIntelligence.crops[key].priceInsight = rec.insightSummary;
+            DemandIntelligence.crops[key].farmerRec = rec.recommendation;
+            DemandIntelligence.crops[key].buyerRec = rec.recommendation;
+            DemandIntelligence.crops[key].trend = rec.changePercent > 1 ? 'Increasing' : (rec.changePercent < -1 ? 'Decreasing' : 'Stable');
+          }
+        });
+        renderDemandIntelligence();
       }
     }
 
