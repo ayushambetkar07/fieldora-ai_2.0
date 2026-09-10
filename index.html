@@ -264,7 +264,7 @@
           <span class="font-heading font-extrabold text-2xl text-deep-forest tracking-tight block leading-none">
             Fieldora
           </span>
-          <span class="text-[9px] uppercase font-extrabold tracking-widest text-[#166534] block mt-0.5">
+          <span data-i18n="ecosystem_pill" class="text-[9px] uppercase font-extrabold tracking-widest text-[#166534] block mt-0.5">
             PLATINUM ELITE
           </span>
         </div>
@@ -272,36 +272,36 @@
 
       <!-- Navigation Menu Links -->
       <nav class="hidden lg:flex items-center gap-7 text-sm font-semibold text-secondary-text">
-        <a href="javascript:void(0)" onclick="showView('gateway')" class="hover:text-deep-forest transition-colors font-medium">Overview</a>
+        <a data-i18n="overview_menu" href="javascript:void(0)" onclick="showView('gateway')" class="hover:text-deep-forest transition-colors font-medium">Overview</a>
         <a href="javascript:void(0)" onclick="showFarmerTab('farmer-market-prices')" class="hover:text-deep-forest transition-colors flex items-center gap-1.5 font-medium text-[#166534]">
-          <i data-lucide="sparkles" class="w-4 h-4 text-[#10b981]"></i> AI Price Forecast
+          <i data-lucide="sparkles" class="w-4 h-4 text-[#10b981]"></i> <span data-i18n="ai_price_forecast_menu">AI Price Forecast</span>
         </a>
         
         <!-- Portals Dropdown (Clickable & Accessible) -->
         <div class="relative" id="nav-portals-wrapper">
           <button type="button" onclick="togglePortalsMenu(event)" class="hover:text-deep-forest transition-colors flex items-center gap-1 font-medium text-secondary-text focus:outline-hidden py-2">
-            <span>Portals</span> <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-500"></i>
+            <span data-i18n="portals_menu">Portals</span> <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-500"></i>
           </button>
           
           <div id="nav-portals-dropdown" class="absolute top-full left-0 mt-1 w-56 bg-white border border-[#E6ECE6] rounded-2xl shadow-xl p-2 hidden space-y-1 z-50 animate-fade-in">
             <button onclick="enterPortalWithAuth('farmer'); closePortalsDropdown();" class="w-full text-left px-3 py-2.5 text-xs font-bold text-deep-forest hover:bg-[#e6f7ec] rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer">
               <span class="text-lg">🌾</span>
               <div>
-                <span class="block font-bold text-deep-forest">Farmer Portal</span>
+                <span data-i18n="farmer_portal_label" class="block font-bold text-deep-forest">Farmer Portal</span>
                 <span class="block text-[10px] text-secondary-text font-normal" id="nav-farmer-sub">Rajendra Patel (Nashik)</span>
               </div>
             </button>
             <button onclick="enterPortalWithAuth('buyer'); closePortalsDropdown();" class="w-full text-left px-3 py-2.5 text-xs font-bold text-deep-forest hover:bg-[#e6f7ec] rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer">
               <span class="text-lg">🏢</span>
               <div>
-                <span class="block font-bold text-deep-forest">Buyer Portal</span>
+                <span data-i18n="buyer_portal_label" class="block font-bold text-deep-forest">Buyer Portal</span>
                 <span class="block text-[10px] text-secondary-text font-normal" id="nav-buyer-sub">FreshMart Enterprise</span>
               </div>
             </button>
             <div class="pt-1.5 border-t border-[#E6ECE6]">
               <button onclick="showView('gateway'); closePortalsDropdown();" class="w-full text-left px-3 py-2 text-[11px] font-semibold text-secondary-text hover:bg-gray-100 rounded-lg flex items-center gap-1.5 cursor-pointer">
                 <i data-lucide="home" class="w-3.5 h-3.5 text-gray-500"></i>
-                <span>Main Gateway</span>
+                <span data-i18n="main_gateway">Main Gateway</span>
               </button>
             </div>
           </div>
@@ -559,7 +559,7 @@
         </button>
         <button onclick="signOutUser()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer" title="Sign Out">
           <i data-lucide="log-out" class="w-3.5 h-3.5 text-rose-600"></i>
-          <span>Sign Out</span>
+          <span data-i18n="sign_out">Sign Out</span>
         </button>
       </div>
     </div>
@@ -637,7 +637,7 @@
         <div class="pt-2 border-t border-[#E6ECE6]">
           <button onclick="signOutUser()" class="w-full py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-bold text-rose-700 flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs">
             <i data-lucide="log-out" class="w-4 h-4 text-rose-600"></i>
-            <span>Sign Out of Farmer Portal</span>
+            <span data-i18n="f_sign_out">Sign Out of Farmer Portal</span>
           </button>
         </div>
 
@@ -674,27 +674,27 @@
               <span class="text-xs font-bold text-secondary-text uppercase" data-i18n="stat_active_listings">Active Listings</span>
               <div class="flex items-baseline">
                 <span class="text-3xl font-heading font-extrabold text-deep-forest">4</span>
-                <span class="text-sm font-semibold text-secondary-text ml-1.5">Lots</span>
+                <span data-i18n="unit_lots" class="text-sm font-semibold text-secondary-text ml-1.5">Lots</span>
               </div>
-              <span class="text-[11px] text-[#166534] font-semibold">Live on Marketplace</span>
+              <span data-i18n="f_stat_live_marketplace" class="text-[11px] text-[#166534] font-semibold">Live on Marketplace</span>
             </div>
 
             <div class="ref-card p-5 space-y-1">
               <span class="text-xs font-bold text-secondary-text uppercase" data-i18n="stat_buyer_offers">Buyer Offers</span>
               <div class="flex items-baseline">
                 <span class="text-3xl font-heading font-extrabold text-[#b45309]">2</span>
-                <span class="text-sm font-semibold text-secondary-text ml-1.5">Pending</span>
+                <span data-i18n="status_pending" class="text-sm font-semibold text-secondary-text ml-1.5">Pending</span>
               </div>
-              <span class="text-[11px] text-[#b45309] font-semibold">Direct purchase bids</span>
+              <span data-i18n="f_stat_purchase_bids" class="text-[11px] text-[#b45309] font-semibold">Direct purchase bids</span>
             </div>
 
             <div class="ref-card p-5 space-y-1">
               <span class="text-xs font-bold text-secondary-text uppercase" data-i18n="stat_active_orders">Active Orders</span>
               <div class="flex items-baseline">
                 <span class="text-3xl font-heading font-extrabold text-[#2563eb]">1</span>
-                <span class="text-sm font-semibold text-secondary-text ml-1.5">In Transit</span>
+                <span data-i18n="status_in_transit" class="text-sm font-semibold text-secondary-text ml-1.5">In Transit</span>
               </div>
-              <span class="text-[11px] text-[#2563eb] font-semibold">Escrow secured</span>
+              <span data-i18n="f_stat_escrow_secured" class="text-[11px] text-[#2563eb] font-semibold">Escrow secured</span>
             </div>
 
             <div class="ref-card p-5 space-y-1">
@@ -702,7 +702,7 @@
               <div class="flex items-baseline">
                 <span class="text-3xl font-heading font-extrabold text-deep-forest">₹3,77,500</span>
               </div>
-              <span class="text-[11px] text-secondary-text">Total valuation</span>
+              <span data-i18n="f_stat_total_valuation" class="text-[11px] text-secondary-text">Total valuation</span>
             </div>
           </div>
 
@@ -713,10 +713,10 @@
               <div class="flex items-center justify-between">
                 <div>
                   <h3 class="font-bold text-sm text-deep-forest" data-i18n="snapshot_title">Market Price Snapshot</h3>
-                  <p class="text-xs text-secondary-text">Live APMC Mandi Spot Reference Rates</p>
+                  <p data-i18n="mkt_price_snapshot_sub" class="text-xs text-secondary-text">Live APMC Mandi Spot Reference Rates</p>
                 </div>
                 <button onclick="showFarmerTab('farmer-market-prices')" class="text-xs font-bold text-deep-forest hover:underline">
-                  View All Mandis →
+                  <span data-i18n="btn_view_all_mandis">View All Mandis →</span>
                 </button>
               </div>
 
@@ -745,21 +745,21 @@
             <div class="lg:col-span-5 ref-card p-5 space-y-3 bg-gradient-to-br from-white to-[#dcfce7]/30 border-[#a7f3d0]">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-deep-forest flex items-center gap-1.5">
-                  <i data-lucide="sparkles" class="w-4 h-4 text-emerald-600"></i> Fieldora Price Insight
+                  <i data-lucide="sparkles" class="w-4 h-4 text-emerald-600"></i> <span data-i18n="fieldora_price_insight">Fieldora Price Insight</span>
                 </span>
                 <span class="px-2 py-0.5 bg-[#dcfce7] text-deep-forest font-bold text-[10px] rounded-full">
-                  Mandi AI
+                  <span data-i18n="ask_mandi_ai">Mandi AI</span>
                 </span>
               </div>
               <p id="f-price-insight-summary" class="text-xs text-secondary-text leading-relaxed bg-white/90 p-3 rounded-xl border border-[#E6ECE6]">
                 Tomato No. 1 recorded high arrival of 1,893 Qtl averaging ₹2,000/q (₹20/kg) at Mumbai APMC (Vashi).
               </p>
               <div class="text-xs space-y-1">
-                <div class="flex justify-between"><span>Your Asking Rate:</span> <strong class="font-mono">₹2,800/q</strong></div>
-                <div class="flex justify-between"><span>Vashi Benchmark:</span> <strong class="font-mono text-deep-forest">₹2,800/q</strong></div>
+                <div class="flex justify-between"><span data-i18n="your_asking_rate">Your Asking Rate:</span> <strong class="font-mono">₹2,800/q</strong></div>
+                <div class="flex justify-between"><span data-i18n="vashi_benchmark">Vashi Benchmark:</span> <strong class="font-mono text-deep-forest">₹2,800/q</strong></div>
               </div>
               <button onclick="showFarmerTab('farmer-requests')" class="w-full py-2 bg-white border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-xl text-deep-forest">
-                Review Direct Offers (2)
+                <span data-i18n="btn_review_direct_offers">Review Direct Offers (2)</span>
               </button>
             </div>
 
@@ -2099,7 +2099,7 @@
         </button>
         <button onclick="signOutUser()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer" title="Sign Out">
           <i data-lucide="log-out" class="w-3.5 h-3.5 text-rose-600"></i>
-          <span>Sign Out</span>
+          <span data-i18n="sign_out">Sign Out</span>
         </button>
       </div>
     </div>
@@ -2178,7 +2178,7 @@
         <div class="pt-2 border-t border-[#E6ECE6]">
           <button onclick="signOutUser()" class="w-full py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-bold text-rose-700 flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs">
             <i data-lucide="log-out" class="w-4 h-4 text-rose-600"></i>
-            <span>Sign Out of Buyer Portal</span>
+            <span data-i18n="b_sign_out">Sign Out of Buyer Portal</span>
           </button>
         </div>
 
@@ -2222,9 +2222,9 @@
               </div>
               <div class="flex items-baseline">
                 <span class="text-3xl font-heading font-extrabold text-deep-forest">3</span>
-                <span class="text-sm font-semibold text-secondary-text ml-1.5">Open</span>
+                <span data-i18n="status_open" class="text-sm font-semibold text-secondary-text ml-1.5">Open</span>
               </div>
-              <span class="text-[11px] text-[#166534] font-semibold block">Broadcasted to 12,400+ FPOs</span>
+              <span data-i18n="stat_broadcasted_fpos" class="text-[11px] text-[#166534] font-semibold block">Broadcasted to 12,400+ FPOs</span>
             </div>
 
             <!-- 2. Pending Orders -->
@@ -2237,9 +2237,9 @@
               </div>
               <div class="flex items-baseline">
                 <span class="text-3xl font-heading font-extrabold text-[#2563eb]">2</span>
-                <span class="text-sm font-semibold text-secondary-text ml-1.5">In Transit</span>
+                <span data-i18n="status_in_transit" class="text-sm font-semibold text-secondary-text ml-1.5">In Transit</span>
               </div>
-              <span class="text-[11px] text-[#2563eb] font-semibold block">Escrow milestone active</span>
+              <span data-i18n="stat_escrow_active" class="text-[11px] text-[#2563eb] font-semibold block">Escrow milestone active</span>
             </div>
 
             <!-- 3. Total Purchases -->
@@ -2252,15 +2252,15 @@
               </div>
               <div class="flex items-baseline">
                 <span class="text-3xl font-heading font-extrabold text-deep-forest">18</span>
-                <span class="text-sm font-semibold text-secondary-text ml-1.5">Lots</span>
+                <span data-i18n="unit_lots" class="text-sm font-semibold text-secondary-text ml-1.5">Lots</span>
               </div>
-              <span class="text-[11px] text-[#10b981] font-semibold block">Lab assay verified deliveries</span>
+              <span data-i18n="stat_lab_verified_deliv" class="text-[11px] text-[#10b981] font-semibold block">Lab assay verified deliveries</span>
             </div>
 
             <!-- 4. Amount Spent -->
             <div class="ref-card p-5 space-y-2 bg-white hover:border-[#9a3412] transition-colors">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-secondary-text uppercase">Amount Spent</span>
+                <span data-i18n="b_stat_procurement_vol" class="text-xs font-bold text-secondary-text uppercase">Amount Spent</span>
                 <div class="w-8 h-8 rounded-lg bg-[#fef3c7] text-[#92400e] flex items-center justify-center">
                   <i data-lucide="indian-rupee" class="w-4 h-4 text-[#b45309]"></i>
                 </div>
@@ -3995,7 +3995,7 @@
               <span class="font-heading font-extrabold text-2xl text-deep-forest tracking-tight">Fieldora</span>
               <span class="px-2 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-extrabold rounded-full uppercase tracking-wider">Platinum Elite</span>
             </div>
-            <p class="text-xs text-secondary-text mt-0.5">India's Intelligent Direct Agricultural Trade & Price Intelligence Ecosystem</p>
+            <p data-i18n="footer_tagline" class="text-xs text-secondary-text mt-0.5">India's Intelligent Direct Agricultural Trade & Price Intelligence Ecosystem</p>
           </div>
         </div>
 
@@ -4003,15 +4003,15 @@
         <div class="flex flex-wrap items-center gap-4 text-xs font-semibold text-deep-forest">
           <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E6ECE6] rounded-xl shadow-2xs">
             <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-            <span>100% Escrow Protected</span>
+            <span data-i18n="footer_escrow_badge">100% Escrow Protected</span>
           </div>
           <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E6ECE6] rounded-xl shadow-2xs">
             <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
-            <span>NABL Assay Certified</span>
+            <span data-i18n="footer_nabl_badge">NABL Assay Certified</span>
           </div>
           <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E6ECE6] rounded-xl shadow-2xs">
             <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
-            <span>APMC Regulated</span>
+            <span data-i18n="footer_apmc_badge">APMC Regulated</span>
           </div>
         </div>
       </div>
@@ -4023,33 +4023,33 @@
         
         <!-- Column 1: Marketplace Portals -->
         <div class="space-y-4">
-          <h4 class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest pb-2 border-b border-[#E6ECE6]">
+          <h4 data-i18n="footer_col1_title" class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest pb-2 border-b border-[#E6ECE6]">
             Marketplace Portals
           </h4>
           <ul class="space-y-2.5 text-xs">
             <li>
               <a href="javascript:void(0)" onclick="showView('farmer-portal')" class="hover:text-deep-forest hover:underline transition-colors flex items-center gap-2">
-                <span>🌾 Farmer & FPO Portal</span>
+                <span data-i18n="footer_col1_farmer">🌾 Farmer & FPO Portal</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="showView('buyer-portal')" class="hover:text-deep-forest hover:underline transition-colors flex items-center gap-2">
-                <span>🏢 Enterprise Buyer Hub</span>
+                <span data-i18n="footer_col1_buyer">🏢 Enterprise Buyer Hub</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="showBuyerTab('buyer-marketplace')" class="hover:text-deep-forest hover:underline transition-colors flex items-center gap-2">
-                <span>🏪 Verified Farm-Gate Produce</span>
+                <span data-i18n="footer_col1_marketplace">🏪 Verified Farm-Gate Produce</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="openRfqModal()" class="hover:text-deep-forest hover:underline transition-colors flex items-center gap-2">
-                <span>📄 Post Procurement RFQ</span>
+                <span data-i18n="footer_col1_rfq">📄 Post Procurement RFQ</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="showFarmerTab('farmer-add-produce')" class="hover:text-deep-forest hover:underline transition-colors flex items-center gap-2">
-                <span>➕ List New Harvest Produce</span>
+                <span data-i18n="footer_col1_list">➕ List New Harvest Produce</span>
               </a>
             </li>
           </ul>
@@ -4057,33 +4057,33 @@
 
         <!-- Column 2: Price Intelligence & Mandis -->
         <div class="space-y-4">
-          <h4 class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest pb-2 border-b border-[#E6ECE6]">
+          <h4 data-i18n="footer_col2_title" class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest pb-2 border-b border-[#E6ECE6]">
             Price Intelligence
           </h4>
           <ul class="space-y-2.5 text-xs">
             <li>
               <a href="javascript:void(0)" onclick="showFarmerTab('farmer-market-prices')" class="hover:text-deep-forest hover:underline transition-colors">
-                Live Agmarknet Mandi Rates
+                <span data-i18n="footer_col2_mandi_rates">Live Agmarknet Mandi Rates</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="toggleAiAssistant()" class="hover:text-deep-forest hover:underline transition-colors text-emerald-700 font-semibold flex items-center gap-1">
-                <span>✦ AI Crop Rate Forecast</span>
+                <span data-i18n="footer_col2_ai_forecast">✦ AI Crop Rate Forecast</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="showFarmerTab('farmer-requirements')" class="hover:text-deep-forest hover:underline transition-colors">
-                Regional Demand Heatmaps
+                <span data-i18n="footer_col2_heatmaps">Regional Demand Heatmaps</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="showBuyerTab('buyer-mandi-prices')" class="hover:text-deep-forest hover:underline transition-colors">
-                Terminal Market Parity Benchmarks
+                <span data-i18n="footer_col2_benchmarks">Terminal Market Parity Benchmarks</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="sendAiQuery('Explain today price trends'); toggleAiAssistant();" class="hover:text-deep-forest hover:underline transition-colors">
-                Daily Agro-Market Advisory
+                <span data-i18n="footer_col2_advisory">Daily Agro-Market Advisory</span>
               </a>
             </li>
           </ul>
@@ -4091,33 +4091,33 @@
 
         <!-- Column 3: Quality & Trade Security -->
         <div class="space-y-4">
-          <h4 class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest pb-2 border-b border-[#E6ECE6]">
+          <h4 data-i18n="footer_col3_title" class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest pb-2 border-b border-[#E6ECE6]">
             Trade Security & Quality
           </h4>
           <ul class="space-y-2.5 text-xs">
             <li>
               <a href="javascript:void(0)" onclick="sendAiQuery('How does Smart Escrow protect farmers?'); toggleAiAssistant();" class="hover:text-deep-forest hover:underline transition-colors">
-                Milestone Bank Escrow System
+                <span data-i18n="footer_col3_escrow">Milestone Bank Escrow System</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="alert('NABL Lab Quality Assays: Moisture, Purity & Grain Uniformity Verification')" class="hover:text-deep-forest hover:underline transition-colors">
-                NABL Certified Quality Testing
+                <span data-i18n="footer_col3_nabl">NABL Certified Quality Testing</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="alert('Digital Weighbridge Integration: Automated Receipt & Weight Audit')" class="hover:text-deep-forest hover:underline transition-colors">
-                Digital Weighbridge Verification
+                <span data-i18n="footer_col3_weighbridge">Digital Weighbridge Verification</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="showFarmerTab('farmer-orders')" class="hover:text-deep-forest hover:underline transition-colors">
-                Transit Milestone Tracking
+                <span data-i18n="footer_col3_transit">Transit Milestone Tracking</span>
               </a>
             </li>
             <li>
               <a href="javascript:void(0)" onclick="alert('Standard Contract Templates governed by APMC trade rules')" class="hover:text-deep-forest hover:underline transition-colors">
-                Digital Purchase Agreements
+                <span data-i18n="footer_col3_contracts">Digital Purchase Agreements</span>
               </a>
             </li>
           </ul>
@@ -4125,22 +4125,22 @@
 
         <!-- Column 4: Trader Support & Contact -->
         <div class="space-y-4">
-          <h4 class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest pb-2 border-b border-[#E6ECE6]">
+          <h4 data-i18n="footer_col4_title" class="font-heading font-bold text-xs uppercase tracking-wider text-deep-forest pb-2 border-b border-[#E6ECE6]">
             Assistance & Support
           </h4>
           <div class="space-y-3 text-xs">
-            <p class="leading-relaxed text-secondary-text">
+            <p data-i18n="footer_col4_desc" class="leading-relaxed text-secondary-text">
               Dedicated agricultural trade support for farmers, cooperatives, and corporate procurement teams.
             </p>
             <div class="p-3 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl space-y-1">
-              <span class="text-[10px] uppercase font-bold text-gray-400 block">Toll-Free Helpline</span>
+              <span data-i18n="footer_helpline_title" class="text-[10px] uppercase font-bold text-gray-400 block">Toll-Free Helpline</span>
               <span class="font-bold text-deep-forest text-sm font-mono block">1800-419-3322</span>
-              <span class="text-[10px] text-secondary-text block">Mon – Sat • 6:00 AM to 9:00 PM IST</span>
+              <span data-i18n="footer_helpline_hours" class="text-[10px] text-secondary-text block">Mon – Sat • 6:00 AM to 9:00 PM IST</span>
             </div>
             <div class="pt-1">
               <button onclick="toggleAiAssistant()" class="w-full py-2 bg-gradient-to-r from-emerald-50 to-[#dcfce7] border border-[#a7f3d0] rounded-xl text-xs font-bold text-deep-forest hover:bg-[#bbf7d0] transition-colors flex items-center justify-center gap-1.5">
                 <i data-lucide="sparkles" class="w-4 h-4 text-emerald-600"></i>
-                <span>Open 24/7 AI Trader Desk</span>
+                <span data-i18n="footer_ai_desk">Open 24/7 AI Trader Desk</span>
               </button>
             </div>
           </div>
@@ -4155,24 +4155,24 @@
         
         <!-- Left: Copyright & Mission -->
         <div class="flex items-center gap-2 text-secondary-text text-center md:text-left">
-          <span>© 2026 Fieldora Agricultural Technologies Inc.</span>
+          <span data-i18n="footer_copyright">© 2026 Fieldora Agricultural Technologies Inc.</span>
           <span class="hidden sm:inline">•</span>
-          <span class="hidden sm:inline">Built for Indian Agriculture</span>
+          <span data-i18n="footer_built_for" class="hidden sm:inline">Built for Indian Agriculture</span>
         </div>
 
         <!-- Center: Live Feeds Synced Status -->
         <div class="flex items-center gap-2 px-3 py-1 bg-white border border-[#E6ECE6] rounded-full text-[11px] font-semibold text-deep-forest shadow-2xs">
           <span class="live-dot"></span>
-          <span>42 APMC Terminal Mandi Feeds Synced</span>
+          <span data-i18n="footer_feeds_synced">42 APMC Terminal Mandi Feeds Synced</span>
         </div>
 
         <!-- Right: Legal Links -->
         <div class="flex items-center gap-4 text-[11px] font-medium text-secondary-text">
-          <a href="javascript:void(0)" onclick="alert('Privacy Policy: Fieldora strictly secures all farmer trade data and banking credentials.')" class="hover:text-deep-forest transition-colors">Privacy Policy</a>
+          <a href="javascript:void(0)" onclick="alert('Privacy Policy: Fieldora strictly secures all farmer trade data and banking credentials.')" class="hover:text-deep-forest transition-colors"><span data-i18n="footer_privacy">Privacy Policy</span></a>
           <span>•</span>
-          <a href="javascript:void(0)" onclick="alert('Terms of Service: All agricultural transactions are governed by national APMC guidelines.')" class="hover:text-deep-forest transition-colors">Terms of Service</a>
+          <a href="javascript:void(0)" onclick="alert('Terms of Service: All agricultural transactions are governed by national APMC guidelines.')" class="hover:text-deep-forest transition-colors"><span data-i18n="footer_terms">Terms of Service</span></a>
           <span>•</span>
-          <a href="javascript:void(0)" onclick="alert('Security: 256-bit SSL encrypted escrow financial settlement.')" class="hover:text-deep-forest transition-colors">Security Standards</a>
+          <a href="javascript:void(0)" onclick="alert('Security: 256-bit SSL encrypted escrow financial settlement.')" class="hover:text-deep-forest transition-colors"><span data-i18n="footer_security">Security Standards</span></a>
         </div>
 
       </div>
@@ -6292,6 +6292,7 @@
           }));
           renderFarmerProduceGrid();
           renderBuyerProduceGrid();
+          localStorage.setItem('fieldora_produce_items', JSON.stringify(window.FIELDORA_PRODUCE_DATA));
         }
       } catch (err) {
         console.warn('Could not load produce listings from backend:', err);
@@ -6308,7 +6309,18 @@
         if (!offersRes.ok) return;
         const offersJson = await offersRes.json();
         const rawOffers = offersJson.data || [];
-        if (!rawOffers || rawOffers.length === 0) return;
+        if (!rawOffers || rawOffers.length === 0) {
+          if (!localStorage.getItem('fieldora_offers_items')) {
+            const defaultOffers = [
+              { buyer_name: 'Mumbai Fresh Mart', buyer_company: 'Mumbai Fresh Mart', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2800, total_offer_amount: 140000, status: 'pending', delivery_location: 'Bhiwandi Central Depot' },
+              { buyer_name: 'FreshCart Wholesale', buyer_company: 'FreshCart Wholesale', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2700, total_offer_amount: 135000, status: 'pending', delivery_location: 'Kalyan Wholesale Hub' },
+              { buyer_name: 'City Foods Enterprise', buyer_company: 'City Foods Enterprise', crop_name: 'Tomato', requested_quantity: 50, unit: 'quintal', offered_price_per_unit: 2900, total_offer_amount: 145000, status: 'pending', delivery_location: 'Vashi Terminal' }
+            ];
+            window.FIELDORA_OFFERS_DATA = defaultOffers;
+            localStorage.setItem('fieldora_offers_items', JSON.stringify(defaultOffers));
+          }
+          return;
+        }
 
         let produceListings = [];
         if (produceRes.ok) {
@@ -6396,6 +6408,8 @@
         historyOffers.sort((a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
 
         const offers = [...pendingOffers, ...historyOffers];
+        window.FIELDORA_OFFERS_DATA = offers;
+        localStorage.setItem('fieldora_offers_items', JSON.stringify(offers));
 
         const badgeEl = document.getElementById('f-incoming-offers-badge');
         if (badgeEl) {
@@ -7557,7 +7571,9 @@
 
     
 
-    function sendAiQuery(query) {
+    let aiChatHistory = [];
+
+    async function sendAiQuery(query) {
       const messagesContainer = document.getElementById('ai-chat-messages');
       const input = document.getElementById('ai-user-input');
       if (input) input.value = query;
@@ -7568,25 +7584,77 @@
         userMsg.innerHTML = `<span class="font-bold block text-[10px] text-emerald-800 uppercase">You</span>${query}`;
         messagesContainer.appendChild(userMsg);
 
-        // Simulated AI response
-        setTimeout(() => {
+        const loadingMsg = document.createElement('div');
+        loadingMsg.className = 'p-3.5 bg-white border border-[#E6ECE6] rounded-2xl space-y-1.5 shadow-2xs text-xs';
+        loadingMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed animate-pulse">Analyzing your data...</p>`;
+        messagesContainer.appendChild(loadingMsg);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        lucide.createIcons();
+
+        const userData = currentAuthUser ? {
+          name: currentAuthUser.name,
+          email: currentAuthUser.email,
+          role: currentAuthUser.role,
+          location: currentAuthUser.location || '',
+          organization: currentAuthUser.organization || ''
+        } : { role: 'farmer', name: 'Guest' };
+
+        const produceData = (JSON.parse(localStorage.getItem('fieldora_produce_items') || '[]')).map(p => ({
+          crop: p.crop, variety: p.variety, quantity: p.qty + ' ' + p.unit,
+          price: '₹' + p.price + '/q', location: p.location, quality: p.grade, status: p.status, farmer: p.farmer
+        }));
+
+        const rfqData = (JSON.parse(localStorage.getItem('fieldora_rfq_items') || '[]')).map(r => ({
+          crop: r.crop, buyer: r.buyer, quantity: r.qty + ' Quintals',
+          targetPrice: '₹' + r.price + '/q', deliveryLocation: r.dest, matchScore: r.match + '%'
+        }));
+
+        const offersData = (JSON.parse(localStorage.getItem('fieldora_offers_items') || '[]')).map(o => ({
+          buyer: o.buyer_name || o.buyer || o.buyerCompany || 'Unknown',
+          crop: o.crop_name || o.crop || 'Unknown',
+          quantity: (o.requested_quantity || o.quantity || 0) + ' Quintals',
+          offeredPrice: '₹' + (o.offered_price_per_unit || o.offered_price || 0) + '/q',
+          status: o.status,
+          date: o.created_at || o.date || '',
+          totalValue: '₹' + (o.total_offer_amount || o.totalVal || 0).toLocaleString('en-IN')
+        }));
+
+        try {
+          const response = await fetch('http://localhost:5000/api/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: query,
+              userRole: currentAuthUser?.role || 'farmer',
+              userData: { ...userData, listings: produceData, requirements: rfqData, incomingOffers: offersData },
+              marketData: window.FIELDORA_PRODUCE_DATA || [],
+              history: aiChatHistory
+            })
+          });
+
+          const data = await response.json();
+          aiChatHistory.push({ sender: 'user', content: query });
+
+          loadingMsg.remove();
           const aiMsg = document.createElement('div');
           aiMsg.className = 'p-3.5 bg-white border border-[#E6ECE6] rounded-2xl space-y-1.5 shadow-2xs text-xs';
-          
-          let reply = `Based on live APMC mandi data across Maharashtra, Gujarat, and MP: Current verified modal rates for this commodity are benchmarked at ₹${Math.floor(2200 + Math.random() * 800)}/quintal (+4.2% weekly momentum). Verified FPO supply lots are ready for farm-gate dispatch.`;
-          if (query.toLowerCase().includes('tomato')) {
-            reply = `🍅 <strong>Vashi APMC Live Rate:</strong> Current modal price is ₹28.50/kg (₹2,850/q). Daily arrival volume is 142 MT with forward demand expected to peak in 4 days.`;
-          } else if (query.toLowerCase().includes('wheat')) {
-            reply = `🌾 <strong>Wheat Procurement Intelligence:</strong> Sharbati MP milling grade is trading at ₹3,080/q in Indore. 4 verified FPOs currently have 850 quintals available with moisture under 11%.`;
-          } else if (query.toLowerCase().includes('escrow')) {
-            reply = `🛡️ <strong>Fieldora Smart Escrow:</strong> Buyer deposits funds into a secure tripartite escrow account before dispatch. Once destination assay & weighment are verified, funds release to farmer's account within 2 hours.`;
-          }
+
+          const reply = data.success ? data.reply : 'Sorry, I could not process your request. Make sure the backend server is running on port 5000.';
+          aiChatHistory.push({ sender: 'assistant', content: reply });
 
           aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed">${reply}</p>`;
           messagesContainer.appendChild(aiMsg);
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
           lucide.createIcons();
-        }, 400);
+        } catch (err) {
+          loadingMsg.remove();
+          const aiMsg = document.createElement('div');
+          aiMsg.className = 'p-3.5 bg-white border border-[#E6ECE6] rounded-2xl space-y-1.5 shadow-2xs text-xs';
+          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed">Could not connect to AI service. Please make sure the backend is running on port 5000.</p>`;
+          messagesContainer.appendChild(aiMsg);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          lucide.createIcons();
+        }
       }
       if (input) input.value = '';
     }
