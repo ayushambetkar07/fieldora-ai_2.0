@@ -21,7 +21,9 @@ server.listen(5099, async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: 'What is the current tomato price at Vashi APMC?',
-        userRole: 'farmer'
+        userRole: 'farmer',
+        userData: { name: 'Rajendra Patel', role: 'farmer', location: 'Nashik', listings: [{ crop: 'Tomato', quantity: '50 Quintals', price: '₹2800/q', status: 'Active' }] },
+        marketData: [{ crop: 'Tomato', mandi: 'Vashi APMC', currentPrice: 2800, trend: 'up' }]
       })
     });
     const json2 = await res2.json();
@@ -34,7 +36,9 @@ server.listen(5099, async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: 'आले सातारा बाजारभाव सांगा',
-        userRole: 'farmer'
+        userRole: 'farmer',
+        userData: { name: 'Rajendra Patel', role: 'farmer', location: 'Nashik', listings: [{ crop: 'Tomato', quantity: '50 Quintals', price: '₹2800/q', status: 'Active' }] },
+        marketData: [{ crop: 'Tomato', mandi: 'Vashi APMC', currentPrice: 2800, trend: 'up' }]
       })
     });
     const json3 = await res3.json();
@@ -47,7 +51,9 @@ server.listen(5099, async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: 'How much is Green Peas rate and arrival in Mumbai APMC?',
-        userRole: 'buyer'
+        userRole: 'buyer',
+        userData: { name: 'Sanjay Deshmukh', role: 'buyer', location: 'Mumbai', requirements: [{ crop: 'Tomato', quantity: '50 Quintals', targetPrice: '₹2800/q' }] },
+        marketData: [{ crop: 'Tomato', mandi: 'Vashi APMC', currentPrice: 2800, trend: 'up' }]
       })
     });
     const json4 = await res4.json();

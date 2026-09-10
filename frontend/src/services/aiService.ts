@@ -1,15 +1,11 @@
-import { ParsedSearchQuery, AIAssistantMessage } from '../types';
-import { MOCK_MARKET_PRICES, MOCK_REQUIREMENTS, MOCK_PRODUCE, MOCK_ORDERS } from '../data/mockData';
+import { ParsedSearchQuery, AIAssistantMessage, UserRole, ProduceListing, MarketPricePoint, OrderItem, BuyerRequirement } from '../types';
 
-/**
- * Natural Language Query Parser for Buyer Search
- * Interprets phrases like: "I need 500 kg Grade A tomatoes near Mumbai under ₹3,000/q"
- */
+const API_BASE = 'http://localhost:5000/api';
+
 export function parseNaturalLanguageQuery(query: string): ParsedSearchQuery {
   const lower = query.toLowerCase();
   const result: ParsedSearchQuery = { rawQuery: query };
 
-  // Crop detection
   if (lower.includes('tomato')) result.crop = 'Tomato';
   else if (lower.includes('onion')) result.crop = 'Onion';
   else if (lower.includes('potato')) result.crop = 'Potato';
@@ -17,16 +13,15 @@ export function parseNaturalLanguageQuery(query: string): ParsedSearchQuery {
   else if (lower.includes('rice') || lower.includes('basmati')) result.crop = 'Rice';
   else if (lower.includes('soybean') || lower.includes('soya')) result.crop = 'Soybean';
 
-  // Quantity detection (e.g. 500 kg, 1 ton, 50 qtl, 50 quintals)
   const qtyMatch = query.match(/(\d+(?:,\d+)?(?:\.\d+)?)\s*(kg|quintal|qtl|ton|tons|quintals|q)/i);
   if (qtyMatch) {
     const rawVal = parseFloat(qtyMatch[1].replace(/,/g, ''));
     const unit = qtyMatch[2].toLowerCase();
     if (unit.startsWith('ton')) {
-      result.quantity = rawVal * 10; // 1 ton = 10 quintals
+      result.quantity = rawVal * 10;
       result.unit = 'quintal (from ' + rawVal + ' tons)';
     } else if (unit === 'kg') {
-      result.quantity = Math.round(rawVal / 100); // 100 kg = 1 quintal
+      result.quantity = Math.round(rawVal / 100);
       result.unit = `${rawVal} kg`;
     } else {
       result.quantity = rawVal;
@@ -34,12 +29,10 @@ export function parseNaturalLanguageQuery(query: string): ParsedSearchQuery {
     }
   }
 
-  // Quality detection
   if (lower.includes('grade a+') || lower.includes('grade a plus')) result.quality = 'Grade A+';
   else if (lower.includes('grade a') || lower.includes('export')) result.quality = 'Grade A';
   else if (lower.includes('grade b')) result.quality = 'Grade B';
 
-  // Location detection
   const locations = ['mumbai', 'nashik', 'pune', 'vashi', 'lasalgaon', 'indore', 'karnal', 'nagpur', 'delhi'];
   for (const loc of locations) {
     if (lower.includes(loc)) {
@@ -48,7 +41,6 @@ export function parseNaturalLanguageQuery(query: string): ParsedSearchQuery {
     }
   }
 
-  // Price detection (e.g. under 3000, under ₹3,000, below 2500, max 2800)
   const priceMatch = query.match(/(?:under|below|less than|max|up to|₹|rs\.?)\s*(\d+(?:,\d+)?)/i);
   if (priceMatch) {
     result.maxPrice = parseInt(priceMatch[1].replace(/,/g, ''), 10);
@@ -57,14 +49,8 @@ export function parseNaturalLanguageQuery(query: string): ParsedSearchQuery {
   return result;
 }
 
-/**
- * AI-Assisted Requirement Extractor
- * Interprets: "I need 1 ton Grade A potatoes in Mumbai by 20 September. My target price is ₹2,200/q."
- */
 export function extractRequirementFromPrompt(prompt: string) {
   const parsed = parseNaturalLanguageQuery(prompt);
-  
-  // Extract date if present
   let requiredBy = '2026-09-20';
   if (prompt.toLowerCase().includes('september') || prompt.toLowerCase().includes('sept')) {
     const dayMatch = prompt.match(/(\d{1,2})\s*(?:th|st|nd|rd)?\s*(?:sept|september)/i);
@@ -87,102 +73,97 @@ export function extractRequirementFromPrompt(prompt: string) {
   };
 }
 
-/**
- * Assistant Response Engine (Context-aware responses)
- */
-export function getAssistantResponse(query: string, userRole: 'farmer' | 'buyer'): AIAssistantMessage {
-  const lower = query.toLowerCase();
+interface AssistantContext {
+  userRole: UserRole;
+  userData: any;
+  marketData: any;
+  produceList: ProduceListing[];
+  ordersList: OrderItem[];
+  requirementsList: BuyerRequirement[];
+}
+
+export async function getAssistantResponse(
+  query: string,
+  context: AssistantContext,
+  history?: { sender: 'user' | 'assistant'; content: string }[]
+): Promise<AIAssistantMessage> {
   const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // 1. Market Price Queries
-  if (lower.includes('price') || lower.includes('rate') || lower.includes('mandi') || lower.includes('tomato price') || lower.includes('onion price')) {
-    const cropMatch = lower.includes('onion') ? 'Onion' : lower.includes('potato') ? 'Potato' : 'Tomato';
-    const priceData = MOCK_MARKET_PRICES.find(p => p.crop.toLowerCase() === cropMatch.toLowerCase()) || MOCK_MARKET_PRICES[0];
-    
-    return {
-      id: 'msg-' + Date.now(),
-      sender: 'assistant',
-      timestamp,
-      content: `Here is the verified APMC Mandi reference for **${priceData.crop}**:`,
-      structuredData: {
-        type: 'market_price',
-        data: priceData
-      },
-      suggestedActions: [
-        'Compare nearby markets',
-        'Find verified buyers',
-        'View 30-day price trend'
-      ]
-    };
-  }
-
-  // 2. Finding Buyers (Farmer side)
-  if (lower.includes('find buyer') || lower.includes('buyers') || lower.includes('matching buyer')) {
-    return {
-      id: 'msg-' + Date.now(),
-      sender: 'assistant',
-      timestamp,
-      content: `Found **${MOCK_REQUIREMENTS.length} active verified institutional buyer requirements** matching your regional harvest capacity:`,
-      structuredData: {
-        type: 'buyer_matches',
-        data: MOCK_REQUIREMENTS
-      },
-      suggestedActions: [
-        'View 94% match requirement',
-        'List new harvest lot',
-        'Check pending purchase requests'
-      ]
-    };
-  }
-
-  // 3. Finding Produce (Buyer side)
-  if (lower.includes('find produce') || lower.includes('buy') || lower.includes('search produce') || lower.includes('500kg')) {
-    return {
-      id: 'msg-' + Date.now(),
-      sender: 'assistant',
-      timestamp,
-      content: `Here are available verified harvest lots ready for immediate farm-gate dispatch:`,
-      structuredData: {
-        type: 'produce_list',
-        data: MOCK_PRODUCE.slice(0, 3)
-      },
-      suggestedActions: [
-        'Filter by Grade A+',
-        'View Nashik Tomato lot',
-        'Create customized requirement'
-      ]
-    };
-  }
-
-  // 4. Pending Orders
-  if (lower.includes('order') || lower.includes('pending') || lower.includes('track')) {
-    return {
-      id: 'msg-' + Date.now(),
-      sender: 'assistant',
-      timestamp,
-      content: `You have **${MOCK_ORDERS.length} active orders** currently in progress with guaranteed escrow security:`,
-      structuredData: {
-        type: 'order_summary',
-        data: MOCK_ORDERS
-      },
-      suggestedActions: [
-        'Track GPS shipment #FD-1042',
-        'Download assay report',
-        'View completed deliveries'
-      ]
-    };
-  }
-
-  // Default response
-  return {
-    id: 'msg-' + Date.now(),
-    sender: 'assistant',
-    timestamp,
-    content: userRole === 'farmer'
-      ? `I can help you analyze mandi price parity, find high-match institutional buyers, list new harvest lots, or track your escrow payments.`
-      : `I can help you search lab-verified produce lots, post bulk commodity requirements, interpret natural language procurement queries, and track deliveries.`,
-    suggestedActions: userRole === 'farmer'
-      ? ['What\'s the current tomato price?', 'Find buyers for my tomatoes', 'Show my pending orders']
-      : ['Find 500kg tomatoes near Mumbai', 'Show my pending orders', 'Create requirement for 1 ton potatoes']
+  const userData = {
+    role: context.userRole,
+    ...context.userData,
+    listings: context.produceList.map(p => ({
+      crop: p.crop,
+      variety: p.variety,
+      quantity: p.quantity + ' ' + p.unit,
+      price: '₹' + p.expectedPrice + '/q',
+      location: p.location,
+      quality: p.quality,
+      status: p.status
+    })),
+    requirements: context.requirementsList.map(r => ({
+      crop: r.crop,
+      quantity: r.quantity + ' ' + r.unit,
+      targetPrice: '₹' + r.targetPrice + '/q',
+      location: r.deliveryLocation,
+      status: r.status
+    })),
+    orders: context.ordersList.map(o => ({
+      orderNumber: o.orderNumber,
+      crop: o.crop,
+      quantity: o.quantity + ' ' + o.unit,
+      totalAmount: '₹' + o.totalAmount.toLocaleString('en-IN'),
+      status: o.status,
+      paymentStatus: o.paymentStatus
+    }))
   };
+
+  const marketData = context.marketData;
+
+  try {
+    const response = await fetch(`${API_BASE}/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: query,
+        userRole: context.userRole,
+        userData,
+        marketData,
+        history
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Backend returned ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'AI request failed');
+    }
+
+    return {
+      id: 'msg-' + Date.now(),
+      sender: 'assistant',
+      timestamp,
+      content: data.reply,
+      suggestedActions: getSuggestedActions(context.userRole)
+    };
+  } catch (error: any) {
+    console.error('AI chat error:', error);
+    return {
+      id: 'msg-' + Date.now(),
+      sender: 'assistant',
+      timestamp,
+      content: `I'm having trouble connecting to the AI service. Please make sure the backend server is running on port 5000.\n\nError: ${error.message}`,
+      suggestedActions: ['Retry']
+    };
+  }
+}
+
+function getSuggestedActions(userRole: UserRole): string[] {
+  return userRole === 'farmer'
+    ? ['What is my produce listing price?', 'Show my active orders', 'Which buyers match my crops?']
+    : ['Show available produce lots', 'What are current market prices?', 'Track my pending orders'];
 }

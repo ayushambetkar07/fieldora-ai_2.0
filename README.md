@@ -7,13 +7,13 @@
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=3ECF8E)](https://supabase.com/)
-[![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![GROQ](https://img.shields.io/badge/GROQ-LLM-FF6B00?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDJMMyA3djEwbDkgNSA5LTVIN0wxMiAzeiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=&logoColor=white)](https://groq.com/)
 
 ---
 
 ## 📖 Overview
 
-**Fieldora AI 2.0** is an enterprise-grade, full-stack agricultural commerce ecosystem designed to bridge the gap between farmers, institutional buyers, and logistics networks. Powered by **Google Gemini AI**, **Real-Time APMC Mandi Feeds**, and an **A\* Graph Routing Algorithm**, Fieldora eliminates predatory middlemen, enforces fair pricing, and streamlines agri-supply chain logistics
+**Fieldora AI 2.0** is an enterprise-grade, full-stack agricultural commerce ecosystem designed to bridge the gap between farmers, institutional buyers, and logistics networks. Powered by **GROQ AI (openai/gpt-oss-120b)**, **Real-Time APMC Mandi Feeds**, and an **A\* Graph Routing Algorithm**, Fieldora eliminates predatory middlemen, enforces fair pricing, and streamlines agri-supply chain logistics
 
 ---
 
@@ -69,7 +69,7 @@
 
 ### 🤖 4. AI Assistant & Intelligence Suite
 - **Multilingual Agri-Advisory Chatbot**:
-  - Powered by **Google Gemini AI**, offering instant voice and text guidance in regional languages (English, Hindi, Marathi, etc.).
+  - Powered by **GROQ AI**, offering instant voice and text guidance in regional languages (English, Hindi, Marathi, etc.).
   - Crop disease diagnosis recommendations, soil health advice, and season planning.
 - **Proactive Demand & Price Spike Alerts**:
   - Automated background monitoring that alerts farmers when a nearby buyer requirement matches their inventory or when market prices jump significantly.
@@ -91,7 +91,7 @@ fieldora-2.0/
 │   ├── src/
 │   │   ├── components/     # Layout, Nav, AIAssistantDrawer, Transport, UI
 │   │   ├── pages/          # Farmer, Buyer, Transport, Public Pages
-│   │   ├── services/       # AI (Gemini), A* Routing, Supabase, Auth
+│   │   ├── services/       # AI (GROQ), A* Routing, Supabase, Auth
 │   │   └── context/        # Global App Context & State
 ├── backend/                # Express + TypeScript Server
 │   ├── src/
@@ -106,7 +106,7 @@ fieldora-2.0/
 | **Frontend** | React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons |
 | **Backend** | Node.js, Express, TypeScript, Serverless HTTP |
 | **Database & Auth** | Supabase (PostgreSQL, Row-Level Security, Realtime Subscriptions, Auth) |
-| **AI & Algorithms** | Google Gemini API (`@google/generative-ai`), Custom A* Graph Pathfinding |
+| **AI & Algorithms** | GROQ API (openai/gpt-oss-120b), Custom A* Graph Pathfinding |
 | **Geospatial** | Haversine Distance Matrix Algorithm |
 
 ---
@@ -117,7 +117,7 @@ fieldora-2.0/
 - **Node.js** (v18.0 or higher)
 - **npm** or **yarn**
 - **Supabase Account**
-- **Google Gemini API Key**
+- **GROQ API Key**
 
 ### 2. Clone the Repository
 ```bash
@@ -133,7 +133,8 @@ Create `backend/.env` based on `backend/.env.example`:
 PORT=5000
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your_supabase_anon_key
-GEMINI_API_KEY=your_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 #### Frontend Configuration:
@@ -181,7 +182,7 @@ npm run dev:frontend
 | `PATCH` | `/api/orders/:id/negotiate` | Counter-offer or update negotiation status |
 | `PATCH` | `/api/orders/:id/lifecycle` | Advance shipment milestone (Harvested, In-Transit, Delivered) |
 | `POST` | `/api/reviews` | Submit verified buyer/seller ratings |
-| `POST` | `/api/ai/chat` | Query Google Gemini Multilingual Agri-Assistant |
+| `POST` | `/api/ai/chat` | Query GROQ AI Multilingual Agri-Assistant (user + market data context) |
 | `GET` | `/api/demand-alerts` | Retrieve targeted demand spike alerts |
 
 ---

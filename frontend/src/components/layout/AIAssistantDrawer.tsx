@@ -2,26 +2,33 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { getAssistantResponse } from '../../services/aiService';
 import { AIAssistantMessage } from '../../types';
+import { MOCK_MARKET_PRICES } from '../../data/mockData';
 import { 
   Sparkles, 
   X, 
-  Send, 
-  Wheat, 
-  Store, 
-  TrendingUp, 
-  Inbox, 
-  PackageCheck, 
-  IndianRupee, 
-  BadgeCheck,
+  Send,
+  Loader2,
   ArrowRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button, cn } from '../ui';
 
 export const AIAssistantDrawer: React.FC = () => {
-  const { isAssistantOpen, setIsAssistantOpen, userRole, currentFarmer, currentBuyer } = useApp();
+  const {
+    isAssistantOpen,
+    setIsAssistantOpen,
+    userRole,
+    currentFarmer,
+    currentBuyer,
+    currentUser,
+    produceList,
+    ordersList,
+    requirementsList
+  } = useApp();
+
   const [inputQuery, setInputQuery] = useState('');
-  
+  const [isLoading, setIsLoading] = useState(false);
+
   const initialWelcome = userRole === 'farmer'
     ? `Hello ${currentFarmer.name} 👋 What can I help you analyze or match today?`
     : `Hello ${currentBuyer.name} 👋 What commodities or procurement contracts do you need assistance with?`;
@@ -40,9 +47,9 @@ export const AIAssistantDrawer: React.FC = () => {
 
   if (!isAssistantOpen) return null;
 
-  const handleSend = (text?: string) => {
+  const handleSend = async (text?: string) => {
     const query = text || inputQuery.trim();
-    if (!query) return;
+    if (!query || isLoading) return;
 
     const userMsg: AIAssistantMessage = {
       id: 'msg-u-' + Date.now(),
@@ -53,12 +60,32 @@ export const AIAssistantDrawer: React.FC = () => {
 
     setMessages(prev => [...prev, userMsg]);
     if (!text) setInputQuery('');
+    setIsLoading(true);
 
-    // Simulate smart thinking delay
-    setTimeout(() => {
-      const resp = getAssistantResponse(query, userRole);
+    try {
+      const userData = userRole === 'farmer' ? currentFarmer : currentBuyer;
+
+      const resp = await getAssistantResponse(query, {
+        userRole,
+        userData: { ...userData, email: currentUser?.email },
+        marketData: MOCK_MARKET_PRICES,
+        produceList,
+        ordersList,
+        requirementsList
+      }, messages.map(m => ({ sender: m.sender as 'user' | 'assistant', content: m.content })));
+
       setMessages(prev => [...prev, resp]);
-    }, 400);
+    } catch {
+      setMessages(prev => [...prev, {
+        id: 'msg-err-' + Date.now(),
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        content: 'Something went wrong. Please try again.',
+        suggestedActions: ['Retry']
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -112,7 +139,6 @@ export const AIAssistantDrawer: React.FC = () => {
               >
                 <p className="whitespace-pre-wrap">{msg.content}</p>
 
-                {/* Structured Output Card: Market Price */}
                 {msg.structuredData?.type === 'market_price' && (
                   <div className="bg-card border border-border p-3 rounded-input space-y-2 mt-2 shadow-card text-main">
                     <div className="flex items-center justify-between border-b border-border pb-1.5">
@@ -131,7 +157,6 @@ export const AIAssistantDrawer: React.FC = () => {
                   </div>
                 )}
 
-                {/* Structured Output Card: Buyer Matches */}
                 {msg.structuredData?.type === 'buyer_matches' && (
                   <div className="space-y-2 mt-2">
                     {msg.structuredData.data.slice(0, 2).map((req: any) => (
@@ -154,7 +179,6 @@ export const AIAssistantDrawer: React.FC = () => {
                   </div>
                 )}
 
-                {/* Structured Output Card: Produce List */}
                 {msg.structuredData?.type === 'produce_list' && (
                   <div className="space-y-2 mt-2">
                     {msg.structuredData.data.map((prod: any) => (
@@ -180,7 +204,6 @@ export const AIAssistantDrawer: React.FC = () => {
                   </div>
                 )}
 
-                {/* Structured Output Card: Orders */}
                 {msg.structuredData?.type === 'order_summary' && (
                   <div className="space-y-2 mt-2">
                     {msg.structuredData.data.map((ord: any) => (
@@ -197,8 +220,7 @@ export const AIAssistantDrawer: React.FC = () => {
 
               </div>
 
-              {/* Suggested Action Chips */}
-              {msg.suggestedActions && msg.suggestedActions.length > 0 && (
+              {msg.suggestedActions && msg.suggestedActions.length > 0 && !isLoading && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {msg.suggestedActions.map((action, i) => (
                     <button
@@ -213,6 +235,15 @@ export const AIAssistantDrawer: React.FC = () => {
               )}
             </div>
           ))}
+
+          {isLoading && (
+            <div className="flex items-start">
+              <div className="max-w-[88%] p-3.5 rounded-card text-xs sm:text-sm bg-[#F7F9F6] border border-border text-main flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span>Analyzing your data...</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Input Bar */}
@@ -229,10 +260,11 @@ export const AIAssistantDrawer: React.FC = () => {
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               placeholder="Ask about market prices, buyer matches..."
-              className="flex-1 px-3.5 py-2 bg-card border border-border rounded-input text-xs sm:text-sm text-main placeholder:text-muted focus:border-primary focus:ring-1 focus:ring-primary"
+              disabled={isLoading}
+              className="flex-1 px-3.5 py-2 bg-card border border-border rounded-input text-xs sm:text-sm text-main placeholder:text-muted focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
             />
-            <Button type="submit" size="sm" variant="primary" className="px-3">
-              <Send className="w-4 h-4" />
+            <Button type="submit" size="sm" variant="primary" className="px-3" disabled={isLoading}>
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
           </form>
         </div>
