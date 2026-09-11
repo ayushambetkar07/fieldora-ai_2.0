@@ -365,6 +365,10 @@ export async function getAssistantResponse(
           userId: context.userData?.id,
           userName: context.userData?.name,
           email: context.userData?.email,
+          organization: context.userData?.organization,
+          listings: context.produceList || [],
+          requirements: context.requirementsList || [],
+          orders: context.ordersList || [],
           userData,
           marketData,
           history: (history || []).slice(-8)

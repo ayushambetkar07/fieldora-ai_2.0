@@ -8691,33 +8691,62 @@
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
         lucide.createIcons();
 
+        const activeRole = (typeof currentRole !== 'undefined' && currentRole) ? currentRole : (currentAuthUser?.role || 'farmer');
+        const isBuyer = activeRole === 'buyer';
+
         const userData = currentAuthUser ? {
+          id: currentAuthUser.id,
           name: currentAuthUser.name,
           email: currentAuthUser.email,
-          role: currentAuthUser.role,
+          role: activeRole,
           location: currentAuthUser.location || '',
-          organization: currentAuthUser.organization || ''
-        } : { role: 'farmer', name: 'Guest' };
+          organization: currentAuthUser.organization || (isBuyer ? 'FreshMart Supermarkets Ltd • Mumbai Corporate Procurement Hub' : 'Patel Organic Farms • Nashik Farm Cluster')
+        } : (isBuyer ? {
+          role: 'buyer',
+          name: 'FreshMart Supermarkets Ltd (Procurement)',
+          organization: 'FreshMart Supermarkets Ltd • Mumbai Corporate Procurement Hub'
+        } : {
+          role: 'farmer',
+          name: 'Rajendra Patel (Farmer)',
+          organization: 'Patel Organic Farms • Nashik Farm Cluster'
+        });
 
-        const produceData = (JSON.parse(localStorage.getItem('fieldora_produce_items') || '[]')).map(p => ({
-          crop: p.crop, variety: p.variety, quantity: p.qty + ' ' + p.unit,
-          price: '₹' + p.price + '/q', location: p.location, quality: p.grade, status: p.status, farmer: p.farmer
-        }));
+        const produceList = window.FIELDORA_PRODUCE_DATA || JSON.parse(localStorage.getItem('fieldora_produce_items') || '[]');
+        const offersList = window.FIELDORA_OFFERS_DATA || JSON.parse(localStorage.getItem('fieldora_offers_items') || '[]');
+        const rfqList = window.FIELDORA_RFQ_DATA || JSON.parse(localStorage.getItem('fieldora_rfq_items') || '[]');
+        const ordersList = window.FIELDORA_ORDERS_DATA || JSON.parse(localStorage.getItem('fieldora_orders_items') || '[]');
 
-        const rfqData = (JSON.parse(localStorage.getItem('fieldora_rfq_items') || '[]')).map(r => ({
-          crop: r.crop, buyer: r.buyer, quantity: r.qty + ' Quintals',
-          targetPrice: '₹' + r.price + '/q', deliveryLocation: r.dest, matchScore: r.match + '%'
-        }));
+        const activeListingsCount = produceList.length;
+        const pendingOffersCount = offersList.filter(o => !['rejected', 'declined', 'cancelled'].includes((o.status || '').toLowerCase())).length;
+        const activeOrdersCount = ordersList.length > 0 ? ordersList.filter(o => !['completed', 'cancelled'].includes((o.status || '').toLowerCase())).length : 1;
+        const totalValuationNum = produceList.reduce((acc, cur) => acc + ((Number(cur.price) || 0) * (Number(cur.qty) || 0)), 0);
+        const totalValuationStr = '₹' + (totalValuationNum > 0 ? totalValuationNum.toLocaleString('en-IN') : '3,77,500');
 
-        const offersData = (JSON.parse(localStorage.getItem('fieldora_offers_items') || '[]')).map(o => ({
-          buyer: o.buyer_name || o.buyer || o.buyerCompany || 'Unknown',
-          crop: o.crop_name || o.crop || 'Unknown',
-          quantity: (o.requested_quantity || o.quantity || 0) + ' Quintals',
-          offeredPrice: '₹' + (o.offered_price_per_unit || o.offered_price || 0) + '/q',
-          status: o.status,
-          date: o.created_at || o.date || '',
-          totalValue: '₹' + (o.total_offer_amount || o.totalVal || 0).toLocaleString('en-IN')
-        }));
+        const dashboardStats = isBuyer ? {
+          activeRequirementsCount: rfqList.length || 3,
+          pendingOrdersCount: 2,
+          totalPurchasesCount: 18,
+          amountSpent: '₹24.8 Lakhs',
+          activeRfqsCount: rfqList.length || 3,
+          buyerOffersCount: pendingOffersCount
+        } : {
+          activeListingsCount,
+          buyerOffersCount: pendingOffersCount,
+          activeOrdersCount,
+          totalValuation: totalValuationStr,
+          activeRfqsCount: rfqList.length
+        };
+
+        const transportPayload = {
+          milestoneIndex: TransportState.milestoneIndex,
+          isTracking: TransportState.isTracking,
+          selectedVehicle: TransportState.selectedVehicle,
+          pickup: TransportState.selectedPickup,
+          delivery: TransportState.selectedDelivery,
+          orderWeight: TransportState.orderWeight,
+          crop: TransportState.cropName,
+          latestTelemetry: TransportState.latestTelemetry
+        };
 
         let data = null;
         const candidateUrls = [
@@ -8738,8 +8767,18 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 message: query,
-                userRole: currentAuthUser?.role || 'farmer',
-                userData: { ...userData, listings: produceData, requirements: rfqData, incomingOffers: offersData },
+                userRole: activeRole,
+                userId: userData.id,
+                userName: userData.name,
+                email: userData.email,
+                organization: userData.organization,
+                dashboardStats,
+                listings: produceList,
+                offers: offersList,
+                requirements: rfqList,
+                orders: ordersList,
+                transport: transportPayload,
+                userData: { ...userData, dashboardStats, listings: produceList, requirements: rfqList, incomingOffers: offersList, orders: ordersList, transport: transportPayload },
                 marketData: window.FIELDORA_PRODUCE_DATA || [],
                 history: aiChatHistory
               }),

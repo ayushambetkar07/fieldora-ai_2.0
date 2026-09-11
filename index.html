@@ -8694,14 +8694,25 @@
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
         lucide.createIcons();
 
+        const activeRole = (typeof currentRole !== 'undefined' && currentRole) ? currentRole : (currentAuthUser?.role || 'farmer');
+        const isBuyer = activeRole === 'buyer';
+
         const userData = currentAuthUser ? {
           id: currentAuthUser.id,
           name: currentAuthUser.name,
           email: currentAuthUser.email,
-          role: currentAuthUser.role,
+          role: activeRole,
           location: currentAuthUser.location || '',
-          organization: currentAuthUser.organization || ''
-        } : { role: 'farmer', name: 'Rajendra Patel (Farmer)' };
+          organization: currentAuthUser.organization || (isBuyer ? 'FreshMart Supermarkets Ltd • Mumbai Corporate Procurement Hub' : 'Patel Organic Farms • Nashik Farm Cluster')
+        } : (isBuyer ? {
+          role: 'buyer',
+          name: 'FreshMart Supermarkets Ltd (Procurement)',
+          organization: 'FreshMart Supermarkets Ltd • Mumbai Corporate Procurement Hub'
+        } : {
+          role: 'farmer',
+          name: 'Rajendra Patel (Farmer)',
+          organization: 'Patel Organic Farms • Nashik Farm Cluster'
+        });
 
         const produceList = window.FIELDORA_PRODUCE_DATA || JSON.parse(localStorage.getItem('fieldora_produce_items') || '[]');
         const offersList = window.FIELDORA_OFFERS_DATA || JSON.parse(localStorage.getItem('fieldora_offers_items') || '[]');
@@ -8714,7 +8725,14 @@
         const totalValuationNum = produceList.reduce((acc, cur) => acc + ((Number(cur.price) || 0) * (Number(cur.qty) || 0)), 0);
         const totalValuationStr = '₹' + (totalValuationNum > 0 ? totalValuationNum.toLocaleString('en-IN') : '3,77,500');
 
-        const dashboardStats = {
+        const dashboardStats = isBuyer ? {
+          activeRequirementsCount: rfqList.length || 3,
+          pendingOrdersCount: 2,
+          totalPurchasesCount: 18,
+          amountSpent: '₹24.8 Lakhs',
+          activeRfqsCount: rfqList.length || 3,
+          buyerOffersCount: pendingOffersCount
+        } : {
           activeListingsCount,
           buyerOffersCount: pendingOffersCount,
           activeOrdersCount,
@@ -8752,11 +8770,11 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 message: query,
-                userRole: currentAuthUser?.role || 'farmer',
-                userId: currentAuthUser?.id,
-                userName: currentAuthUser?.name,
-                email: currentAuthUser?.email,
-                organization: currentAuthUser?.organization,
+                userRole: activeRole,
+                userId: userData.id,
+                userName: userData.name,
+                email: userData.email,
+                organization: userData.organization,
                 dashboardStats,
                 listings: produceList,
                 offers: offersList,

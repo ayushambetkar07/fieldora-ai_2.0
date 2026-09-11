@@ -152,7 +152,10 @@ async function resolveUserContext(req: Request): Promise<AuthenticatedUserContex
 
   // Set clean human fallback name if still undefined
   if (!userName) {
-    userName = userRole === 'farmer' ? 'Rajendra Patel (Farmer)' : 'Enterprise Procurement Buyer';
+    userName = userRole === 'farmer' ? 'Rajendra Patel (Farmer)' : 'FreshMart Supermarkets Ltd (Procurement)';
+  }
+  if (!organization) {
+    organization = userRole === 'farmer' ? 'Patel Organic Farms • Nashik Farm Cluster' : 'FreshMart Supermarkets Ltd • Mumbai Corporate Procurement Hub';
   }
 
   // Build unique ID array for database scoping
@@ -309,12 +312,25 @@ async function fetchUserScopedData(userCtx: AuthenticatedUserContext, clientPayl
   }
 
   // Dashboard Stats & Transport snapshot
-  const dashboardStats = clientPayload.dashboardStats || clientPayload.userData?.dashboardStats || {
+  const isBuyer = userRole === 'buyer';
+  const defaultStats = isBuyer ? {
+    activeRequirementsCount: userRequirements.length || 3,
+    pendingOrdersCount: 2,
+    totalPurchasesCount: 18,
+    amountSpent: '₹24.8 Lakhs',
+    activeRfqsCount: userRequirements.length || 3,
+    buyerOffersCount: userActiveNegotiations.length || 0
+  } : {
     activeListingsCount: userListings.length || 4,
     buyerOffersCount: userActiveNegotiations.length || 2,
     activeOrdersCount: userOrders.length || 1,
     totalValuation: '₹3,77,500',
     activeRfqsCount: userRequirements.length || 0
+  };
+
+  const dashboardStats = {
+    ...defaultStats,
+    ...(clientPayload.dashboardStats || clientPayload.userData?.dashboardStats || {})
   };
 
   const transportState = clientPayload.transport || clientPayload.userData?.transport || {
@@ -451,33 +467,35 @@ function generateDirectSupabaseResponse(
         `• 📦 **Active Orders:** **${ordersCount} Order** (Escrow Secured)\n` +
         `• 💰 **Total Harvest Valuation:** **${valText}**\n` +
         `• 🚚 **Transport Status:** Tata Ace Gold (MH-15-EG-4412) assigned to Driver Suresh More`
-      : `📊 **Live Buyer Procurement Dashboard Overview for ${userName}:**\n\n` +
-        `• 📋 **Active Procurement RFQs:** **${dbData.userRequirements?.length || stats.activeRfqsCount || 1} Active**\n` +
-        `• 🛒 **Marketplace Produce Available:** **${dbData.userListings?.length || 50} Verified Lots**\n` +
-        `• 🤝 **Active Counter Offers:** **${offersCount} In Negotiation**\n` +
-        `• 📦 **Active Escrow Orders:** **${ordersCount} In Fulfillment**`;
+      : `📊 **Live Enterprise Procurement Dashboard Overview for ${userName}:**\n\n` +
+        `• 📋 **Active Requirements:** **${stats.activeRequirementsCount || 3} Open** (Broadcasted to 12,400+ FPOs)\n` +
+        `• 📦 **Pending Orders:** **${stats.pendingOrdersCount || 2} In Transit** (Escrow milestone active)\n` +
+        `• 🏷️ **Total Purchases:** **${stats.totalPurchasesCount || 18} Lots** (Lab assay verified deliveries)\n` +
+        `• 💰 **Amount Spent:** **${stats.amountSpent || '₹24.8 Lakhs'}** (100% Escrow secured trade)\n` +
+        `• 🤝 **Active Counter Offers / Supplier Quotes:** **${offersCount} In Negotiation**`;
 
     return {
       reply,
       structuredData: { type: 'dashboard_overview', data: stats },
       suggestedActions: userRole === 'farmer'
         ? ['Show my active produce listings', 'Show active counter offers', 'Check APMC mandi prices']
-        : ['Browse produce lots in marketplace', 'Show active counter offers', 'Check APMC mandi rates']
+        : ['Find Grade A tomatoes near Mumbai', 'Show active counter offers', 'Check APMC mandi rates']
     };
   }
 
   // 2. Greetings / Small Talk
   const greetingWords = ['helo', 'hello', 'hi', 'hey', 'namaste', 'hola', 'good morning', 'good evening', 'good afternoon', 'hii', 'hy'];
   if (greetingWords.some(w => lower === w || lower.startsWith(w + ' ') || lower.startsWith(w + '!'))) {
+    const stats = dbData.dashboardStats || {};
     const reply = userRole === 'farmer'
       ? `**Hello ${userName}!** 👋\n\nI am your **Fieldora Agricultural Intelligence AI** powered by live dashboard & Supabase data.\n\nHere is your current status:\n• **${dbData.userListings?.length || 4} Active Listings** (Valuation: ${dbData.dashboardStats?.totalValuation || '₹3,77,500'})\n• **${dbData.userActiveNegotiations?.length || 2} Pending Buyer Offers**\n• **${dbData.userOrders?.length || 1} Active Order** in transit\n\nHow can I assist you today?`
-      : `**Hello ${userName}!** 👋\n\nI am your **Fieldora Procurement Intelligence AI** connected directly with verified farm clusters.\n\nHow can I help you source harvest lots today?\n• Search **lab-certified farm-fresh lots** across Maharashtra & MP\n• View **active counter offers & procurement bids**\n• Compare **live Mandi rates vs farmer asking prices**\n• Monitor **GPS telemetry & smart escrow fulfillment**`;
+      : `**Hello ${userName}!** 👋\n\nI am your **Fieldora Procurement Intelligence AI** connected directly with verified farm clusters and 12,400+ FPOs.\n\nHere is your current procurement dashboard snapshot:\n• 📋 **Active Requirements:** **${stats.activeRequirementsCount || 3} Open RFQs**\n• 📦 **Pending Orders:** **${stats.pendingOrdersCount || 2} In Transit** (Escrow active)\n• 🏷️ **Total Purchases:** **${stats.totalPurchasesCount || 18} Lots**\n• 💰 **Amount Spent:** **${stats.amountSpent || '₹24.8 Lakhs'}**\n\nHow can I assist your sourcing today?`;
 
     return {
       reply,
       suggestedActions: userRole === 'farmer'
         ? ['What is on my dashboard?', 'Show active counter offers', 'What is the current tomato price?']
-        : ['Find Grade A+ produce lots', 'Show active counter offers', 'Check APMC market benchmark']
+        : ['What is on my dashboard?', 'Find Grade A produce lots', 'Show active counter offers']
     };
   }
 
@@ -548,86 +566,98 @@ function generateDirectSupabaseResponse(
           `   • Status: **${statusLabel}**`;
       }).join('\n\n');
 
-      const reply = `According to your dashboard, you currently have **${activeOffers.length} active offer(s) / negotiation(s)**:\n\n` +
+      const reply = `**Active Counter Offers & Negotiations (${activeOffers.length} Active):**\n\n` +
         `${offersText}\n\n` +
-        `You can accept, counter-offer, or reject these directly from your Incoming Requests & Negotiations tab.`;
+        `You can accept or submit a counter offer directly from your Negotiations tab.`;
 
       return {
         reply,
-        structuredData: { type: 'negotiation_list', data: topOffers },
+        structuredData: { type: 'active_negotiations', data: topOffers },
         suggestedActions: [
           'What is on my dashboard?',
-          'Compare with APMC modal rate',
-          'Check pending orders'
+          'Check current mandi prices',
+          'Track active orders'
         ]
       };
     } else {
-      const reply = `According to your dashboard, you currently have **no pending counter-offers or buyer bids**.\n\n` +
-        `All bids are up to date or completed.`;
+      const reply = userRole === 'farmer'
+        ? `You currently have **0 active counter offers** pending.\n\nYour **${dbData.userListings?.length || 4} produce listings** are live on the marketplace. Verified buyers will submit offers soon.`
+        : `You currently have **0 active counter offers** pending.\n\nYou have **${dbData.dashboardStats?.activeRequirementsCount || 3} active requirements (RFQs)** broadcasted across 12,400+ FPOs.`;
 
       return {
         reply,
         suggestedActions: userRole === 'farmer'
-          ? ['View buyer RFQs looking for produce', 'List new harvest lot', 'What is on my dashboard?']
-          : ['Post new procurement RFQ', 'Browse farmer harvest lots', 'Track ongoing orders']
+          ? ['What is on my dashboard?', 'Show my produce listings', 'Check APMC mandi rates']
+          : ['Find Grade A produce lots', 'What is on my dashboard?', 'Post new RFQ']
       };
     }
   }
 
-  // 5. Order inquiries (STRICT REAL DATA ONLY)
-  if (lower.includes('order') || lower.includes('escrow') || lower.includes('track') || lower.includes('status') || lower.includes('पेंडिंग') || lower.includes('ऑर्डर')) {
-    const orders = dbData.userOrders || [];
-    if (orders.length > 0) {
-      const topOrders = orders.slice(0, 4);
-      const ordersText = topOrders.map((o: any) => 
-        `• **Order #${o.order_number || o.id || 'TR-1042'}**: ${o.crop || 'Onion (Nashik Garwa)'} (${o.quantity || '8 Quintals'}) | Value: **₹${Number(o.total_amount || 22800).toLocaleString('en-IN')}** | Status: **${o.status || 'In Transit'}** | Escrow: **${o.payment_status || 'Secured'}**`
-      ).join('\n');
+  // 5. APMC Mandi Price inquiries
+  if (
+    lower.includes('price') || 
+    lower.includes('rate') || 
+    lower.includes('mandi') || 
+    lower.includes('apmc') || 
+    lower.includes('भाव') || 
+    lower.includes('दर') || 
+    lower.includes('किंमत') ||
+    lower.includes('market') ||
+    lower.includes('bhav')
+  ) {
+    const matched = findMatchingMarketPrice(message, dbData.marketPrices);
+    if (matched) {
+      const crop = matched.crop;
+      const localName = matched.local_name ? ` (${matched.local_name})` : '';
+      const mandi = matched.mandi || 'Maharashtra Mandi Hub';
+      const avgPrice = matched.average_price || matched.current_price || 2800;
+      const minPrice = matched.min_price || Math.round(avgPrice * 0.9);
+      const maxPrice = matched.max_price || Math.round(avgPrice * 1.12);
+      const trend = (matched.price_trend || 'stable').toUpperCase();
+      const modal = matched.modal_price || avgPrice;
 
-      const reply = `You have **${orders.length} active order(s)** tracked in the Fieldora Escrow System:\n\n${ordersText}\n\nAll funds are locked in smart escrow and released automatically upon delivery verification.`;
+      const reply = `📊 **APMC Mandi Price Benchmark — ${crop}${localName}:**\n\n` +
+        `• **Mandi:** ${mandi}\n` +
+        `• **Modal Price:** **₹${Number(modal).toLocaleString('en-IN')}/quintal**\n` +
+        `• **Daily Range:** ₹${Number(minPrice).toLocaleString('en-IN')} – ₹${Number(maxPrice).toLocaleString('en-IN')}/quintal\n` +
+        `• **Market Trend:** **${trend}** 📈\n` +
+        `• **Escrow Trade Guidance:** Fair farmer-buyer settlement price recommended at ₹${Number(modal).toLocaleString('en-IN')}/q.`;
+
       return {
         reply,
-        structuredData: { type: 'order_summary', data: topOrders },
+        structuredData: { type: 'market_price', data: matched },
         suggestedActions: [
-          'Track active transport vehicle',
-          'Check escrow payout status',
+          `Find buyers for ${crop}`,
+          'Show active counter offers',
           'What is on my dashboard?'
         ]
       };
     }
   }
 
-  // 6. Price inquiries
-  if (
-    lower.includes('price') || 
-    lower.includes('mandi') || 
-    lower.includes('bhav') || 
-    lower.includes('rate') || 
-    lower.includes('भाव') || 
-    lower.includes('बाजारभाव') ||
-    lower.includes('दर') ||
-    lower.includes('आले') ||
-    lower.includes('वाटाणा') ||
-    lower.includes('टोमॅटो') ||
-    lower.includes('कांदा') ||
-    lower.includes('बटाटा')
-  ) {
-    const matchedPrice = findMatchingMarketPrice(message, dbData.marketPrices);
-    if (matchedPrice) {
-      const reply = `**Live APMC Mandi Price for ${matchedPrice.crop} (${matchedPrice.local_name || ''})**\n\n` +
-        `• **Mandi:** ${matchedPrice.mandi || 'Vashi Mandi'}, ${matchedPrice.state || 'Maharashtra'}\n` +
-        `• **Modal / Current Rate:** ₹${matchedPrice.current_price ?? matchedPrice.average_price}/quintal\n` +
-        `• **Price Range:** ₹${matchedPrice.lowest_price || Math.round((matchedPrice.average_price || 2000) * 0.9)} - ₹${matchedPrice.highest_price || Math.round((matchedPrice.average_price || 2000) * 1.1)}/q\n` +
-        `• **Daily Trend:** ${matchedPrice.price_trend || 'Stable'} (${matchedPrice.change_percent ? (matchedPrice.change_percent > 0 ? '+' : '') + matchedPrice.change_percent + '%' : '0.0%'})\n` +
-        `• **Arrival Volume:** ${matchedPrice.arrival_volume || 150} Quintals\n\n` +
-        `💡 *Recommendation:* ${matchedPrice.recommendation || matchedPrice.insight_summary || 'Prices are healthy. Compare nearby mandis or match with verified buyers.'}`;
+  // 6. Orders inquiries
+  if (lower.includes('order') || lower.includes('escrow') || lower.includes('payment') || lower.includes('ऑर्डर') || lower.includes('पैसे')) {
+    const orders = dbData.userOrders || [];
+
+    if (orders.length > 0) {
+      const topOrders = orders.slice(0, 4);
+      const ordersText = topOrders.map((o: any, i: number) => 
+        `${i + 1}. **Order #${o.order_number || o.id || 'TR-1042'}**: ${o.crop || 'Produce Lot'} (${o.quantity || '8q'})\n` +
+        `   • Amount: **₹${Number(o.total_amount || 22800).toLocaleString('en-IN')}** (100% Escrow Secured)\n` +
+        `   • Status: **${(o.status || 'In Transit').toUpperCase()}**\n` +
+        `   • Destination: ${o.delivery_location || 'Mumbai APMC Hub'}`
+      ).join('\n\n');
+
+      const reply = `📦 **Active Escrow Orders (${orders.length} Total):**\n\n${ordersText}\n\n` +
+        `Smart Escrow automatically disburses farmer payment upon GPS delivery and assay quality verification.`;
 
       return {
         reply,
-        structuredData: { type: 'market_price', data: matchedPrice },
+        structuredData: { type: 'order_list', data: topOrders },
         suggestedActions: [
-          `Find buyers for ${matchedPrice.crop}`,
-          `Compare nearby mandi rates`,
-          `View 30-day price trend`
+          'Track live vehicle GPS',
+          'What is on my dashboard?',
+          'Show active counter offers'
         ]
       };
     }
@@ -680,7 +710,7 @@ function generateDirectSupabaseResponse(
   // 9. Default intelligent guidance
   const reply = userRole === 'farmer'
     ? `I can help you review your **dashboard overview**, check your **${dbData.userListings?.length || 4} active listings (${dbData.dashboardStats?.totalValuation || '₹3,77,500'})**, view **${dbData.userActiveNegotiations?.length || 2} buyer offers**, check **APMC Mandi rates**, or track **escrow orders & transport**.\n\nTry asking:\n• *"What is on my dashboard?"*\n• *"Show active counter offers"*\n• *"What are my active produce listings?"*\n• *"What is the current tomato rate?"*`
-    : `I can help you find **certified produce lots**, review your **active counter offers**, compare **mandi benchmarks vs seller quotes**, or track **escrow orders**.\n\nTry asking:\n• *"What is on my dashboard?"*\n• *"Show active counter offers"*\n• *"Find Grade A tomatoes near Mumbai"*\n• *"Track my pending orders"*`;
+    : `I can help you review your **enterprise procurement dashboard**, check your **${dbData.dashboardStats?.activeRequirementsCount || 3} active requirements (RFQs)**, browse **verified harvest lots**, review **supplier counter offers**, or track **escrow orders & transport**.\n\nTry asking:\n• *"What is on my dashboard?"*\n• *"Show active counter offers"*\n• *"Find Grade A tomatoes near Mumbai"*\n• *"Track pending orders"*`;
 
   return {
     reply,
@@ -715,7 +745,7 @@ router.post('/chat', async (req: Request, res: Response) => {
 
     // Active negotiations summary
     const userActiveOffersSummary = (dbData.userActiveNegotiations || []).map((o: any, idx: number) => {
-      const partner = userCtx.userRole === 'farmer' ? (o.buyer_company || o.buyer_name || o.buyer || 'Mumbai Fresh Mart') : (o.farmer_name || o.farmer || 'Farmer');
+      const partner = userCtx.userRole === 'farmer' ? (o.buyer_company || o.buyer_name || o.buyer || 'Mumbai Fresh Mart') : (o.farmer_name || o.farmer || 'Farmer Producer');
       const crop = o.crop_name || o.crop || 'Produce Lot';
       const qty = `${o.requested_quantity || o.current_quantity || o.qty || 50} ${o.unit || 'q'}`;
       const price = o.offered_price_per_unit || o.offered_price || o.price || 2800;
@@ -755,40 +785,55 @@ router.post('/chat', async (req: Request, res: Response) => {
       day: 'numeric'
     });
 
+    const dashboardStateSection = userCtx.userRole === 'buyer'
+      ? `LIVE USER DASHBOARD STATE (Enterprise Procurement Dashboard — ${userCtx.userName}):
+- Role: Enterprise Institutional Buyer / Corporate Procurement Hub
+- Organization / Company: ${userCtx.organization || 'FreshMart Supermarkets Ltd • Mumbai Corporate Procurement Hub'}
+- Active Requirements (RFQs): ${dbData.dashboardStats?.activeRequirementsCount || 3} Open (Broadcasted to 12,400+ FPOs)
+- Pending Orders: ${dbData.dashboardStats?.pendingOrdersCount || 2} In Transit (Escrow milestone active)
+- Total Purchases: ${dbData.dashboardStats?.totalPurchasesCount || 18} Lots (Lab assay verified deliveries)
+- Amount Spent: ${dbData.dashboardStats?.amountSpent || '₹24.8 Lakhs'} (100% Escrow secured trade)
+- Active Supplier Quotes / Counter Offers: ${userActiveOffersSummary.length} In Negotiation
+- Recommended Farm Lots for Procurement:
+  1. Abhinav Hybrid Red Tomato @ ₹2,800/q (50 Quintals • Rajendra Patel, Nashik)
+  2. Sharbati Gold C-306 Wheat @ ₹2,750/q (200 Quintals • Narmada Valley FPO)`
+      : `LIVE USER DASHBOARD STATE (Farmer Producer Dashboard — ${userCtx.userName}):
+- Role: Farmer / Agricultural Producer
+- Farm Organization: ${userCtx.organization || 'Patel Organic Farms • Nashik Farm Cluster'}
+- Active Produce Listings Count: ${dbData.userListings.length} Lots
+- Total Harvest Valuation: ${dbData.dashboardStats?.totalValuation || '₹3,77,500'}
+- Pending Buyer Offers: ${userActiveOffersSummary.length} Pending
+- Active Orders: ${userOrdersSummary.length} In Transit (Escrow Secured)
+- Transport Vehicle: Tata Ace Gold MH-15-EG-4412 (Driver: Suresh More)`;
+
     const systemPrompt = `You are the Fieldora Platinum Agricultural Marketplace Intelligence AI.
 Fieldora connects farmers directly with enterprise buyers with smart escrow order lifecycles and real-time APMC Mandi benchmarking.
 
 CURRENT SYSTEM DATE: ${currentDateStr}
 CURRENT USER PROFILE:
 - Name: ${userCtx.userName}
-- Role: ${userCtx.userRole === 'farmer' ? 'Farmer / Producer' : 'Enterprise Buyer'}
+- Role: ${userCtx.userRole === 'buyer' ? 'Enterprise Institutional Buyer' : 'Farmer / Producer'}
 - Email: ${userCtx.userEmail || 'N/A'}
-- Cluster / Location: ${userCtx.organization || 'Nashik Farm Cluster, Maharashtra'}
+- Organization: ${userCtx.organization}
 
-LIVE USER DASHBOARD STATE (Source of Truth matching user's screen):
-- Active Produce Listings Count: ${dbData.userListings.length} Lots
-- Total Harvest Valuation: ${dbData.dashboardStats?.totalValuation || '₹3,77,500'}
-- Pending Buyer Offers: ${userActiveOffersSummary.length} Pending
-- Active Orders: ${userOrdersSummary.length} In Transit (Escrow Secured)
-- Transport: Vehicle Tata Ace Gold MH-15-EG-4412 (Driver: Suresh More)
+${dashboardStateSection}
 
-ACTIVE PRODUCE LOTS ON USER DASHBOARD:
-${userListingsSummary.length > 0 ? userListingsSummary.join('\n') : 'None'}
+${userCtx.userRole === 'farmer' ? `ACTIVE PRODUCE LOTS ON USER DASHBOARD:\n${userListingsSummary.length > 0 ? userListingsSummary.join('\n') : 'None'}` : `BUYER REQUIREMENTS / RFQs ON DASHBOARD:\n${userReqsSummary.length > 0 ? userReqsSummary.join('\n') : '• 1. Tomato (100 q @ ₹2,800/q) | 2. Wheat (200 q @ ₹2,750/q) | 3. Onion (150 q @ ₹2,400/q)'}`}
 
-ACTIVE BUYER OFFERS / NEGOTIATIONS ON USER DASHBOARD:
+ACTIVE OFFERS / NEGOTIATIONS ON USER DASHBOARD:
 ${userActiveOffersSummary.length > 0 ? userActiveOffersSummary.join('\n') : 'None (0 pending bids)'}
 
 ACTIVE ORDERS:
 ${userOrdersSummary.length > 0 ? userOrdersSummary.join('\n') : 'None'}
 
-${userCtx.userRole === 'buyer' ? `BUYER RFQs / REQUIREMENTS:\n${userReqsSummary.join('\n')}` : ''}
-
 LIVE APMC MANDI BENCHMARK RATES:
 ${relevantPrices.join('\n')}
 
 CORE INSTRUCTIONS:
-1. ALWAYS reference and answer accurately using the real user dashboard state and numbers above (e.g. ${dbData.userListings.length} lots, valuation ${dbData.dashboardStats?.totalValuation || '₹3,77,500'}, buyer offers from Mumbai Fresh Mart, etc.).
-2. When asked about dashboard overview, listings, offers, valuation, or transport, provide the exact real figures displayed on the user's dashboard.
+1. ALWAYS reference and answer accurately using the real user dashboard state matching the active role:
+   - If user is a BUYER (${userCtx.userRole === 'buyer'}): State Active Requirements (3 Open), Pending Orders (2 In Transit), Total Purchases (18 Lots), Amount Spent (₹24.8 Lakhs), FreshMart Supermarkets. DO NOT output farmer harvest listings or harvest valuation!
+   - If user is a FARMER: State Active Produce Listings (${dbData.userListings.length} lots), Total Harvest Valuation (${dbData.dashboardStats?.totalValuation || '₹3,77,500'}), and pending buyer offers.
+2. When asked about dashboard overview, listings, RFQs, offers, valuation, or spending, provide the exact real figures displayed on the user's active dashboard.
 3. NEVER fabricate fake records that contradict the dashboard data above.
 4. Format responses cleanly with bold highlights and bullet points. Support English, Hindi, and Marathi naturally.`;
 
