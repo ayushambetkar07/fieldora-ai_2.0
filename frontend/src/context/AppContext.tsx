@@ -26,7 +26,13 @@ import {
   createPurchaseRequest,
   updateRequestStatus,
   fetchOrders,
-  createOrder
+  createOrder,
+  confirmFarmerTransportApi,
+  dispatchOrderTransportApi,
+  markOrderArrivedApi,
+  verifyOrderQualityApi,
+  releaseOrderPayoutApi,
+  lockOrderEscrowApi
 } from '../services/supabaseService';
 import {
   AuthProfile,
@@ -72,6 +78,13 @@ interface AppContextType {
   counterRequest: (requestId: string, counterPrice: number, counterQuantity: number, message?: string) => Promise<void>;
   
   ordersList: OrderItem[];
+  refreshOrders: () => Promise<void>;
+  confirmFarmerTransport: (orderId: string, notes?: string) => Promise<boolean>;
+  dispatchOrder: (orderId: string, details?: any) => Promise<boolean>;
+  markOrderArrived: (orderId: string, arrivalRemarks?: string) => Promise<boolean>;
+  verifyOrderQuality: (orderId: string, data: { actualReceivedQuantity: number; actualQuantityUnit?: string; qualityGrade: string; assayResult: string; assayNotes?: string; verificationRemarks?: string }) => Promise<boolean>;
+  releaseOrderPayout: (orderId: string, notes?: string) => Promise<boolean>;
+  lockOrderEscrow: (orderId: string) => Promise<boolean>;
   
   isAssistantOpen: boolean;
   setIsAssistantOpen: (open: boolean) => void;
@@ -458,20 +471,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       orderDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
       expectedDeliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
       status: 'Confirmed',
-      paymentStatus: 'Escrow Locked',
+      paymentStatus: 'Pending',
+      transportConfirmed: false,
       trackingSteps: [
-        { title: 'Purchase Request', description: 'Buyer sent requirement & price offer.', date: 'Today', completed: true, current: false },
-        { title: 'Confirmed', description: 'Farmer accepted offer. Escrow locked.', date: 'Today', completed: true, current: true },
-        { title: 'In Transit', description: 'Preparing dispatch from farm-gate.', completed: false, current: false },
-        { title: 'Delivered', description: 'Destination inspection & weighing.', completed: false, current: false },
-        { title: 'Completed', description: 'Assay verified & escrow released.', completed: false, current: false },
+        { title: 'Deal Agreed', description: 'Purchase request terms accepted by both parties.', date: 'Today', completed: true, current: false },
+        { title: 'Confirm Transport', description: 'Farmer must confirm transport readiness.', date: 'Today', completed: false, current: true },
+        { title: 'Buyer Escrow Deposit', description: 'Buyer deposits contract funds into secure smart escrow.', completed: false, current: false },
+        { title: 'Logistics & Dispatch', description: 'Assigned transport vehicle en route to farm pickup.', completed: false, current: false },
+        { title: 'Destination Quality & Weighment', description: 'Destination NABL assay & weighbridge verification.', completed: false, current: false },
+        { title: 'Smart Escrow Released', description: 'Funds released to farmer upon dual assay/weight sign-off.', completed: false, current: false }
       ]
     };
 
     setOrdersList(prev => [newOrder, ...prev]);
     await createOrder(newOrder);
 
-    showToast('Request Accepted & Order Created!', `Order #${orderNum} generated for ₹${total.toLocaleString('en-IN')}.`, 'success');
+    showToast('Request Accepted & Order Created!', `Order #${orderNum} generated. Farmer must now confirm transport readiness.`, 'success');
   };
 
   // Handler: Reject Request (Farmer rejects)
@@ -498,6 +513,136 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  // Handler: Refresh orders
+  const refreshOrders = async () => {
+    try {
+      const ords = await fetchOrders();
+      if (ords && ords.length > 0) setOrdersList(ords);
+    } catch (e) {
+      console.warn('Failed to refresh orders:', e);
+    }
+  };
+
+  // Handler: Confirm Transport (Farmer Only)
+  const confirmFarmerTransport = async (orderId: string, notes?: string): Promise<boolean> => {
+    const updated = await confirmFarmerTransportApi(orderId, {
+      confirmedBy: currentUser?.name || currentFarmer.name,
+      notes
+    });
+    if (updated) {
+      setOrdersList(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o));
+      showToast('Transport Confirmed!', `Order #${updated.orderNumber} transport confirmed. Buyer can now lock escrow.`, 'success');
+      return true;
+    }
+    return false;
+  };
+
+  // Handler: Dispatch Order (Buyer / Logistics)
+  const dispatchOrder = async (orderId: string, details?: any): Promise<boolean> => {
+    const updated = await dispatchOrderTransportApi(orderId, details);
+    if (updated) {
+      setOrdersList(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o));
+      showToast('Transport Dispatched!', `Order #${updated.orderNumber} is now In Transit.`, 'success');
+      return true;
+    }
+    return false;
+  };
+
+  // Handler: Lock Escrow (Buyer Only)
+  const lockOrderEscrow = async (orderId: string): Promise<boolean> => {
+    const targetOrder = ordersList.find(o => o.id === orderId);
+    if (targetOrder && !targetOrder.transportConfirmed && targetOrder.status === 'Confirmed') {
+      showToast('Farmer Confirmation Required', 'Farmer must confirm transport readiness before you can lock escrow.', 'warning');
+      return false;
+    }
+
+    const updated = await lockOrderEscrowApi(orderId);
+    if (updated) {
+      setOrdersList(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o));
+      showToast('Escrow Locked', `Contract funds of ₹${updated.totalAmount.toLocaleString('en-IN')} secured in vault. Ready for dispatch!`, 'success');
+      return true;
+    }
+    return false;
+  };
+
+  // Handler: Mark Arrived
+  const markOrderArrived = async (orderId: string, arrivalRemarks?: string): Promise<boolean> => {
+    const updated = await markOrderArrivedApi(orderId, {
+      arrivedBy: currentUser?.name || (userRole === 'buyer' ? currentBuyer.name : currentFarmer.name),
+      arrivalRemarks
+    });
+
+    if (updated) {
+      setOrdersList(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o));
+      showToast('Shipment Arrived!', `Order #${updated.orderNumber} marked arrived at destination facility.`, 'success');
+      return true;
+    } else {
+      setOrdersList(prev => prev.map(o => {
+        if (o.id === orderId) {
+          return {
+            ...o,
+            status: 'Arrived' as const,
+            arrivedAt: new Date().toISOString(),
+            arrivalRemarks: arrivalRemarks || 'Arrived at destination'
+          };
+        }
+        return o;
+      }));
+      showToast('Shipment Arrived', 'Arrival recorded successfully.', 'success');
+      return true;
+    }
+  };
+
+  // Handler: Verify Weight & Quality
+  const verifyOrderQuality = async (
+    orderId: string,
+    data: {
+      actualReceivedQuantity: number;
+      actualQuantityUnit?: string;
+      qualityGrade: string;
+      assayResult: string;
+      assayNotes?: string;
+      verificationRemarks?: string;
+    }
+  ): Promise<boolean> => {
+    const result = await verifyOrderQualityApi(orderId, {
+      ...data,
+      verifiedBy: currentUser?.name || 'Destination Assay Laboratory'
+    });
+
+    if (result.success && result.order) {
+      const ord = result.order;
+      setOrdersList(prev => prev.map(o => o.id === orderId ? { ...o, ...ord } : o));
+      showToast(
+        'Verification Complete',
+        `Received ${data.actualReceivedQuantity} ${data.actualQuantityUnit || 'kg'} • ${data.qualityGrade} • Assay: ${data.assayResult}`,
+        'success'
+      );
+      return true;
+    } else {
+      showToast('Verification Notice', result.error || 'Failed to verify order weight & quality', result.success ? 'success' : 'error');
+      return result.success;
+    }
+  };
+
+  // Handler: Release Payout
+  const releaseOrderPayout = async (orderId: string, notes?: string): Promise<boolean> => {
+    const result = await releaseOrderPayoutApi(orderId, { notes });
+    if (result.success && result.order) {
+      const ord = result.order;
+      setOrdersList(prev => prev.map(o => o.id === orderId ? { ...o, ...ord } : o));
+      showToast(
+        'Smart Payout Released!',
+        `Payout of ₹${(ord.payoutAmount || ord.totalAmount).toLocaleString('en-IN')} has been disbursed to ${ord.farmerName}.`,
+        'success'
+      );
+      return true;
+    } else {
+      showToast('Payout Error', result.error || 'Failed to release smart escrow payout', 'error');
+      return false;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -520,6 +665,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         rejectRequest,
         counterRequest,
         ordersList,
+        refreshOrders,
+        confirmFarmerTransport,
+        dispatchOrder,
+        markOrderArrived,
+        verifyOrderQuality,
+        releaseOrderPayout,
+        lockOrderEscrow,
         isAssistantOpen,
         setIsAssistantOpen,
         toggleAssistant,

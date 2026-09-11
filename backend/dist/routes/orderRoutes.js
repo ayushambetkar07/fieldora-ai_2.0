@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { supabase } from '../config/supabase.js';
 import { requireAuth } from '../middleware/auth.js';
-import { lockEscrowDeposit, dispatchOrderLogistics, recordGpsTelemetry, getLatestGpsTelemetry, markOrderDelivered, recordQualityAssay, recordOrderWeighment, releaseSmartPayout, generateOrderInvoice, getOrderAuditTrail } from '../services/orderLifecycleService.js';
+import { confirmFarmerTransport, lockEscrowDeposit, dispatchOrderLogistics, recordGpsTelemetry, getLatestGpsTelemetry, markOrderArrived, verifyOrderQualityAndWeight, markOrderDelivered, recordQualityAssay, recordOrderWeighment, releaseSmartPayout, generateOrderInvoice, getOrderAuditTrail } from '../services/orderLifecycleService.js';
 const router = Router();
 // =========================================================================
 // 1. GET /api/orders (List Orders with Filtering & Pagination)
@@ -92,14 +92,44 @@ router.post('/', requireAuth, async (req, res) => {
     }
 });
 // =========================================================================
+// 3.5. POST /api/orders/:id/confirm-transport (Confirm Transport Readiness - Farmer Only)
+// =========================================================================
+router.post('/:id/confirm-transport', requireAuth, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { confirmed_by, notes } = req.body || {};
+        const userRole = (req.user?.role || req.body?.user_role || req.headers['x-user-role'] || 'farmer').toLowerCase();
+        const userDisplayName = req.user?.email ? req.user.email.split('@')[0] : (confirmed_by || 'Farmer');
+        const result = await confirmFarmerTransport({
+            order_id: id,
+            user_id: req.user?.id || req.body?.user_id,
+            user_role: userRole,
+            confirmed_by: userDisplayName,
+            notes
+        });
+        res.status(200).json({
+            success: true,
+            message: 'Farmer confirmed transport readiness. Buyer can now lock escrow.',
+            data: result
+        });
+    }
+    catch (error) {
+        const status = error.status || 400;
+        res.status(status).json({ success: false, message: error.message });
+    }
+});
+// =========================================================================
 // 4. POST /api/orders/:id/escrow/lock (Lock Buyer Escrow Deposit)
 // =========================================================================
 router.post('/:id/escrow/lock', requireAuth, async (req, res) => {
     try {
         const id = req.params.id;
         const { deposit_amount, idempotency_key, notes } = req.body;
+        const userRole = (req.user?.role || req.body?.user_role || req.headers['x-user-role'] || 'buyer').toLowerCase();
         const result = await lockEscrowDeposit({
             order_id: id,
+            user_id: req.user?.id || req.body?.user_id,
+            user_role: userRole,
             buyer_id: req.user?.id,
             deposit_amount,
             idempotency_key,
@@ -129,6 +159,7 @@ router.post('/:id/dispatch', requireAuth, async (req, res) => {
                 message: 'vehicle_name, vehicle_type, vehicle_number, driver_name, and driver_phone are required'
             });
         }
+        const userRole = (req.user?.role || req.body?.user_role || req.headers['x-user-role'] || 'buyer').toLowerCase();
         const result = await dispatchOrderLogistics(id, {
             vehicle_id,
             vehicle_name,
@@ -144,6 +175,9 @@ router.post('/:id/dispatch', requireAuth, async (req, res) => {
             estimated_distance_km,
             estimated_duration_minutes,
             estimated_toll_cost
+        }, {
+            user_id: req.user?.id || req.body?.user_id,
+            user_role: userRole
         });
         res.status(200).json({
             success: true,
@@ -198,7 +232,64 @@ router.get('/:id/gps', requireAuth, async (req, res) => {
     }
 });
 // =========================================================================
-// 7. POST /api/orders/:id/deliver (Mark Delivered at Destination)
+// 7. POST /api/orders/:id/arrive (Mark Arrived at Destination - Action 1)
+// =========================================================================
+router.post('/:id/arrive', requireAuth, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { arrival_remarks, arrived_by } = req.body || {};
+        const userRole = (req.user?.role || req.body?.user_role || req.headers['x-user-role'] || 'buyer').toLowerCase();
+        const userDisplayName = req.user?.email ? req.user.email.split('@')[0] : (arrived_by || 'Destination Hub Inspector');
+        const result = await markOrderArrived(id, {
+            arrived_by: userDisplayName,
+            arrival_remarks,
+            user_id: req.user?.id || req.body?.user_id,
+            user_role: userRole
+        });
+        res.status(200).json({
+            success: true,
+            message: 'Shipment arrival recorded successfully',
+            data: result
+        });
+    }
+    catch (error) {
+        const status = error.status || 400;
+        res.status(status).json({ success: false, message: error.message });
+    }
+});
+// =========================================================================
+// 7.5. POST /api/orders/:id/verify (Verify Weight & Quality - Action 2)
+// =========================================================================
+router.post('/:id/verify', requireAuth, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { actual_received_quantity, actual_quantity_unit, quality_grade, assay_result, assay_notes, verification_remarks, verified_by } = req.body || {};
+        const userRole = (req.user?.role || req.body?.user_role || req.headers['x-user-role'] || 'buyer').toLowerCase();
+        const userDisplayName = req.user?.email ? req.user.email.split('@')[0] : (verified_by || 'Quality Verifier');
+        const result = await verifyOrderQualityAndWeight(id, {
+            actual_received_quantity: Number(actual_received_quantity),
+            actual_quantity_unit,
+            quality_grade,
+            assay_result,
+            assay_notes,
+            verification_remarks,
+            verified_by: userDisplayName,
+            user_id: req.user?.id || req.body?.user_id,
+            user_role: userRole
+        });
+        res.status(200).json({
+            success: true,
+            message: 'Weight and quality verified successfully',
+            data: result
+        });
+    }
+    catch (error) {
+        const status = error.status || 400;
+        res.status(status).json({ success: false, message: error.message });
+    }
+});
+// =========================================================================
+// 7.8. POST /api/orders/:id/deliver (Legacy compatibility)
 // =========================================================================
 router.post('/:id/deliver', requireAuth, async (req, res) => {
     try {
@@ -274,15 +365,17 @@ router.post('/:id/weighment', requireAuth, async (req, res) => {
     }
 });
 // =========================================================================
-// 10. POST /api/orders/:id/escrow/release (Dual-Gate Smart Payout Release)
+// 10. POST /api/orders/:id/release-payout & /api/orders/:id/escrow/release (Action 3)
 // =========================================================================
-router.post('/:id/escrow/release', requireAuth, async (req, res) => {
+const handleReleasePayout = async (req, res) => {
     try {
         const id = req.params.id;
-        const { idempotency_key, notes } = req.body;
+        const { idempotency_key, notes } = req.body || {};
+        const userRole = (req.user?.role || req.body?.user_role || req.headers['x-user-role'] || 'buyer').toLowerCase();
         const result = await releaseSmartPayout({
             order_id: id,
-            user_id: req.user?.id,
+            user_id: req.user?.id || req.body?.user_id,
+            user_role: userRole,
             idempotency_key,
             notes
         });
@@ -296,7 +389,9 @@ router.post('/:id/escrow/release', requireAuth, async (req, res) => {
         const status = error.status || 400;
         res.status(status).json({ success: false, message: error.message });
     }
-});
+};
+router.post('/:id/escrow/release', requireAuth, handleReleasePayout);
+router.post('/:id/release-payout', requireAuth, handleReleasePayout);
 // =========================================================================
 // 11. GET /api/orders/:id/invoice (Digital Invoice & Settlement Summary)
 // =========================================================================

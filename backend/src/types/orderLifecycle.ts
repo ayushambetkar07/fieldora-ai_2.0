@@ -1,7 +1,11 @@
 export type OrderStatus =
   | 'Confirmed'
+  | 'Transport Confirmed'
+  | 'Escrow Locked'
   | 'In Transit'
+  | 'Arrived'
   | 'Delivered'
+  | 'Quality Verified'
   | 'Completed'
   | 'Cancelled'
   | 'Disputed';
@@ -52,9 +56,27 @@ export interface OrderRecord {
   expected_delivery_date?: string | null;
   status: OrderStatus;
   payment_status: PaymentStatus;
+  transport_confirmed?: boolean;
+  transport_confirmed_at?: string | null;
+  transport_confirmed_by?: string | null;
   escrow_deposit_amount?: number;
   escrow_locked_at?: string | null;
+  arrived_at?: string | null;
+  arrived_by?: string | null;
+  arrival_remarks?: string | null;
+  actual_received_quantity?: number | null;
+  actual_quantity_unit?: string | null;
+  quality_grade?: string | null;
+  assay_result?: string | null;
+  assay_notes?: string | null;
+  verification_remarks?: string | null;
+  verified_at?: string | null;
+  verified_by?: string | null;
+  payout_status?: string | null;
+  payout_amount?: number | null;
   payout_released_at?: string | null;
+  payout_released_by?: string | null;
+  payout_reference?: string | null;
   tracking_steps?: TrackingStep[];
   created_at?: string;
   updated_at?: string;
@@ -125,11 +147,14 @@ export interface QualityAssayRecord extends QualityAssayInput {
 }
 
 export interface WeighmentInput {
+  weighbridge_id?: string;
   weighbridge_name: string;
   weighbridge_slip_id: string;
+  weighbridge_slip_url?: string;
   operator_name?: string;
   gross_weight: number;
   tare_weight: number;
+  net_weight?: number;
   unit?: string;
   notes?: string;
 }
@@ -137,8 +162,10 @@ export interface WeighmentInput {
 export interface WeighmentRecord {
   id: string;
   order_id: string;
+  weighbridge_id?: string;
   weighbridge_name: string;
   weighbridge_slip_id: string;
+  weighbridge_slip_url?: string;
   operator_name?: string;
   contracted_weight: number;
   gross_weight: number;

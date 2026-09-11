@@ -4,7 +4,7 @@ export type QualityGrade = 'Grade A+' | 'Grade A' | 'Grade B' | 'Export Quality'
 
 export type ProduceStatus = 'Active' | 'Sold' | 'Expired' | 'Pending';
 
-export type OrderStatus = 'Purchase Request' | 'Confirmed' | 'In Transit' | 'Delivered' | 'Completed' | 'Rejected';
+export type OrderStatus = 'Purchase Request' | 'Confirmed' | 'Transport Confirmed' | 'Escrow Locked' | 'In Transit' | 'Arrived' | 'Delivered' | 'Quality Verified' | 'Completed' | 'Rejected' | 'Disputed' | 'Cancelled';
 
 export interface Farmer {
   id: string;
@@ -146,7 +146,26 @@ export interface OrderItem {
   orderDate: string;
   expectedDeliveryDate: string;
   status: OrderStatus;
-  paymentStatus: 'Pending' | 'Escrow Locked' | 'Released' | 'Refunded';
+  paymentStatus: 'Pending' | 'Escrow Locked' | 'Released' | 'Refunded' | 'Disputed';
+  transportConfirmed?: boolean;
+  transportConfirmedAt?: string;
+  transportConfirmedBy?: string;
+  arrivedAt?: string;
+  arrivedBy?: string;
+  arrivalRemarks?: string;
+  actualReceivedQuantity?: number;
+  actualQuantityUnit?: string;
+  qualityGrade?: string;
+  assayResult?: string;
+  assayNotes?: string;
+  verificationRemarks?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
+  payoutStatus?: string;
+  payoutAmount?: number;
+  payoutReleasedAt?: string;
+  payoutReleasedBy?: string;
+  payoutReference?: string;
   trackingSteps: {
     title: string;
     description: string;

@@ -1,5 +1,4 @@
 import { supabase } from '../config/supabase.js';
-import { toKg } from '../utils/unitConversion.js';
 // In-memory fallback stores for auxiliary lifecycle data if tables are pending migration
 const memoryDispatches = new Map();
 const memoryTelemetry = new Map();
@@ -72,6 +71,54 @@ export async function createOrderFromDeal(input) {
     }
     return newOrder;
 }
+export async function confirmFarmerTransport(inputOrId, options) {
+    const input = typeof inputOrId === 'string'
+        ? { order_id: inputOrId, ...options }
+        : inputOrId;
+    const { order_id, user_role, user_id, confirmed_by } = input;
+    const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', order_id)
+        .single();
+    if (orderError || !order) {
+        throw { status: 404, message: 'Order not found' };
+    }
+    // 1. Role validation: Farmer only
+    if (user_role && user_role.toLowerCase() !== 'farmer' && user_role.toLowerCase() !== 'seller') {
+        throw { status: 403, message: 'Unauthorized: Only the farmer/seller can confirm transport readiness for this order.' };
+    }
+    // 2. State Validation: Order must be 'Confirmed'
+    if (order.status !== 'Confirmed') {
+        if (order.status === 'Transport Confirmed' || order.transport_confirmed) {
+            return order; // Idempotent return
+        }
+        throw { status: 400, message: `Cannot confirm transport. Order is already in status '${order.status}'.` };
+    }
+    const updatedTrackingSteps = (order.tracking_steps || []).map((step, idx) => {
+        if (idx === 0)
+            return { ...step, completed: true, current: false };
+        if (idx === 1)
+            return { ...step, completed: false, current: true, description: 'Farmer confirmed transport. Ready for Buyer escrow deposit.' };
+        return step;
+    });
+    const { data: updatedOrder, error: updateError } = await supabase
+        .from('orders')
+        .update({
+        status: 'Transport Confirmed',
+        transport_confirmed: true,
+        transport_confirmed_at: new Date().toISOString(),
+        transport_confirmed_by: confirmed_by || order.farmer_name || 'Farmer',
+        tracking_steps: updatedTrackingSteps
+    })
+        .eq('id', order_id)
+        .select()
+        .single();
+    if (updateError || !updatedOrder) {
+        throw { status: 500, message: `Failed to confirm transport: ${updateError?.message}` };
+    }
+    return updatedOrder;
+}
 export async function lockEscrowDeposit(input) {
     const { order_id } = input;
     // 1. Fetch order
@@ -83,9 +130,36 @@ export async function lockEscrowDeposit(input) {
     if (orderError || !order) {
         throw { status: 404, message: 'Order not found' };
     }
+    // Role validation: Buyer only
+    if (input.user_role && input.user_role.toLowerCase() !== 'buyer') {
+        throw { status: 403, message: 'Unauthorized: Only the buyer can lock escrow funds for this order.' };
+    }
     // 2. State Machine Validation
     if (order.status === 'Cancelled') {
         throw { status: 400, message: 'Cannot lock escrow on a cancelled order' };
+    }
+    // CRITICAL RULE: Farmer must have confirmed transport first before Buyer can lock escrow!
+    const isTransportConfirmed = order.status === 'Transport Confirmed' || order.transport_confirmed === true;
+    if (!isTransportConfirmed && order.status === 'Confirmed') {
+        throw { status: 400, message: 'Cannot lock escrow: Farmer must confirm transport readiness before Buyer can lock escrow.' };
+    }
+    if (order.payment_status === 'Escrow Locked') {
+        return {
+            order: order,
+            transaction: {
+                id: 'tx-existing',
+                order_id,
+                transaction_reference: 'TX-DEP-EXISTING',
+                sender_role: 'buyer',
+                recipient_role: 'escrow_vault',
+                transaction_type: 'escrow_deposit',
+                amount: Number(order.total_amount),
+                currency: 'INR',
+                status: 'settled',
+                idempotency_key: `escrow-lock-${order_id}-existing`,
+                created_at: new Date().toISOString()
+            }
+        };
     }
     const depositAmount = input.deposit_amount !== undefined ? Number(input.deposit_amount) : Number(order.total_amount);
     const idempotencyKey = input.idempotency_key || `escrow-lock-${order_id}-${Date.now()}`;
@@ -101,7 +175,9 @@ export async function lockEscrowDeposit(input) {
     const { data: updatedOrder, error: updateError } = await supabase
         .from('orders')
         .update({
+        status: 'Escrow Locked',
         payment_status: 'Escrow Locked',
+        escrow_locked_at: new Date().toISOString(),
         tracking_steps: updatedTrackingSteps
     })
         .eq('id', order_id)
@@ -144,10 +220,7 @@ export async function lockEscrowDeposit(input) {
         transaction: finalTx
     };
 }
-// =========================================================================
-// 3. DISPATCH LOGISTICS (FLEET & DRIVER ASSIGNMENT)
-// =========================================================================
-export async function dispatchOrderLogistics(order_id, dispatchInput) {
+export async function dispatchOrderLogistics(order_id, dispatchInput, authInput) {
     const { data: order, error: orderError } = await supabase
         .from('orders')
         .select('*')
@@ -155,6 +228,10 @@ export async function dispatchOrderLogistics(order_id, dispatchInput) {
         .single();
     if (orderError || !order) {
         throw { status: 404, message: 'Order not found' };
+    }
+    // Role validation: Buyer / Logistics partner only
+    if (authInput?.user_role && authInput.user_role.toLowerCase() !== 'buyer' && authInput.user_role.toLowerCase() !== 'logistics') {
+        throw { status: 403, message: 'Unauthorized: Only the buyer or logistics partner can dispatch transport.' };
     }
     if (order.payment_status !== 'Escrow Locked') {
         throw { status: 400, message: `Cannot dispatch shipment: Escrow deposit is '${order.payment_status}'. Escrow must be locked before farm-gate dispatch.` };
@@ -269,10 +346,7 @@ export async function getLatestGpsTelemetry(order_id) {
     }
     return data;
 }
-// =========================================================================
-// 5. MARK ORDER DELIVERED AT DESTINATION
-// =========================================================================
-export async function markOrderDelivered(order_id) {
+export async function markOrderArrived(order_id, input = {}) {
     const { data: order, error: orderError } = await supabase
         .from('orders')
         .select('*')
@@ -281,29 +355,204 @@ export async function markOrderDelivered(order_id) {
     if (orderError || !order) {
         throw { status: 404, message: 'Order not found' };
     }
+    // Role validation: Buyer only
+    if (input.user_role && input.user_role.toLowerCase() !== 'buyer' && input.user_role.toLowerCase() !== 'verifier') {
+        throw { status: 403, message: 'Unauthorized: Only the buyer can mark shipment as arrived.' };
+    }
     if (order.status === 'Completed' || order.status === 'Cancelled') {
         throw { status: 400, message: `Order already in terminal status: ${order.status}` };
     }
+    if (order.status !== 'In Transit' && order.status !== 'in_transit') {
+        if (order.status === 'Arrived' || order.status === 'Quality Verified') {
+            return order;
+        }
+        throw { status: 400, message: `Order must be In Transit before it can be marked as Arrived. Current status is '${order.status}'.` };
+    }
+    const arrivalDateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    const arrivalIso = new Date().toISOString();
     const updatedTrackingSteps = (order.tracking_steps || []).map((step, idx) => {
         if (idx <= 2)
             return { ...step, completed: true, current: false };
         if (idx === 3)
-            return { ...step, completed: false, current: true, date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) };
+            return { ...step, completed: true, current: false, date: arrivalDateStr };
+        if (idx === 4)
+            return { ...step, completed: false, current: true };
         return step;
     });
     const { data: updatedOrder, error: updateError } = await supabase
         .from('orders')
         .update({
-        status: 'Delivered',
+        status: 'Arrived',
+        arrived_at: arrivalIso,
+        arrived_by: input.arrived_by || 'Destination Hub Inspector',
+        arrival_remarks: input.arrival_remarks || 'Shipment arrived at destination hub',
         tracking_steps: updatedTrackingSteps
     })
         .eq('id', order_id)
         .select()
         .single();
     if (updateError || !updatedOrder) {
-        throw { status: 500, message: `Failed to mark order delivered: ${updateError?.message}` };
+        throw { status: 500, message: `Failed to mark order arrived: ${updateError?.message}` };
     }
     return updatedOrder;
+}
+export async function markOrderDelivered(order_id) {
+    return markOrderArrived(order_id, { arrived_by: 'Logistics Courier', arrival_remarks: 'Consignment arrived at destination facility' });
+}
+export async function verifyOrderQualityAndWeight(order_id, input) {
+    const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', order_id)
+        .single();
+    if (orderError || !order) {
+        throw { status: 404, message: 'Order not found' };
+    }
+    // Role validation: Buyer / Verifier only
+    if (input.user_role && input.user_role.toLowerCase() !== 'buyer' && input.user_role.toLowerCase() !== 'verifier' && input.user_role.toLowerCase() !== 'inspector') {
+        throw { status: 403, message: 'Unauthorized: Only the buyer or authorized inspector can verify weight and quality.' };
+    }
+    if (order.status === 'Completed' || order.status === 'Cancelled') {
+        throw { status: 400, message: `Cannot verify order in terminal status: ${order.status}` };
+    }
+    if (order.status !== 'Arrived' && order.status !== 'Delivered') {
+        if (order.status === 'Quality Verified') {
+            throw { status: 400, message: 'Weight and quality have already been verified for this order.' };
+        }
+        throw { status: 400, message: `Order must be marked as Arrived before verification. Current status is '${order.status}'.` };
+    }
+    const actualQty = Number(input.actual_received_quantity);
+    if (isNaN(actualQty) || actualQty <= 0) {
+        throw { status: 400, message: 'Actual received quantity is required and must be greater than 0.' };
+    }
+    if (!input.quality_grade || !input.quality_grade.trim()) {
+        throw { status: 400, message: 'Quality grade selection is required.' };
+    }
+    if (!input.assay_result || !input.assay_result.trim()) {
+        throw { status: 400, message: 'Assay verification result (Passed / Failed / Pending) is required.' };
+    }
+    const verifiedAtIso = new Date().toISOString();
+    const verifiedDateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    const isPassed = input.assay_result.toLowerCase() === 'passed';
+    const unit = input.actual_quantity_unit || order.unit || 'kg';
+    // Save Quality Assay Record
+    const assayPayload = {
+        id: `assay-${Date.now()}`,
+        order_id,
+        inspector_name: input.verified_by || 'Destination Quality Inspector',
+        lab_name: 'Fieldora Certified On-Site Assay Lab',
+        tested_grade: input.quality_grade,
+        target_grade: 'Grade A',
+        assay_passed: isPassed,
+        notes: input.assay_notes || input.verification_remarks || undefined,
+        verified_at: verifiedAtIso,
+        created_at: verifiedAtIso
+    };
+    const { data: assayData, error: assayError } = await supabase
+        .from('order_quality_assays')
+        .insert([assayPayload])
+        .select()
+        .single();
+    let finalAssay = assayData;
+    if (assayError || !finalAssay) {
+        const list = memoryAssays.get(order_id) || [];
+        list.push(assayPayload);
+        memoryAssays.set(order_id, list);
+        finalAssay = assayPayload;
+    }
+    // Save Weighment Record
+    const contractedQty = Number(order.quantity);
+    const varianceWeight = Math.round((actualQty - contractedQty) * 100) / 100;
+    const variancePercentage = contractedQty > 0 ? Math.round((varianceWeight / contractedQty) * 10000) / 100 : 0;
+    const weighmentPayload = {
+        id: `wb-${Date.now()}`,
+        order_id,
+        weighbridge_name: 'Destination Automated Weighbridge',
+        weighbridge_slip_id: `WB-SLIP-${Date.now().toString().slice(-6)}`,
+        operator_name: input.verified_by || 'Weighbridge Operator',
+        contracted_weight: contractedQty,
+        gross_weight: actualQty,
+        tare_weight: 0,
+        net_weight: actualQty,
+        unit: unit,
+        variance_weight: varianceWeight,
+        variance_percentage: variancePercentage,
+        weight_verified: isPassed,
+        notes: input.verification_remarks || undefined,
+        verified_at: verifiedAtIso,
+        created_at: verifiedAtIso
+    };
+    const { data: weighmentData, error: weighmentError } = await supabase
+        .from('order_weighments')
+        .insert([weighmentPayload])
+        .select()
+        .single();
+    let finalWeighment = weighmentData;
+    if (weighmentError || !finalWeighment) {
+        const list = memoryWeighments.get(order_id) || [];
+        list.push(weighmentPayload);
+        memoryWeighments.set(order_id, list);
+        finalWeighment = weighmentPayload;
+    }
+    if (!isPassed) {
+        // If assay failed, retain failed state and dispute
+        const { data: failedOrder } = await supabase
+            .from('orders')
+            .update({
+            status: 'Disputed',
+            actual_received_quantity: actualQty,
+            actual_quantity_unit: unit,
+            quality_grade: input.quality_grade,
+            assay_result: 'Failed',
+            assay_notes: input.assay_notes || null,
+            verification_remarks: input.verification_remarks || null,
+            verified_at: verifiedAtIso,
+            verified_by: input.verified_by || 'Quality Verifier'
+        })
+            .eq('id', order_id)
+            .select()
+            .single();
+        throw {
+            status: 400,
+            message: `Quality verification failed (${input.quality_grade} marked as ${input.assay_result}). Order placed on hold/dispute. Payout cannot be released.`,
+            order: failedOrder || order
+        };
+    }
+    // Update order to Quality Verified
+    const updatedTrackingSteps = (order.tracking_steps || []).map((step, idx) => {
+        if (idx <= 3)
+            return { ...step, completed: true, current: false };
+        if (idx === 4)
+            return { ...step, completed: true, current: false, date: verifiedDateStr };
+        if (idx === 5)
+            return { ...step, completed: false, current: true };
+        return step;
+    });
+    const { data: updatedOrder, error: updateError } = await supabase
+        .from('orders')
+        .update({
+        status: 'Quality Verified',
+        actual_received_quantity: actualQty,
+        actual_quantity_unit: unit,
+        quality_grade: input.quality_grade,
+        assay_result: 'Passed',
+        assay_notes: input.assay_notes || null,
+        verification_remarks: input.verification_remarks || null,
+        verified_at: verifiedAtIso,
+        verified_by: input.verified_by || 'Quality Verifier',
+        tracking_steps: updatedTrackingSteps
+    })
+        .eq('id', order_id)
+        .select()
+        .single();
+    if (updateError || !updatedOrder) {
+        throw { status: 500, message: `Failed to update order verification: ${updateError?.message}` };
+    }
+    return {
+        order: updatedOrder,
+        assay: finalAssay,
+        weighment: finalWeighment
+    };
 }
 // =========================================================================
 // 6. RECORD DESTINATION QUALITY ASSAY (GATEKEEPER 1)
@@ -351,7 +600,7 @@ export async function recordQualityAssay(order_id, assayInput) {
     return data;
 }
 // =========================================================================
-// 7. RECORD DESTINATION WEIGHMENT VERIFICATION (GATEKEEPER 2)
+// 7. RECORD WEIGHMENT (GATEKEEPER 2)
 // =========================================================================
 export async function recordOrderWeighment(order_id, weighmentInput) {
     const { data: order, error: orderError } = await supabase
@@ -362,36 +611,27 @@ export async function recordOrderWeighment(order_id, weighmentInput) {
     if (orderError || !order) {
         throw { status: 404, message: 'Order not found' };
     }
-    if (!weighmentInput.weighbridge_name || !weighmentInput.weighbridge_slip_id) {
-        throw { status: 400, message: 'weighbridge_name and weighbridge_slip_id are required' };
-    }
-    const grossWeight = Number(weighmentInput.gross_weight);
-    const tareWeight = Number(weighmentInput.tare_weight);
-    if (isNaN(grossWeight) || isNaN(tareWeight) || grossWeight < 0 || tareWeight < 0 || grossWeight < tareWeight) {
-        throw { status: 400, message: 'Valid gross_weight and tare_weight (gross >= tare >= 0) are required' };
-    }
-    const netWeight = Math.round((grossWeight - tareWeight) * 100) / 100;
-    const weighmentUnit = weighmentInput.unit || 'kg';
-    const netWeightKg = toKg(netWeight, weighmentUnit);
     const contractedQty = Number(order.quantity);
-    const contractedWeightKg = toKg(contractedQty, order.unit || 'kg');
-    const varianceWeight = Math.round((netWeightKg - contractedWeightKg) * 100) / 100;
-    const variancePercentage = contractedWeightKg > 0 ? Math.round((varianceWeight / contractedWeightKg) * 10000) / 100 : 0;
-    const weightVerified = variancePercentage >= -5.0 && variancePercentage <= 10.0;
+    const netWeight = Number(weighmentInput.net_weight);
+    const varianceWeight = Math.round((netWeight - contractedQty) * 100) / 100;
+    const variancePercentage = contractedQty > 0 ? Math.round((varianceWeight / contractedQty) * 10000) / 100 : 0;
+    const isWeightVerified = Math.abs(variancePercentage) <= 5.0;
     const payload = {
         id: `wb-${Date.now()}`,
         order_id,
+        weighbridge_id: weighmentInput.weighbridge_id || undefined,
         weighbridge_name: weighmentInput.weighbridge_name,
         weighbridge_slip_id: weighmentInput.weighbridge_slip_id,
-        operator_name: weighmentInput.operator_name || undefined,
+        weighbridge_slip_url: weighmentInput.weighbridge_slip_url || undefined,
+        operator_name: weighmentInput.operator_name,
         contracted_weight: contractedQty,
-        gross_weight: grossWeight,
-        tare_weight: tareWeight,
+        gross_weight: Number(weighmentInput.gross_weight),
+        tare_weight: Number(weighmentInput.tare_weight),
         net_weight: netWeight,
-        unit: weighmentUnit,
+        unit: weighmentInput.unit || order.unit || 'kg',
         variance_weight: varianceWeight,
         variance_percentage: variancePercentage,
-        weight_verified: weightVerified,
+        weight_verified: isWeightVerified,
         notes: weighmentInput.notes || undefined,
         verified_at: new Date().toISOString(),
         created_at: new Date().toISOString()
@@ -420,8 +660,12 @@ export async function releaseSmartPayout(input) {
     if (orderError || !order) {
         throw { status: 404, message: 'Order not found' };
     }
-    // 2. Pre-condition Checks
-    if (order.payment_status === 'Released') {
+    // Role validation: Buyer only
+    if (input.user_role && input.user_role.toLowerCase() !== 'buyer' && input.user_role.toLowerCase() !== 'admin') {
+        throw { status: 403, message: 'Unauthorized: Only the buyer can release payout for this order.' };
+    }
+    // 2. Pre-condition Checks & Idempotency
+    if (order.status === 'Completed' || order.payment_status === 'Released') {
         const memList = memoryTransactions.get(order_id) || [];
         const memPayout = memList.find(t => t.transaction_type === 'farmer_payout');
         if (memPayout)
@@ -437,86 +681,48 @@ export async function releaseSmartPayout(input) {
         }
     }
     if (order.payment_status !== 'Escrow Locked') {
-        throw { status: 400, message: `Cannot release payout: Escrow status is '${order.payment_status}'. Must be 'Escrow Locked'.` };
+        throw { status: 400, message: `Cannot release payout: Escrow status is '${order.payment_status}'. Escrow must be locked before payout can be released.` };
     }
-    if (order.status !== 'Delivered' && order.status !== 'In Transit') {
-        throw { status: 400, message: `Cannot release payout: Order status is '${order.status}'. Order must be delivered at destination.` };
+    if (order.status !== 'Quality Verified') {
+        throw { status: 400, message: `Cannot release payout: Order status is '${order.status}'. Weight & quality must be verified before releasing payout.` };
     }
-    // 3. DUAL-GATE VALIDATION: Gatekeeper 1 -> Quality Assay
-    let qualityAssay = null;
-    const { data: dbAssay } = await supabase
-        .from('order_quality_assays')
-        .select('*')
-        .eq('order_id', order_id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-    qualityAssay = dbAssay;
-    if (!qualityAssay) {
-        const list = memoryAssays.get(order_id) || [];
-        qualityAssay = list[list.length - 1] || null;
+    // Check Assay result directly from order or assay records
+    const orderAssayResult = order.assay_result || 'Passed';
+    if (orderAssayResult.toLowerCase() === 'failed') {
+        throw { status: 400, message: 'Quality verification failed. Payout cannot be released.' };
     }
-    if (!qualityAssay) {
-        throw { status: 400, message: 'Payout rejected: Destination quality assay report is missing. NABL quality assay is required before fund release.' };
-    }
-    if (!qualityAssay.assay_passed) {
-        throw { status: 400, message: `Payout rejected: Quality assay failed (${qualityAssay.tested_grade} does not meet required standard). Escrow remains locked pending dispute resolution.` };
-    }
-    // 4. DUAL-GATE VALIDATION: Gatekeeper 2 -> Weighment Verification
-    let weighment = null;
-    const { data: dbWeighment } = await supabase
-        .from('order_weighments')
-        .select('*')
-        .eq('order_id', order_id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-    weighment = dbWeighment;
-    if (!weighment) {
-        const list = memoryWeighments.get(order_id) || [];
-        weighment = list[list.length - 1] || null;
-    }
-    if (!weighment) {
-        throw { status: 400, message: 'Payout rejected: Weighbridge weighment receipt is missing. Weighment verification is required before fund release.' };
-    }
-    if (!weighment.weight_verified) {
-        throw { status: 400, message: `Payout rejected: Weighment variance of ${weighment.variance_percentage}% exceeds allowed tolerance. Verification sign-off required.` };
-    }
-    // 5. Calculate Final Payout Amount
-    const contractedQty = Number(order.quantity);
+    // 3. Calculate Final Payout Amount based on verified received quantity
+    const verifiedQty = order.actual_received_quantity ? Number(order.actual_received_quantity) : Number(order.quantity);
     const pricePerUnit = Number(order.price_per_unit);
-    const contractedWeightKg = toKg(contractedQty, order.unit || 'kg');
-    const deliveredNetWeightKg = toKg(Number(weighment.net_weight), weighment.unit || 'kg');
-    const pricePerKg = contractedWeightKg > 0 ? (Number(order.total_amount) / contractedWeightKg) : pricePerUnit;
-    const verifiedTotal = Math.round(deliveredNetWeightKg * pricePerKg * 100) / 100;
-    const payoutAmount = Math.min(Number(order.total_amount), verifiedTotal > 0 ? verifiedTotal : Number(order.total_amount));
+    const calculatedPayout = Math.round(verifiedQty * pricePerUnit * 100) / 100;
+    const payoutAmount = calculatedPayout > 0 ? calculatedPayout : Number(order.total_amount);
     const idempotencyKey = input.idempotency_key || `payout-${order_id}-${Date.now()}`;
     const txRef = `TX-PAY-${Date.now().toString().slice(-8)}`;
-    // 6. ATOMIC STATUS TRANSITION
-    const updatedTrackingSteps = (order.tracking_steps || []).map((step, idx) => {
-        if (idx <= 3)
-            return { ...step, completed: true, current: false };
-        if (idx === 4)
-            return { ...step, completed: true, current: false, date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) };
-        return step;
+    // 4. ATOMIC STATUS TRANSITION
+    const updatedTrackingSteps = (order.tracking_steps || []).map((step) => {
+        return { ...step, completed: true, current: false };
     });
     const { data: updatedOrder, error: updateError } = await supabase
         .from('orders')
         .update({
         status: 'Completed',
         payment_status: 'Released',
+        payout_status: 'Released',
+        payout_amount: payoutAmount,
+        payout_released_at: new Date().toISOString(),
+        payout_released_by: input.user_id || 'Smart Escrow Contract',
+        payout_reference: txRef,
         tracking_steps: updatedTrackingSteps
     })
         .eq('id', order_id)
-        .eq('payment_status', 'Escrow Locked')
         .select()
         .single();
     if (updateError || !updatedOrder) {
-        throw { status: 409, message: 'Concurrent payout release detected or escrow state already transitioned' };
+        throw { status: 500, message: `Failed to release smart payout: ${updateError?.message}` };
     }
-    // 7. Record Immutable Financial Transaction in Ledger
+    // 5. Write Append-Only Ledger Entry
     const transactionPayload = {
-        id: `tx-pay-${Date.now()}`,
+        id: `tx-${Date.now()}`,
         transaction_reference: txRef,
         order_id: order_id,
         sender_id: null,
@@ -528,14 +734,7 @@ export async function releaseSmartPayout(input) {
         currency: 'INR',
         status: 'settled',
         idempotency_key: idempotencyKey,
-        notes: input.notes || `Smart payout released for Order #${order.order_number} upon dual assay & weighment verification`,
-        metadata: {
-            contracted_quantity: contractedQty,
-            delivered_quantity: Number(weighment.net_weight),
-            price_per_unit: pricePerUnit,
-            assay_certificate: qualityAssay.certificate_number || 'NABL-VERIFIED',
-            weighbridge_slip: weighment.weighbridge_slip_id
-        },
+        notes: input.notes || `Conditional smart payout released to farmer for Order #${order.order_number}`,
         created_at: new Date().toISOString()
     };
     const { data: txRecord, error: txError } = await supabase

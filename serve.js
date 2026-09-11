@@ -207,13 +207,15 @@ let ordersData = [
     farmer_name: "Rajendra Patel",
     farmer_farm: "Patel Organic Farms",
     delivery_location: "Bhiwandi Central Hub",
-    status: "In Transit",
-    payment_status: "Escrow Locked",
-    order_date: "05 Sep 2026",
+    status: "Confirmed",
+    payment_status: "Pending",
+    transport_confirmed: false,
+    order_date: "11 Sep 2026",
     tracking_steps: [
-      { title: "Deal Agreed", completed: true, current: false, date: "05 Sep", description: "Terms accepted." },
-      { title: "Buyer Escrow Deposit", completed: true, current: false, date: "05 Sep", description: "₹1,40,000 Escrow Verified." },
-      { title: "Logistics & Dispatch", completed: false, current: true, date: "Active", description: "Vehicle assigned (MH-04-AB-1042)." },
+      { title: "Deal Agreed", completed: true, current: false, date: "11 Sep", description: "Terms accepted." },
+      { title: "Confirm Transport", completed: false, current: true, date: "Pending", description: "Farmer must confirm transport readiness." },
+      { title: "Buyer Escrow Deposit", completed: false, current: false, description: "Smart escrow deposit." },
+      { title: "Logistics & Dispatch", completed: false, current: false, description: "Vehicle assignment & dispatch." },
       { title: "Destination Assay", completed: false, current: false, description: "Assay verification on arrival." },
       { title: "Smart Payout", completed: false, current: false, description: "Instant escrow disbursement." }
     ]
@@ -224,7 +226,7 @@ const server = http.createServer((req, res) => {
   // Add universal CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-user-role, x-user-id, *');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -402,15 +404,17 @@ const server = http.createServer((req, res) => {
         farmer_name: "Rajendra Patel",
         farmer_farm: "Patel Organic Farms",
         delivery_location: offer.delivery_location || "Central Distribution Depot",
-        status: "In Transit",
-        payment_status: "Escrow Locked",
+        status: "Confirmed",
+        payment_status: "Pending",
+        transport_confirmed: false,
         order_date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         tracking_steps: [
           { title: "Deal Agreed", completed: true, current: false, date: "Just now", description: "Terms accepted." },
-          { title: "Buyer Escrow Deposit", completed: true, current: false, date: "Just now", description: "Escrow Locked." },
-          { title: "Logistics & Dispatch", completed: false, current: true, date: "Active", description: "Vehicle assigned." },
-          { title: "Destination Assay", completed: false, current: false, description: "Verification pending." },
-          { title: "Smart Payout", completed: false, current: false, description: "Payout upon arrival." }
+          { title: "Confirm Transport", completed: false, current: true, date: "Pending", description: "Farmer must confirm transport readiness." },
+          { title: "Buyer Escrow Deposit", completed: false, current: false, description: "Smart escrow deposit." },
+          { title: "Logistics & Dispatch", completed: false, current: false, description: "Vehicle assignment & dispatch." },
+          { title: "Destination Assay & Weighment", completed: false, current: false, description: "Verification on arrival." },
+          { title: "Smart Payout", completed: false, current: false, description: "Instant disbursement upon arrival." }
         ]
       });
     }
@@ -434,6 +438,9 @@ const server = http.createServer((req, res) => {
         order.id = order.id || `ord-${Date.now()}`;
         order.order_number = order.order_number || `FD-${Math.floor(1000 + Math.random() * 9000)}`;
         order.order_date = order.order_date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        order.status = order.status || 'Confirmed';
+        order.payment_status = order.payment_status || 'Pending';
+        order.transport_confirmed = order.transport_confirmed ?? false;
         ordersData.unshift(order);
         res.writeHead(201, {
           'Content-Type': 'application/json; charset=utf-8',
@@ -453,6 +460,300 @@ const server = http.createServer((req, res) => {
       count: ordersData.length,
       data: ordersData
     }));
+    return;
+  }
+
+  // API Endpoints: Order Actions (/api/orders/:id/confirm-transport, /escrow/lock, /dispatch, /arrive, /verify, /release-payout)
+  const orderActionMatch = reqUrl.match(/^\/api\/orders\/([^\/]+)\/(confirm-transport|arrive|verify|release-payout|escrow\/release|escrow\/lock|dispatch)$/);
+  if (orderActionMatch && req.method === 'POST') {
+    const orderId = orderActionMatch[1];
+    const action = orderActionMatch[2];
+
+    parseJsonBody((err, body) => {
+      const order = ordersData.find(o => o.id === orderId || o.order_number === orderId);
+      if (!order) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'Order not found' }));
+        return;
+      }
+
+      const bodyData = body || {};
+      const userRole = (bodyData.user_role || req.headers['x-user-role'] || '').toString().toLowerCase();
+
+      // ACTION 1: Farmer Confirms Transport
+      if (action === 'confirm-transport') {
+        if (userRole && userRole !== 'farmer' && userRole !== 'seller') {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Unauthorized: Only the farmer/seller can confirm transport readiness.' }));
+          return;
+        }
+
+        if (order.status !== 'Confirmed') {
+          if (order.status === 'Transport Confirmed' || order.transport_confirmed) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, message: 'Transport already confirmed', data: order }));
+            return;
+          }
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: `Cannot confirm transport. Order status is '${order.status}'.` }));
+          return;
+        }
+
+        order.status = 'Transport Confirmed';
+        order.transport_confirmed = true;
+        order.transport_confirmed_at = new Date().toISOString();
+        order.transport_confirmed_by = bodyData.confirmed_by || order.farmer_name || 'Farmer';
+
+        if (order.tracking_steps && Array.isArray(order.tracking_steps)) {
+          if (order.tracking_steps[0]) {
+            order.tracking_steps[0].completed = true;
+            order.tracking_steps[0].current = false;
+          }
+          if (order.tracking_steps[1]) {
+            order.tracking_steps[1].completed = true;
+            order.tracking_steps[1].current = false;
+            order.tracking_steps[1].date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+          }
+          if (order.tracking_steps[2]) {
+            order.tracking_steps[2].current = true;
+          }
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Farmer confirmed transport readiness. Buyer can now lock escrow.', data: order }));
+        return;
+      }
+
+      // ACTION 2: Buyer Locks Escrow
+      if (action === 'escrow/lock') {
+        if (userRole && userRole !== 'buyer' && userRole !== 'admin') {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Unauthorized: Only the buyer can lock escrow funds.' }));
+          return;
+        }
+
+        const isTransportConfirmed = order.status === 'Transport Confirmed' || order.transport_confirmed === true;
+        if (!isTransportConfirmed && order.status === 'Confirmed') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Cannot lock escrow: Farmer must confirm transport readiness before Buyer can lock escrow.' }));
+          return;
+        }
+
+        if (order.payment_status === 'Escrow Locked') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, message: 'Escrow already locked', data: order }));
+          return;
+        }
+
+        order.status = 'Escrow Locked';
+        order.payment_status = 'Escrow Locked';
+        order.escrow_locked_at = new Date().toISOString();
+        if (order.tracking_steps && Array.isArray(order.tracking_steps)) {
+          if (order.tracking_steps[1]) {
+            order.tracking_steps[1].completed = true;
+            order.tracking_steps[1].current = false;
+          }
+          if (order.tracking_steps[2]) {
+            order.tracking_steps[2].completed = true;
+            order.tracking_steps[2].current = false;
+            order.tracking_steps[2].date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+          }
+          if (order.tracking_steps[3]) {
+            order.tracking_steps[3].current = true;
+          }
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Escrow locked successfully in smart escrow vault', data: order }));
+        return;
+      }
+
+      // ACTION 3: Buyer Dispatches Transport
+      if (action === 'dispatch') {
+        if (userRole && userRole !== 'buyer' && userRole !== 'logistics' && userRole !== 'admin') {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Unauthorized: Only the buyer or logistics partner can dispatch transport.' }));
+          return;
+        }
+
+        if (order.payment_status !== 'Escrow Locked') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Cannot dispatch shipment: Escrow must be locked first.' }));
+          return;
+        }
+
+        order.status = 'In Transit';
+        order.dispatched_at = new Date().toISOString();
+        if (order.tracking_steps && Array.isArray(order.tracking_steps)) {
+          if (order.tracking_steps[3]) {
+            order.tracking_steps[3].completed = true;
+            order.tracking_steps[3].current = false;
+            order.tracking_steps[3].date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+          }
+          if (order.tracking_steps[4]) {
+            order.tracking_steps[4].current = true;
+          }
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Shipment dispatched successfully', data: order }));
+        return;
+      }
+
+      // ACTION 4: Buyer Marks Arrived
+      if (action === 'arrive') {
+        if (userRole && userRole === 'farmer') {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Unauthorized: Farmer cannot mark shipment arrival.' }));
+          return;
+        }
+
+        if (order.status !== 'In Transit' && order.status !== 'in_transit') {
+          if (order.status === 'Arrived' || order.status === 'Quality Verified') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, data: order }));
+            return;
+          }
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: `Order must be In Transit before it can be marked as Arrived. Current status: ${order.status}` }));
+          return;
+        }
+
+        order.status = 'Arrived';
+        order.arrived_at = new Date().toISOString();
+        order.arrived_by = bodyData.arrived_by || 'Destination Hub Inspector';
+        order.arrival_remarks = bodyData.arrival_remarks || 'Shipment arrived at destination';
+        if (order.tracking_steps && Array.isArray(order.tracking_steps)) {
+          if (order.tracking_steps[4]) {
+            order.tracking_steps[4].completed = true;
+            order.tracking_steps[4].current = false;
+            order.tracking_steps[4].date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+          }
+          if (order.tracking_steps[5]) {
+            order.tracking_steps[5].current = true;
+          }
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Shipment arrival recorded', data: order }));
+        return;
+      }
+
+      // ACTION 5: Buyer Verifies Weight & Quality
+      if (action === 'verify') {
+        if (userRole && userRole === 'farmer') {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Unauthorized: Farmer cannot verify weight and quality.' }));
+          return;
+        }
+
+        if (order.status !== 'Arrived' && order.status !== 'Delivered') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: `Order must be Arrived before verification. Current status: ${order.status}` }));
+          return;
+        }
+
+        const actualQty = Number(bodyData.actual_received_quantity);
+        if (isNaN(actualQty) || actualQty <= 0) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Actual received quantity must be greater than 0' }));
+          return;
+        }
+
+        if (!bodyData.quality_grade) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Quality grade is required' }));
+          return;
+        }
+
+        const isPassed = (bodyData.assay_result || '').toLowerCase() === 'passed';
+        order.actual_received_quantity = actualQty;
+        order.actual_quantity_unit = bodyData.actual_quantity_unit || order.unit || 'kg';
+        order.quality_grade = bodyData.quality_grade;
+        order.assay_result = isPassed ? 'Passed' : 'Failed';
+        order.assay_notes = bodyData.assay_notes || null;
+        order.verification_remarks = bodyData.verification_remarks || null;
+        order.verified_at = new Date().toISOString();
+        order.verified_by = bodyData.verified_by || 'Quality Verifier';
+
+        if (!isPassed) {
+          order.status = 'Disputed';
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Quality verification failed. Payout cannot be released.', data: order }));
+          return;
+        }
+
+        order.status = 'Quality Verified';
+        const pricePerUnit = Number(order.price_per_unit || (order.quantity ? order.total_amount / order.quantity : 2800));
+        order.payout_amount = Math.round(actualQty * pricePerUnit * 100) / 100;
+
+        if (order.tracking_steps && Array.isArray(order.tracking_steps)) {
+          if (order.tracking_steps[4]) {
+            order.tracking_steps[4].completed = true;
+            order.tracking_steps[4].current = false;
+            order.tracking_steps[4].date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+          }
+          if (order.tracking_steps[5]) {
+            order.tracking_steps[5].current = true;
+          }
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Weight & Quality verified successfully', data: order }));
+        return;
+      }
+
+      // ACTION 6: Buyer Releases Payout
+      if (action === 'release-payout' || action === 'escrow/release') {
+        if (userRole && userRole === 'farmer') {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Unauthorized: Farmer cannot release escrow payout.' }));
+          return;
+        }
+
+        if (order.status === 'Completed' || order.payment_status === 'Released') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, message: 'Payout already released', data: order }));
+          return;
+        }
+
+        if (order.payment_status !== 'Escrow Locked') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Escrow must be locked before payout can be released' }));
+          return;
+        }
+
+        if (order.status !== 'Quality Verified' && order.status !== 'Delivered' && order.status !== 'Arrived') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'Weight and quality must be verified before releasing payout' }));
+          return;
+        }
+
+        const verifiedQty = order.actual_received_quantity ? Number(order.actual_received_quantity) : Number(order.quantity);
+        const pricePerUnit = Number(order.price_per_unit || (order.total_amount / order.quantity));
+        const payoutAmount = Math.round(verifiedQty * pricePerUnit * 100) / 100;
+
+        order.status = 'Completed';
+        order.payment_status = 'Released';
+        order.payout_status = 'Released';
+        order.payout_amount = payoutAmount;
+        order.payout_released_at = new Date().toISOString();
+        order.payout_released_by = 'Smart Escrow Contract';
+        order.payout_reference = `TX-PAY-${Date.now().toString().slice(-8)}`;
+
+        if (order.tracking_steps && Array.isArray(order.tracking_steps)) {
+          order.tracking_steps.forEach(step => {
+            step.completed = true;
+            step.current = false;
+          });
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: `Payout of ₹${payoutAmount.toLocaleString('en-IN')} released to farmer`, data: order }));
+        return;
+      }
+
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, message: 'Unknown action' }));
+    });
     return;
   }
 

@@ -351,6 +351,25 @@ export const fetchOrders = async (): Promise<OrderItem[]> => {
       expectedDeliveryDate: item.expected_delivery_date || new Date().toISOString().split('T')[0],
       status: item.status,
       paymentStatus: item.payment_status,
+      transportConfirmed: item.transport_confirmed ?? (item.status === 'Transport Confirmed' || item.status === 'In Transit' || item.status === 'Arrived' || item.status === 'Quality Verified' || item.status === 'Completed'),
+      transportConfirmedAt: item.transport_confirmed_at,
+      transportConfirmedBy: item.transport_confirmed_by,
+      arrivedAt: item.arrived_at,
+      arrivedBy: item.arrived_by,
+      arrivalRemarks: item.arrival_remarks,
+      actualReceivedQuantity: item.actual_received_quantity !== null && item.actual_received_quantity !== undefined ? Number(item.actual_received_quantity) : undefined,
+      actualQuantityUnit: item.actual_quantity_unit,
+      qualityGrade: item.quality_grade,
+      assayResult: item.assay_result,
+      assayNotes: item.assay_notes,
+      verificationRemarks: item.verification_remarks,
+      verifiedAt: item.verified_at,
+      verifiedBy: item.verified_by,
+      payoutStatus: item.payout_status,
+      payoutAmount: item.payout_amount !== null && item.payout_amount !== undefined ? Number(item.payout_amount) : undefined,
+      payoutReleasedAt: item.payout_released_at,
+      payoutReleasedBy: item.payout_released_by,
+      payoutReference: item.payout_reference,
       trackingSteps: item.tracking_steps || [],
     }));
   } catch (err) {
@@ -361,7 +380,7 @@ export const fetchOrders = async (): Promise<OrderItem[]> => {
 
 export const createOrder = async (order: Omit<OrderItem, 'id'>): Promise<OrderItem | null> => {
   try {
-    const payload = {
+    const payload: any = {
       order_number: order.orderNumber,
       crop: order.crop,
       variety: order.variety,
@@ -369,8 +388,10 @@ export const createOrder = async (order: Omit<OrderItem, 'id'>): Promise<OrderIt
       unit: order.unit,
       price_per_unit: order.pricePerUnit,
       total_amount: order.totalAmount,
+      farmer_id: order.farmerId,
       farmer_name: order.farmerName,
       farmer_farm: order.farmerFarm,
+      buyer_id: order.buyerId,
       buyer_name: order.buyerName,
       buyer_company: order.buyerCompany,
       delivery_location: order.deliveryLocation,
@@ -418,6 +439,636 @@ export const createOrder = async (order: Omit<OrderItem, 'id'>): Promise<OrderIt
     };
   } catch (err) {
     console.error('Create order error:', err);
+    return null;
+  }
+};
+
+// --- REAL ORDER & ESCROW ACTIONS (MARK ARRIVED, VERIFY, RELEASE PAYOUT) ---
+
+export const markOrderArrivedApi = async (orderId: string, arrivalData: { arrivedBy?: string; arrivalRemarks?: string }): Promise<OrderItem | null> => {
+  try {
+    // 1. Try backend endpoint first
+    try {
+      const res = await fetch(`/api/orders/${orderId}/arrive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          arrived_by: arrivalData.arrivedBy,
+          arrival_remarks: arrivalData.arrivalRemarks
+        })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          return {
+            id: json.data.id || orderId,
+            orderNumber: json.data.order_number || json.data.orderNumber,
+            requestId: json.data.request_id || json.data.requestId,
+            produceId: json.data.produce_id || json.data.produceId,
+            crop: json.data.crop,
+            variety: json.data.variety,
+            quantity: Number(json.data.quantity),
+            unit: json.data.unit,
+            pricePerUnit: Number(json.data.price_per_unit || json.data.pricePerUnit),
+            totalAmount: Number(json.data.total_amount || json.data.totalAmount),
+            farmerId: json.data.farmer_id || json.data.farmerId,
+            farmerName: json.data.farmer_name || json.data.farmerName,
+            farmerFarm: json.data.farmer_farm || json.data.farmerFarm,
+            buyerId: json.data.buyer_id || json.data.buyerId,
+            buyerName: json.data.buyer_name || json.data.buyerName,
+            buyerCompany: json.data.buyer_company || json.data.buyerCompany,
+            deliveryLocation: json.data.delivery_location || json.data.deliveryLocation,
+            orderDate: json.data.order_date || json.data.orderDate,
+            expectedDeliveryDate: json.data.expected_delivery_date || json.data.expectedDeliveryDate,
+            status: json.data.status,
+            paymentStatus: json.data.payment_status || json.data.paymentStatus,
+            arrivedAt: json.data.arrived_at || json.data.arrivedAt,
+            arrivedBy: json.data.arrived_by || json.data.arrivedBy,
+            arrivalRemarks: json.data.arrival_remarks || json.data.arrivalRemarks,
+            trackingSteps: json.data.tracking_steps || json.data.trackingSteps,
+          };
+        }
+      }
+    } catch {
+      // Fallback to Supabase
+    }
+
+    // 2. Direct Supabase update
+    const arrivalIso = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('orders')
+      .update({
+        status: 'Arrived',
+        arrived_at: arrivalIso,
+        arrived_by: arrivalData.arrivedBy || 'Destination Hub Inspector',
+        arrival_remarks: arrivalData.arrivalRemarks || 'Shipment arrived at destination hub'
+      })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.warn('Supabase update fallback error for mark arrive:', error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      orderNumber: data.order_number,
+      requestId: data.request_id,
+      produceId: data.produce_id,
+      crop: data.crop,
+      variety: data.variety,
+      quantity: Number(data.quantity),
+      unit: data.unit,
+      pricePerUnit: Number(data.price_per_unit),
+      totalAmount: Number(data.total_amount),
+      farmerId: data.farmer_id,
+      farmerName: data.farmer_name,
+      farmerFarm: data.farmer_farm,
+      buyerId: data.buyer_id,
+      buyerName: data.buyer_name,
+      buyerCompany: data.buyer_company,
+      deliveryLocation: data.delivery_location,
+      orderDate: data.order_date,
+      expectedDeliveryDate: data.expected_delivery_date,
+      status: data.status,
+      paymentStatus: data.payment_status,
+      arrivedAt: data.arrived_at,
+      arrivedBy: data.arrived_by,
+      arrivalRemarks: data.arrival_remarks,
+      trackingSteps: data.tracking_steps,
+    };
+  } catch (err) {
+    console.error('Mark order arrived error:', err);
+    return null;
+  }
+};
+
+export const verifyOrderQualityApi = async (
+  orderId: string,
+  data: {
+    actualReceivedQuantity: number;
+    actualQuantityUnit?: string;
+    qualityGrade: string;
+    assayResult: string;
+    assayNotes?: string;
+    verificationRemarks?: string;
+    verifiedBy?: string;
+  }
+): Promise<{ success: boolean; order?: OrderItem; error?: string }> => {
+  try {
+    // 1. Try backend endpoint
+    try {
+      const res = await fetch(`/api/orders/${orderId}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actual_received_quantity: data.actualReceivedQuantity,
+          actual_quantity_unit: data.actualQuantityUnit,
+          quality_grade: data.qualityGrade,
+          assay_result: data.assayResult,
+          assay_notes: data.assayNotes,
+          verification_remarks: data.verificationRemarks,
+          verified_by: data.verifiedBy
+        })
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success && json.data) {
+        const orderData = json.data.order || json.data;
+        return {
+          success: true,
+          order: {
+            id: orderData.id || orderId,
+            orderNumber: orderData.order_number || orderData.orderNumber,
+            requestId: orderData.request_id || orderData.requestId,
+            produceId: orderData.produce_id || orderData.produceId,
+            crop: orderData.crop,
+            variety: orderData.variety,
+            quantity: Number(orderData.quantity),
+            unit: orderData.unit,
+            pricePerUnit: Number(orderData.price_per_unit || orderData.pricePerUnit),
+            totalAmount: Number(orderData.total_amount || orderData.totalAmount),
+            farmerId: orderData.farmer_id || orderData.farmerId,
+            farmerName: orderData.farmer_name || orderData.farmerName,
+            farmerFarm: orderData.farmer_farm || orderData.farmerFarm,
+            buyerId: orderData.buyer_id || orderData.buyerId,
+            buyerName: orderData.buyer_name || orderData.buyerName,
+            buyerCompany: orderData.buyer_company || orderData.buyerCompany,
+            deliveryLocation: orderData.delivery_location || orderData.deliveryLocation,
+            orderDate: orderData.order_date || orderData.orderDate,
+            expectedDeliveryDate: orderData.expected_delivery_date || orderData.expectedDeliveryDate,
+            status: orderData.status,
+            paymentStatus: orderData.payment_status || orderData.paymentStatus,
+            arrivedAt: orderData.arrived_at || orderData.arrivedAt,
+            arrivedBy: orderData.arrived_by || orderData.arrivedBy,
+            arrivalRemarks: orderData.arrival_remarks || orderData.arrivalRemarks,
+            actualReceivedQuantity: orderData.actual_received_quantity !== undefined ? Number(orderData.actual_received_quantity) : data.actualReceivedQuantity,
+            actualQuantityUnit: orderData.actual_quantity_unit || data.actualQuantityUnit,
+            qualityGrade: orderData.quality_grade || data.qualityGrade,
+            assayResult: orderData.assay_result || data.assayResult,
+            assayNotes: orderData.assay_notes || data.assayNotes,
+            verificationRemarks: orderData.verification_remarks || data.verificationRemarks,
+            verifiedAt: orderData.verified_at || new Date().toISOString(),
+            verifiedBy: orderData.verified_by || data.verifiedBy,
+            trackingSteps: orderData.tracking_steps || orderData.trackingSteps,
+          }
+        };
+      } else if (!res.ok) {
+        return { success: false, error: json.message || 'Verification failed on server' };
+      }
+    } catch {
+      // Direct Supabase fallback
+    }
+
+    const isPassed = data.assayResult.toLowerCase() === 'passed';
+    const verifiedIso = new Date().toISOString();
+
+    const { data: updated, error } = await supabase
+      .from('orders')
+      .update({
+        status: isPassed ? 'Quality Verified' : 'Disputed',
+        actual_received_quantity: data.actualReceivedQuantity,
+        actual_quantity_unit: data.actualQuantityUnit || 'kg',
+        quality_grade: data.qualityGrade,
+        assay_result: isPassed ? 'Passed' : 'Failed',
+        assay_notes: data.assayNotes || null,
+        verification_remarks: data.verificationRemarks || null,
+        verified_at: verifiedIso,
+        verified_by: data.verifiedBy || 'Quality Verifier'
+      })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error || !updated) {
+      return { success: false, error: error?.message || 'Database update error during verification' };
+    }
+
+    return {
+      success: true,
+      order: {
+        id: updated.id,
+        orderNumber: updated.order_number,
+        requestId: updated.request_id,
+        produceId: updated.produce_id,
+        crop: updated.crop,
+        variety: updated.variety,
+        quantity: Number(updated.quantity),
+        unit: updated.unit,
+        pricePerUnit: Number(updated.price_per_unit),
+        totalAmount: Number(updated.total_amount),
+        farmerId: updated.farmer_id,
+        farmerName: updated.farmer_name,
+        farmerFarm: updated.farmer_farm,
+        buyerId: updated.buyer_id,
+        buyerName: updated.buyer_name,
+        buyerCompany: updated.buyer_company,
+        deliveryLocation: updated.delivery_location,
+        orderDate: updated.order_date,
+        expectedDeliveryDate: updated.expected_delivery_date,
+        status: updated.status,
+        paymentStatus: updated.payment_status,
+        arrivedAt: updated.arrived_at,
+        arrivedBy: updated.arrived_by,
+        arrivalRemarks: updated.arrival_remarks,
+        actualReceivedQuantity: Number(updated.actual_received_quantity),
+        actualQuantityUnit: updated.actual_quantity_unit,
+        qualityGrade: updated.quality_grade,
+        assayResult: updated.assay_result,
+        assayNotes: updated.assay_notes,
+        verificationRemarks: updated.verification_remarks,
+        verifiedAt: updated.verified_at,
+        verifiedBy: updated.verified_by,
+        trackingSteps: updated.tracking_steps,
+      }
+    };
+  } catch (err: any) {
+    console.error('Verify order quality error:', err);
+    return { success: false, error: err.message || 'Verification exception' };
+  }
+};
+
+export const releaseOrderPayoutApi = async (orderId: string, data?: { notes?: string }): Promise<{ success: boolean; order?: OrderItem; error?: string }> => {
+  try {
+    // 1. Try backend endpoint
+    try {
+      const res = await fetch(`/api/orders/${orderId}/release-payout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notes: data?.notes,
+          idempotency_key: `payout-${orderId}-${Date.now()}`
+        })
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success && json.data) {
+        const orderData = json.data.order || json.data;
+        return {
+          success: true,
+          order: {
+            id: orderData.id || orderId,
+            orderNumber: orderData.order_number || orderData.orderNumber,
+            requestId: orderData.request_id || orderData.requestId,
+            produceId: orderData.produce_id || orderData.produceId,
+            crop: orderData.crop,
+            variety: orderData.variety,
+            quantity: Number(orderData.quantity),
+            unit: orderData.unit,
+            pricePerUnit: Number(orderData.price_per_unit || orderData.pricePerUnit),
+            totalAmount: Number(orderData.total_amount || orderData.totalAmount),
+            farmerId: orderData.farmer_id || orderData.farmerId,
+            farmerName: orderData.farmer_name || orderData.farmerName,
+            farmerFarm: orderData.farmer_farm || orderData.farmerFarm,
+            buyerId: orderData.buyer_id || orderData.buyerId,
+            buyerName: orderData.buyer_name || orderData.buyerName,
+            buyerCompany: orderData.buyer_company || orderData.buyerCompany,
+            deliveryLocation: orderData.delivery_location || orderData.deliveryLocation,
+            orderDate: orderData.order_date || orderData.orderDate,
+            expectedDeliveryDate: orderData.expected_delivery_date || orderData.expectedDeliveryDate,
+            status: orderData.status,
+            paymentStatus: orderData.payment_status || orderData.paymentStatus,
+            payoutStatus: orderData.payout_status || 'Released',
+            payoutAmount: Number(orderData.payout_amount || orderData.total_amount || orderData.totalAmount),
+            payoutReleasedAt: orderData.payout_released_at || new Date().toISOString(),
+            payoutReference: orderData.payout_reference,
+            trackingSteps: orderData.tracking_steps || orderData.trackingSteps,
+          }
+        };
+      } else if (!res.ok) {
+        return { success: false, error: json.message || 'Payout release rejected by server' };
+      }
+    } catch {
+      // Fallback to Supabase
+    }
+
+    const { data: updated, error } = await supabase
+      .from('orders')
+      .update({
+        status: 'Completed',
+        payment_status: 'Released',
+        payout_status: 'Released',
+        payout_released_at: new Date().toISOString(),
+        payout_reference: `TX-PAY-${Date.now().toString().slice(-8)}`
+      })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error || !updated) {
+      return { success: false, error: error?.message || 'Database error during payout release' };
+    }
+
+    return {
+      success: true,
+      order: {
+        id: updated.id,
+        orderNumber: updated.order_number,
+        requestId: updated.request_id,
+        produceId: updated.produce_id,
+        crop: updated.crop,
+        variety: updated.variety,
+        quantity: Number(updated.quantity),
+        unit: updated.unit,
+        pricePerUnit: Number(updated.price_per_unit),
+        totalAmount: Number(updated.total_amount),
+        farmerId: updated.farmer_id,
+        farmerName: updated.farmer_name,
+        farmerFarm: updated.farmer_farm,
+        buyerId: updated.buyer_id,
+        buyerName: updated.buyer_name,
+        buyerCompany: updated.buyer_company,
+        deliveryLocation: updated.delivery_location,
+        orderDate: updated.order_date,
+        expectedDeliveryDate: updated.expected_delivery_date,
+        status: updated.status,
+        paymentStatus: updated.payment_status,
+        payoutStatus: updated.payout_status,
+        payoutAmount: Number(updated.payout_amount || updated.total_amount),
+        payoutReleasedAt: updated.payout_released_at,
+        payoutReference: updated.payout_reference,
+        trackingSteps: updated.tracking_steps,
+      }
+    };
+  } catch (err: any) {
+    console.error('Release payout error:', err);
+    return { success: false, error: err.message || 'Payout release exception' };
+  }
+};
+
+export const lockOrderEscrowApi = async (orderId: string, data?: { depositAmount?: number; notes?: string }): Promise<OrderItem | null> => {
+  try {
+    // 1. Try backend
+    try {
+      const res = await fetch(`/api/orders/${orderId}/escrow/lock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data || {})
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          const ord = json.data.order || json.data;
+          return {
+            id: ord.id || orderId,
+            orderNumber: ord.order_number || ord.orderNumber,
+            requestId: ord.request_id || ord.requestId,
+            produceId: ord.produce_id || ord.produceId,
+            crop: ord.crop,
+            variety: ord.variety,
+            quantity: Number(ord.quantity),
+            unit: ord.unit,
+            pricePerUnit: Number(ord.price_per_unit || ord.pricePerUnit),
+            totalAmount: Number(ord.total_amount || ord.totalAmount),
+            farmerId: ord.farmer_id || ord.farmerId,
+            farmerName: ord.farmer_name || ord.farmerName,
+            farmerFarm: ord.farmer_farm || ord.farmerFarm,
+            buyerId: ord.buyer_id || ord.buyerId,
+            buyerName: ord.buyer_name || ord.buyerName,
+            buyerCompany: ord.buyer_company || ord.buyerCompany,
+            deliveryLocation: ord.delivery_location || ord.deliveryLocation,
+            orderDate: ord.order_date || ord.orderDate,
+            expectedDeliveryDate: ord.expected_delivery_date || ord.expectedDeliveryDate,
+            status: ord.status,
+            paymentStatus: ord.payment_status || ord.paymentStatus,
+            trackingSteps: ord.tracking_steps || ord.trackingSteps,
+          };
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    const { data: updated } = await supabase
+      .from('orders')
+      .update({
+        payment_status: 'Escrow Locked',
+        escrow_locked_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (!updated) return null;
+
+    return {
+      id: updated.id,
+      orderNumber: updated.order_number,
+      requestId: updated.request_id,
+      produceId: updated.produce_id,
+      crop: updated.crop,
+      variety: updated.variety,
+      quantity: Number(updated.quantity),
+      unit: updated.unit,
+      pricePerUnit: Number(updated.price_per_unit),
+      totalAmount: Number(updated.total_amount),
+      farmerId: updated.farmer_id,
+      farmerName: updated.farmer_name,
+      farmerFarm: updated.farmer_farm,
+      buyerId: updated.buyer_id,
+      buyerName: updated.buyer_name,
+      buyerCompany: updated.buyer_company,
+      deliveryLocation: updated.delivery_location,
+      orderDate: updated.order_date,
+      expectedDeliveryDate: updated.expected_delivery_date,
+      status: updated.status,
+      paymentStatus: updated.payment_status,
+      transportConfirmed: updated.transport_confirmed ?? true,
+      trackingSteps: updated.tracking_steps,
+    };
+  } catch (err) {
+    console.error('Lock escrow error:', err);
+    return null;
+  }
+};
+
+export const confirmFarmerTransportApi = async (orderId: string, data?: { confirmedBy?: string; notes?: string }): Promise<OrderItem | null> => {
+  try {
+    try {
+      const res = await fetch(`/api/orders/${orderId}/confirm-transport`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-user-role': 'farmer' },
+        body: JSON.stringify({
+          user_role: 'farmer',
+          confirmed_by: data?.confirmedBy,
+          notes: data?.notes
+        })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          const ord = json.data;
+          return {
+            id: ord.id || orderId,
+            orderNumber: ord.order_number || ord.orderNumber,
+            requestId: ord.request_id || ord.requestId,
+            produceId: ord.produce_id || ord.produceId,
+            crop: ord.crop,
+            variety: ord.variety,
+            quantity: Number(ord.quantity),
+            unit: ord.unit,
+            pricePerUnit: Number(ord.price_per_unit || ord.pricePerUnit),
+            totalAmount: Number(ord.total_amount || ord.totalAmount),
+            farmerId: ord.farmer_id || ord.farmerId,
+            farmerName: ord.farmer_name || ord.farmerName,
+            farmerFarm: ord.farmer_farm || ord.farmerFarm,
+            buyerId: ord.buyer_id || ord.buyerId,
+            buyerName: ord.buyer_name || ord.buyerName,
+            buyerCompany: ord.buyer_company || ord.buyerCompany,
+            deliveryLocation: ord.delivery_location || ord.deliveryLocation,
+            orderDate: ord.order_date || ord.orderDate,
+            expectedDeliveryDate: ord.expected_delivery_date || ord.expectedDeliveryDate,
+            status: ord.status,
+            paymentStatus: ord.payment_status || ord.paymentStatus,
+            transportConfirmed: ord.transport_confirmed ?? true,
+            transportConfirmedAt: ord.transport_confirmed_at,
+            transportConfirmedBy: ord.transport_confirmed_by,
+            trackingSteps: ord.tracking_steps || ord.trackingSteps,
+          };
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    const { data: updated, error } = await supabase
+      .from('orders')
+      .update({
+        status: 'Transport Confirmed',
+        transport_confirmed: true,
+        transport_confirmed_at: new Date().toISOString(),
+        transport_confirmed_by: data?.confirmedBy || 'Farmer'
+      })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error || !updated) return null;
+
+    return {
+      id: updated.id,
+      orderNumber: updated.order_number,
+      requestId: updated.request_id,
+      produceId: updated.produce_id,
+      crop: updated.crop,
+      variety: updated.variety,
+      quantity: Number(updated.quantity),
+      unit: updated.unit,
+      pricePerUnit: Number(updated.price_per_unit),
+      totalAmount: Number(updated.total_amount),
+      farmerId: updated.farmer_id,
+      farmerName: updated.farmer_name,
+      farmerFarm: updated.farmer_farm,
+      buyerId: updated.buyer_id,
+      buyerName: updated.buyer_name,
+      buyerCompany: updated.buyer_company,
+      deliveryLocation: updated.delivery_location,
+      orderDate: updated.order_date,
+      expectedDeliveryDate: updated.expected_delivery_date,
+      status: updated.status,
+      paymentStatus: updated.payment_status,
+      transportConfirmed: updated.transport_confirmed ?? true,
+      transportConfirmedAt: updated.transport_confirmed_at,
+      transportConfirmedBy: updated.transport_confirmed_by,
+      trackingSteps: updated.tracking_steps,
+    };
+  } catch (err) {
+    console.error('Confirm transport error:', err);
+    return null;
+  }
+};
+
+export const dispatchOrderTransportApi = async (orderId: string, dispatchData?: { vehicleName?: string; vehicleType?: string; vehicleNumber?: string; driverName?: string; driverPhone?: string }): Promise<OrderItem | null> => {
+  try {
+    try {
+      const res = await fetch(`/api/orders/${orderId}/dispatch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-user-role': 'buyer' },
+        body: JSON.stringify({
+          user_role: 'buyer',
+          vehicle_name: dispatchData?.vehicleName || 'Fieldora Smart Logistics',
+          vehicle_type: dispatchData?.vehicleType || 'Eicher 14ft Closed Container',
+          vehicle_number: dispatchData?.vehicleNumber || 'MH-04-AZ-2084',
+          driver_name: dispatchData?.driverName || 'Suresh Jadhav',
+          driver_phone: dispatchData?.driverPhone || '+91 98201 54321',
+        })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          const ord = json.data.order || json.data;
+          return {
+            id: ord.id || orderId,
+            orderNumber: ord.order_number || ord.orderNumber,
+            requestId: ord.request_id || ord.requestId,
+            produceId: ord.produce_id || ord.produceId,
+            crop: ord.crop,
+            variety: ord.variety,
+            quantity: Number(ord.quantity),
+            unit: ord.unit,
+            pricePerUnit: Number(ord.price_per_unit || ord.pricePerUnit),
+            totalAmount: Number(ord.total_amount || ord.totalAmount),
+            farmerId: ord.farmer_id || ord.farmerId,
+            farmerName: ord.farmer_name || ord.farmerName,
+            farmerFarm: ord.farmer_farm || ord.farmerFarm,
+            buyerId: ord.buyer_id || ord.buyerId,
+            buyerName: ord.buyer_name || ord.buyerName,
+            buyerCompany: ord.buyer_company || ord.buyerCompany,
+            deliveryLocation: ord.delivery_location || ord.deliveryLocation,
+            orderDate: ord.order_date || ord.orderDate,
+            expectedDeliveryDate: ord.expected_delivery_date || ord.expectedDeliveryDate,
+            status: 'In Transit',
+            paymentStatus: ord.payment_status || ord.paymentStatus,
+            transportConfirmed: true,
+            trackingSteps: ord.tracking_steps || ord.trackingSteps,
+          };
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    const { data: updated, error } = await supabase
+      .from('orders')
+      .update({
+        status: 'In Transit',
+        dispatched_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error || !updated) return null;
+
+    return {
+      id: updated.id,
+      orderNumber: updated.order_number,
+      requestId: updated.request_id,
+      produceId: updated.produce_id,
+      crop: updated.crop,
+      variety: updated.variety,
+      quantity: Number(updated.quantity),
+      unit: updated.unit,
+      pricePerUnit: Number(updated.price_per_unit),
+      totalAmount: Number(updated.total_amount),
+      farmerId: updated.farmer_id,
+      farmerName: updated.farmer_name,
+      farmerFarm: updated.farmer_farm,
+      buyerId: updated.buyer_id,
+      buyerName: updated.buyer_name,
+      buyerCompany: updated.buyer_company,
+      deliveryLocation: updated.delivery_location,
+      orderDate: updated.order_date,
+      expectedDeliveryDate: updated.expected_delivery_date,
+      status: updated.status,
+      paymentStatus: updated.payment_status,
+      transportConfirmed: true,
+      trackingSteps: updated.tracking_steps,
+    };
+  } catch (err) {
+    console.error('Dispatch order error:', err);
     return null;
   }
 };

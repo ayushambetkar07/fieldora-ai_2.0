@@ -6598,126 +6598,495 @@
     function renderOrderCardHtml(order, role = 'farmer') {
       const isFarmer = role === 'farmer';
       const orderNum = order.order_number || ('FD-' + (order.id ? order.id.slice(0, 4) : '1042'));
-      const cropTitle = `${order.quantity || 50} ${order.unit || 'Quintals'} ${order.crop || 'Produce'} (₹${Number(order.total_amount || 140000).toLocaleString('en-IN')})`;
+      const status = (order.status || 'Confirmed');
+      const paymentStatus = (order.payment_status || 'Pending');
+
+      const isTransportConfirmed = status === 'Transport Confirmed' || order.transport_confirmed === true || ['Escrow Locked', 'In Transit', 'Arrived', 'Quality Verified', 'Completed'].includes(status);
+      const isConfirmedStage = (status === 'Confirmed' && !order.transport_confirmed);
+
+      const canLockEscrow = !isFarmer && isTransportConfirmed && paymentStatus === 'Pending' && status !== 'Escrow Locked' && status !== 'In Transit' && status !== 'Arrived' && status !== 'Quality Verified' && status !== 'Completed';
+      const canDispatch = !isFarmer && (status === 'Escrow Locked' || paymentStatus === 'Escrow Locked') && status !== 'In Transit' && status !== 'Arrived' && status !== 'Quality Verified' && status !== 'Completed';
+      const canMarkArrived = !isFarmer && status === 'In Transit';
+      const canVerify = !isFarmer && status === 'Arrived';
+      const canReleasePayout = !isFarmer && status === 'Quality Verified';
+      const isCompleted = status === 'Completed' || paymentStatus === 'Released' || order.payout_status === 'Released';
+
+      const pricePerUnit = Number(order.price_per_unit || (order.quantity ? order.total_amount / order.quantity : 2800));
+      const hasVerifiedWeight = order.actual_received_quantity !== undefined && order.actual_received_quantity !== null;
+      const verifiedQtyNum = hasVerifiedWeight ? Number(order.actual_received_quantity) : Number(order.quantity || 50);
+      const calculatedPayoutAmt = Math.round(verifiedQtyNum * pricePerUnit * 100) / 100;
+      const currentActiveAmount = (order.payout_amount !== undefined && order.payout_amount !== null) ? Number(order.payout_amount) : (hasVerifiedWeight ? calculatedPayoutAmt : Number(order.total_amount || 140000));
+
+      const cropTitle = `${hasVerifiedWeight ? verifiedQtyNum : (order.quantity || 50)} ${order.actual_quantity_unit || order.unit || 'Quintals'} ${order.crop || 'Produce'} (₹${currentActiveAmount.toLocaleString('en-IN')})`;
       const partnerLabel = isFarmer 
         ? (order.buyer_company || order.buyer_name || 'Verified Buyer')
-        : `Producer: ${order.farmer_name || 'Ayush Ambetkar'}`;
+        : `Producer: ${order.farmer_name || 'Rajendra Patel'}`;
 
-      const status = (order.status || '').toLowerCase();
-      const paymentStatus = (order.payment_status || '').toLowerCase();
-
+      // 6-step milestone classes
       let step1Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
       let step1Sub = order.order_date || 'Confirmed';
 
       let step2Class = 'bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400';
-      let step2Sub = 'Pending Deposit';
-
-      let step3Class = 'bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400';
-      let step3Sub = 'Pending Dispatch';
-
-      let step4Class = 'bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400';
-      let step4Sub = 'Pending Arrival';
-
-      let step5Class = 'bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400';
-      let step5Sub = 'Bank Payout';
-
-      let statusBadge = 'bg-[#dcfce7] text-[#166534]';
-      let statusText = 'Shipment In Transit';
-
-      if (status === 'completed' || paymentStatus === 'released') {
+      let step2Sub = 'Pending Farmer';
+      if (isTransportConfirmed) {
         step2Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
-        step2Sub = `₹${Number(order.total_amount || 140000).toLocaleString('en-IN')} Verified`;
-        step3Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
-        step3Sub = 'Delivered';
-        step4Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
-        step4Sub = 'Assay Passed (100%)';
-        step5Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
-        step5Sub = 'Payout Released';
-        statusText = 'Completed & Paid (₹' + Number(order.total_amount || 140000).toLocaleString('en-IN') + ')';
-        statusBadge = 'bg-[#dcfce7] text-[#166534]';
-      } else if (status === 'delivered' || status.includes('assay')) {
-        step2Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
-        step2Sub = `₹${Number(order.total_amount || 140000).toLocaleString('en-IN')} Verified`;
-        step3Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
-        step3Sub = 'Arrived at Hub';
-        step4Class = 'bg-deep-forest text-white shadow-xs';
-        step4Sub = 'Weighbridge & Assay';
-        statusText = 'At Destination Hub';
-        statusBadge = 'bg-amber-100 text-amber-800';
-      } else if (status === 'in transit' || status.includes('transit') || status.includes('dispatched')) {
-        step2Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
-        step2Sub = `₹${Number(order.total_amount || 140000).toLocaleString('en-IN')} Verified`;
-        step3Class = 'bg-deep-forest text-white shadow-xs';
-        step3Sub = 'Truck Active';
-        statusText = 'Shipment In Transit';
-        statusBadge = 'bg-[#dcfce7] text-[#166534]';
-      } else {
-        step2Class = 'bg-deep-forest text-white shadow-xs';
-        step2Sub = `₹${Number(order.total_amount || 140000).toLocaleString('en-IN')} Verified`;
-        statusText = 'Escrow Locked';
-        statusBadge = 'bg-emerald-100 text-emerald-800';
+        step2Sub = 'Confirmed by Farmer';
+      } else if (isConfirmedStage) {
+        step2Class = 'bg-amber-50 border border-amber-300 text-amber-900 font-bold';
+        step2Sub = isFarmer ? 'Action Required' : 'Awaiting Farmer';
       }
 
-      const isCompleted = status === 'completed' || paymentStatus === 'released';
+      let step3Class = 'bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400';
+      let step3Sub = 'Pending Escrow';
+      if (paymentStatus === 'Escrow Locked' || paymentStatus === 'Released' || ['Escrow Locked', 'In Transit', 'Arrived', 'Quality Verified', 'Completed'].includes(status)) {
+        step3Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
+        step3Sub = '₹' + Number(order.total_amount || 140000).toLocaleString('en-IN') + ' Locked';
+      } else if (canLockEscrow) {
+        step3Class = 'bg-amber-50 border border-amber-300 text-amber-900 font-bold';
+        step3Sub = isFarmer ? 'Awaiting Buyer' : 'Action Required';
+      }
+
+      let step4Class = 'bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400';
+      let step4Sub = 'Pending Dispatch';
+      if (['In Transit', 'Arrived', 'Quality Verified', 'Completed'].includes(status)) {
+        step4Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
+        step4Sub = 'In Transit';
+      } else if (canDispatch) {
+        step4Class = 'bg-amber-50 border border-amber-300 text-amber-900 font-bold';
+        step4Sub = isFarmer ? 'Awaiting Dispatch' : 'Ready to Dispatch';
+      }
+
+      let step5Class = 'bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400';
+      let step5Sub = 'Pending Arrival';
+      if (['Quality Verified', 'Completed'].includes(status)) {
+        step5Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
+        step5Sub = order.quality_grade ? `${order.quality_grade} Verified` : 'Assay Verified';
+      } else if (status === 'Arrived') {
+        step5Class = 'bg-blue-100 border border-blue-300 text-blue-900 font-bold';
+        step5Sub = 'Arrived (Pending Verification)';
+      } else if (status === 'In Transit') {
+        step5Class = 'bg-blue-50 border border-blue-200 text-blue-800';
+        step5Sub = 'En Route to Hub';
+      }
+
+      let step6Class = 'bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400';
+      let step6Sub = 'Bank Payout';
+      if (isCompleted) {
+        step6Class = 'bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest';
+        step6Sub = `₹${currentActiveAmount.toLocaleString('en-IN')} Settled`;
+      } else if (canReleasePayout) {
+        step6Class = 'bg-purple-100 border border-purple-300 text-purple-900 font-bold';
+        step6Sub = isFarmer ? 'Awaiting Buyer Release' : `₹${currentActiveAmount.toLocaleString('en-IN')} Calculated`;
+      }
+
+      let statusBadge = 'bg-amber-100 text-amber-900 border border-amber-300';
+      let statusText = 'Confirmed';
+
+      if (isCompleted) {
+        statusText = 'Completed & Settled';
+        statusBadge = 'bg-[#dcfce7] text-[#166534] border border-[#a7f3d0]';
+      } else if (status === 'Quality Verified') {
+        statusText = 'Quality & Weight Verified';
+        statusBadge = 'bg-purple-100 text-purple-900 border border-purple-300';
+      } else if (status === 'Arrived') {
+        statusText = 'Arrived at Destination Hub';
+        statusBadge = 'bg-blue-100 text-blue-800 border border-blue-200';
+      } else if (status === 'In Transit') {
+        statusText = 'Shipment In Transit';
+        statusBadge = 'bg-[#dcfce7] text-[#166534] border border-[#a7f3d0]';
+      } else if (status === 'Escrow Locked' || paymentStatus === 'Escrow Locked') {
+        statusText = 'Escrow Locked (Vault Secured)';
+        statusBadge = 'bg-emerald-100 text-emerald-800 border border-emerald-300';
+      } else if (isTransportConfirmed) {
+        statusText = 'Transport Confirmed';
+        statusBadge = 'bg-amber-100 text-amber-900 border border-amber-300';
+      }
 
       return `
-        <div class="ref-card p-6 space-y-5 bg-white border border-[#E6ECE6]">
+        <div class="ref-card p-6 space-y-5 bg-white border border-[#E6ECE6] rounded-2xl shadow-xs hover:shadow-md transition-shadow">
           <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#E6ECE6] pb-3">
             <div>
               <span class="font-mono font-bold text-sm text-deep-forest">Order #${orderNum}</span>
               <span class="text-xs text-secondary-text ml-2">${cropTitle} • ${partnerLabel}</span>
             </div>
             <div class="flex items-center gap-2">
-              ${!isCompleted ? `
-                <button onclick="${isFarmer ? "showFarmerTab('farmer-transport')" : "showBuyerTab('buyer-transport')"}" class="px-3 py-1.5 bg-[#166534] text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1 cursor-pointer">
-                  <i data-lucide="truck" class="w-3.5 h-3.5 text-emerald-300"></i> Find Transport
-                </button>
-              ` : ''}
               <span class="px-3 py-1 ${statusBadge} text-xs font-bold rounded-full flex items-center gap-1">
                 ${isCompleted ? '<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>' : ''} ${statusText}
               </span>
             </div>
           </div>
 
-          <!-- 5-Step Order Timeline -->
-          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs pt-2">
-            <div class="p-3 ${step1Class} rounded-xl text-center">
-              <span class="font-bold block">1. Confirmed</span>
-              <span class="text-[10px] ${step1Class.includes('text-white') ? 'text-[#a7f3d0]' : 'text-secondary-text'}">${step1Sub}</span>
+          <!-- 6-Stage Order Timeline Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs pt-1">
+            <div class="p-2.5 ${step1Class} rounded-xl text-center">
+              <span class="font-bold block text-[11px]">1. Confirmed</span>
+              <span class="text-[10px] text-secondary-text block truncate">${step1Sub}</span>
             </div>
-            <div class="p-3 ${step2Class} rounded-xl text-center">
-              <span class="font-bold block">2. Escrow Locked</span>
-              <span class="text-[10px] ${step2Class.includes('text-white') ? 'text-[#a7f3d0]' : 'text-secondary-text'}">${step2Sub}</span>
+            <div class="p-2.5 ${step2Class} rounded-xl text-center">
+              <span class="font-bold block text-[11px]">2. Transport Confirmed</span>
+              <span class="text-[10px] block truncate">${step2Sub}</span>
             </div>
-            <div class="p-3 ${step3Class} rounded-xl text-center">
-              <span class="font-bold block">3. In Transit</span>
-              <span class="text-[10px] ${step3Class.includes('text-white') ? 'text-[#a7f3d0]' : 'text-secondary-text'}">${step3Sub}</span>
+            <div class="p-2.5 ${step3Class} rounded-xl text-center">
+              <span class="font-bold block text-[11px]">3. Escrow Locked</span>
+              <span class="text-[10px] block truncate">${step3Sub}</span>
             </div>
-            <div class="p-3 ${step4Class} rounded-xl text-center">
-              <span class="font-bold block">4. Lab Assay</span>
-              <span class="text-[10px] ${step4Class.includes('text-white') ? 'text-[#a7f3d0]' : 'text-secondary-text'}">${step4Sub}</span>
+            <div class="p-2.5 ${step4Class} rounded-xl text-center">
+              <span class="font-bold block text-[11px]">4. In Transit</span>
+              <span class="text-[10px] block truncate">${step4Sub}</span>
             </div>
-            <div class="p-3 ${step5Class} rounded-xl text-center">
-              <span class="font-bold block">5. Completed</span>
-              <span class="text-[10px] ${step5Class.includes('text-white') ? 'text-[#a7f3d0]' : 'text-secondary-text'}">${step5Sub}</span>
+            <div class="p-2.5 ${step5Class} rounded-xl text-center">
+              <span class="font-bold block text-[11px]">5. Quality Verified</span>
+              <span class="text-[10px] block truncate">${step5Sub}</span>
+            </div>
+            <div class="p-2.5 ${step6Class} rounded-xl text-center">
+              <span class="font-bold block text-[11px]">6. Completed</span>
+              <span class="text-[10px] block truncate">${step6Sub}</span>
             </div>
           </div>
 
-          ${isCompleted ? `
-            <div class="space-y-3 pt-1 border-t border-[#E6ECE6]">
-              <div class="flex items-center justify-between flex-wrap gap-3 text-xs">
-                <div class="space-y-0.5">
-                  <span class="text-secondary-text">Escrow settlement finalized • Verified Grade A Lot.</span>
-                </div>
-                <button onclick="openReviewModal('${(isFarmer ? (order.buyer_company || order.buyer_name || 'FreshMart Agro') : (order.farmer_name || 'Producer')).replace(/'/g, "\\'")}', '${isFarmer ? 'Enterprise Buyer' : 'Verified Farmer'}', '${orderNum}', '${order.buyer_id || '8996d084-1f18-45bd-995a-27ac039436ce'}')" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer">
-                  <span>⭐ Rate ${isFarmer ? 'Buyer' : 'Farmer'} Experience</span>
-                </button>
-              </div>
+          <!-- Contextual Action Bar -->
+          <div class="pt-3 border-t border-[#E6ECE6] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-gray-500 uppercase text-[10px] tracking-wider">Active Stage:</span>
+              <span class="font-bold text-deep-forest text-xs">
+                ${isFarmer ? (
+                  isConfirmedStage ? 'Action Required: Confirm Transport' :
+                  isTransportConfirmed && status !== 'Completed' ? 'Transport Confirmed • Waiting for Buyer Actions' :
+                  isCompleted ? '✓ Order Completed & Settled' : status
+                ) : (
+                  isConfirmedStage ? 'Awaiting Farmer Transport Confirmation' :
+                  canLockEscrow ? 'Action Required: Lock Escrow Deposit' :
+                  canDispatch ? 'Escrow Vault Secured • Ready for Dispatch' :
+                  canMarkArrived ? 'In Transit to Destination Hub' :
+                  canVerify ? 'Arrived • Ready for Weight & Quality Verification' :
+                  canReleasePayout ? `Dual Verified (${verifiedQtyNum} ${order.actual_quantity_unit || order.unit || 'q'}) • Ready for Payout ₹${currentActiveAmount.toLocaleString('en-IN')}` :
+                  isCompleted ? '✓ Order Completed & Settled' : status
+                )}
+              </span>
             </div>
-          ` : ''}
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <!-- FARMER CONTROLS ONLY CONFIRM TRANSPORT -->
+              ${isFarmer && isConfirmedStage ? `
+                <button id="btn-farmer-confirm-${order.id}" onclick="confirmFarmerTransport('${order.id}')" class="px-4 py-2 bg-[#166534] hover:bg-[#14532d] text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                  <i data-lucide="truck" class="w-4 h-4 text-emerald-300"></i> Confirm Transport
+                </button>
+              ` : ''}
+
+              ${isFarmer && isTransportConfirmed && !isCompleted ? `
+                <span class="px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold rounded-xl flex items-center gap-1">
+                  <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Transport Confirmed
+                </span>
+              ` : ''}
+
+              <!-- BUYER CONTROLS SEQUENTIAL WORKFLOW -->
+              ${!isFarmer && isConfirmedStage ? `
+                <span class="px-3 py-1.5 bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold rounded-xl flex items-center gap-1">
+                  <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i> Awaiting Farmer Confirmation
+                </span>
+              ` : ''}
+
+              ${canLockEscrow ? `
+                <button id="btn-buyer-lock-${order.id}" onclick="lockOrderEscrow('${order.id}')" class="px-4 py-2 bg-[#166534] hover:bg-[#14532d] text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-300"></i> Lock Escrow
+                </button>
+              ` : ''}
+
+              ${canDispatch ? `
+                <button id="btn-buyer-dispatch-${order.id}" onclick="dispatchOrderTransport('${order.id}')" class="px-4 py-2 bg-[#166534] hover:bg-[#14532d] text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                  <i data-lucide="truck" class="w-4 h-4 text-emerald-300"></i> Dispatch / Start Transport
+                </button>
+              ` : ''}
+
+              ${canMarkArrived ? `
+                <button onclick="openMarkArrivedModal('${order.id}')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                  <i data-lucide="map-pin" class="w-4 h-4 text-blue-200"></i> Mark Arrived
+                </button>
+              ` : ''}
+
+              ${canVerify ? `
+                <button onclick="openVerifyQualityModal('${order.id}', '${(order.crop || 'Produce').replace(/'/g, "\\'")}', ${Number(order.quantity || 50)}, '${order.unit || 'quintal'}')" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                  <i data-lucide="scale" class="w-4 h-4 text-purple-200"></i> Verify Weight & Quality
+                </button>
+              ` : ''}
+
+              ${canReleasePayout ? `
+                <button onclick="openReleasePayoutModal('${order.id}', '${verifiedQtyNum} ${order.actual_quantity_unit || order.unit || 'quintal'}', ${currentActiveAmount}, '${order.quality_grade || 'Grade A'}', '${order.assay_result || 'Passed'}')" class="px-4 py-2 bg-[#166534] hover:bg-[#14532d] text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                  <i data-lucide="banknote" class="w-4 h-4 text-emerald-300"></i> Release Payout (₹${currentActiveAmount.toLocaleString('en-IN')})
+                </button>
+              ` : ''}
+
+              ${isCompleted ? `
+                <span class="px-3.5 py-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-xl flex items-center gap-1">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-700"></i> Order Completed
+                </span>
+                <button onclick="openReviewModal('${(isFarmer ? (order.buyer_company || order.buyer_name || 'FreshMart Agro') : (order.farmer_name || 'Producer')).replace(/'/g, "\\'")}', '${isFarmer ? 'Enterprise Buyer' : 'Verified Farmer'}', '${orderNum}', '${order.buyer_id || '8996d084-1f18-45bd-995a-27ac039436ce'}')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
+                  <span>⭐ Rate Experience</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
         </div>
       `;
     }
+
+    // =========================================================================
+    // ORDER LIFECYCLE ACTION HANDLERS (FARMER & BUYER) - ATTACHED TO GLOBAL WINDOW
+    // =========================================================================
+    let activeLifecycleOrderId = null;
+
+    window.confirmFarmerTransport = async function(orderId) {
+      const btn = document.getElementById('btn-farmer-confirm-' + orderId);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Confirming...';
+      }
+      try {
+        const res = await fetch(`${FIELDORA_API_BASE}/api/orders/${orderId}/confirm-transport`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-user-role': 'farmer' },
+          body: JSON.stringify({ user_role: 'farmer', confirmed_by: 'Farmer' })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert('✅ Transport readiness confirmed! The Buyer can now lock escrow funds.');
+          await loadOrdersList();
+        } else {
+          alert('❌ ' + (data.message || 'Failed to confirm transport'));
+        }
+      } catch (err) {
+        console.error('Confirm transport error:', err);
+        alert('❌ Error: ' + (err.message || 'Network error'));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    };
+
+    window.lockOrderEscrow = async function(orderId) {
+      const btn = document.getElementById('btn-buyer-lock-' + orderId);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Locking Escrow...';
+      }
+      try {
+        const res = await fetch(`${FIELDORA_API_BASE}/api/orders/${orderId}/escrow/lock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-user-role': 'buyer' },
+          body: JSON.stringify({ user_role: 'buyer' })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert('🔒 Escrow funds successfully locked! Ready to dispatch transport.');
+          await loadOrdersList();
+        } else {
+          alert('❌ ' + (data.message || 'Failed to lock escrow'));
+        }
+      } catch (err) {
+        console.error('Lock escrow error:', err);
+        alert('❌ Error: ' + (err.message || 'Network error'));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    };
+
+    window.dispatchOrderTransport = async function(orderId) {
+      const btn = document.getElementById('btn-buyer-dispatch-' + orderId);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Dispatching...';
+      }
+      try {
+        const res = await fetch(`${FIELDORA_API_BASE}/api/orders/${orderId}/dispatch`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-user-role': 'buyer' },
+          body: JSON.stringify({
+            vehicle_name: 'Direct Reefer Truck',
+            vehicle_type: 'Refrigerated Carrier',
+            vehicle_number: 'MH-04-TR-5542',
+            driver_name: 'Rameshwar Singh',
+            driver_phone: '+91 98160 55443',
+            pickup_location: 'Farm Gate',
+            delivery_location: 'Central Depot',
+            user_role: 'buyer'
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert('🚚 Shipment dispatched! Order is now IN TRANSIT.');
+          await loadOrdersList();
+        } else {
+          alert('❌ ' + (data.message || 'Failed to dispatch transport'));
+        }
+      } catch (err) {
+        console.error('Dispatch error:', err);
+        alert('❌ Error: ' + (err.message || 'Network error'));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    };
+
+    window.openMarkArrivedModal = function(orderId) {
+      activeLifecycleOrderId = orderId;
+      const idEl = document.getElementById('arrival-order-id');
+      if (idEl) idEl.innerText = 'Order #' + orderId;
+      const modal = document.getElementById('modal-mark-arrived');
+      if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeMarkArrivedModal = function() {
+      const modal = document.getElementById('modal-mark-arrived');
+      if (modal) modal.classList.add('hidden');
+      activeLifecycleOrderId = null;
+    };
+
+    window.submitMarkArrived = async function() {
+      if (!activeLifecycleOrderId) return;
+      const remarks = document.getElementById('arrival-remarks')?.value || 'Carrier arrived at destination hub. Seals intact.';
+      const btn = document.getElementById('btn-confirm-arrival');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Confirming...';
+      }
+      try {
+        const res = await fetch(`${FIELDORA_API_BASE}/api/orders/${activeLifecycleOrderId}/arrive`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-user-role': 'buyer' },
+          body: JSON.stringify({ arrival_remarks: remarks, user_role: 'buyer', arrived_by: 'Hub Receiving Manager' })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          closeMarkArrivedModal();
+          alert('📍 Shipment marked as ARRIVED! Ready for weight & quality verification.');
+          await loadOrdersList();
+        } else {
+          alert('❌ ' + (data.message || 'Failed to mark arrival'));
+        }
+      } catch (err) {
+        console.error('Mark arrived error:', err);
+        alert('❌ Error: ' + (err.message || 'Network error'));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    };
+
+    window.openVerifyQualityModal = function(orderId, cropTitle, expectedQty, unit) {
+      activeLifecycleOrderId = orderId;
+      const idEl = document.getElementById('verify-order-id');
+      const cropEl = document.getElementById('verify-produce-name');
+      const expEl = document.getElementById('verify-expected-qty');
+      const actualInput = document.getElementById('verify-actual-qty');
+      const unitEl = document.getElementById('verify-unit-label');
+
+      if (idEl) idEl.innerText = 'Order #' + orderId;
+      if (cropEl) cropEl.innerText = cropTitle || 'Produce Lot';
+      if (expEl) expEl.innerText = (expectedQty || 50) + ' ' + (unit || 'Quintals');
+      if (actualInput) actualInput.value = expectedQty || 50;
+      if (unitEl) unitEl.innerText = unit || 'Quintals';
+
+      const modal = document.getElementById('modal-verify-quality');
+      if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeVerifyQualityModal = function() {
+      const modal = document.getElementById('modal-verify-quality');
+      if (modal) modal.classList.add('hidden');
+      activeLifecycleOrderId = null;
+    };
+
+    window.submitVerifyQuality = async function() {
+      if (!activeLifecycleOrderId) return;
+      const actualQty = Number(document.getElementById('verify-actual-qty')?.value || 50);
+      const grade = document.getElementById('verify-quality-grade')?.value || 'Grade A';
+      const assayResult = document.getElementById('verify-assay-result')?.value || 'Passed';
+      const notes = document.getElementById('verify-assay-notes')?.value || 'Destination verification passed.';
+      const remarks = document.getElementById('verify-remarks')?.value || 'Weighbridge slip verified.';
+
+      const btn = document.getElementById('btn-confirm-verify');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Verifying...';
+      }
+      try {
+        const res = await fetch(`${FIELDORA_API_BASE}/api/orders/${activeLifecycleOrderId}/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-user-role': 'buyer' },
+          body: JSON.stringify({
+            actual_received_quantity: actualQty,
+            quality_grade: grade,
+            assay_result: assayResult,
+            assay_notes: notes,
+            verification_remarks: remarks,
+            user_role: 'buyer'
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          closeVerifyQualityModal();
+          alert('🔬 Weight & Quality Verified! Ready to release final payout.');
+          await loadOrdersList();
+        } else {
+          alert('❌ ' + (data.message || 'Verification failed'));
+        }
+      } catch (err) {
+        console.error('Verification error:', err);
+        alert('❌ Error: ' + (err.message || 'Network error'));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    };
+
+    window.openReleasePayoutModal = function(orderId, verifiedQty, totalAmount, grade, assay) {
+      activeLifecycleOrderId = orderId;
+      const idEl = document.getElementById('payout-order-id');
+      const qtyEl = document.getElementById('payout-verified-qty');
+      const gradeEl = document.getElementById('payout-quality-grade');
+      const assayEl = document.getElementById('payout-assay-result');
+      const amtEl = document.getElementById('payout-final-amount');
+
+      if (idEl) idEl.innerText = 'Order #' + orderId;
+      if (qtyEl) qtyEl.innerText = verifiedQty || '50 Quintals';
+      if (gradeEl) gradeEl.innerText = grade || 'Grade A';
+      if (assayEl) assayEl.innerText = assay || 'Passed';
+      if (amtEl) amtEl.innerText = '₹' + Number(totalAmount || 140000).toLocaleString('en-IN');
+
+      const modal = document.getElementById('modal-release-payout');
+      if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeReleasePayoutModal = function() {
+      const modal = document.getElementById('modal-release-payout');
+      if (modal) modal.classList.add('hidden');
+      activeLifecycleOrderId = null;
+    };
+
+    window.submitReleasePayout = async function() {
+      if (!activeLifecycleOrderId) return;
+      const btn = document.getElementById('btn-confirm-payout');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Releasing Payout...';
+      }
+      try {
+        const res = await fetch(`${FIELDORA_API_BASE}/api/orders/${activeLifecycleOrderId}/release-payout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-user-role': 'buyer' },
+          body: JSON.stringify({ user_role: 'buyer', notes: 'Smart escrow payout released upon dual verification' })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          closeReleasePayoutModal();
+          alert('🎉 ' + (data.message || 'Payout released successfully! Order is now COMPLETED.'));
+          await loadOrdersList();
+        } else {
+          alert('❌ ' + (data.message || 'Payout failed'));
+        }
+      } catch (err) {
+        console.error('Payout error:', err);
+        alert('❌ Error: ' + (err.message || 'Network error'));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    };
 
     async function loadOrdersList() {
       try {
@@ -8718,6 +9087,203 @@
       loadOrderReviewState('FD-1038', '039b5a52-cfab-42df-9cbc-22214e210de5', 'fd-1038-review-container');
     }, 100);
   </script>
+
+
+  
+  
+  <!-- ========================================================================= -->
+  <!-- MODAL 1: SHIPMENT ARRIVAL -->
+  <!-- ========================================================================= -->
+  <div id="modal-mark-arrived" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-[#E6ECE6] animate-in fade-in zoom-in duration-200">
+      <div class="p-6 bg-[#06240f] text-white flex items-center justify-between border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-blue-500/20 flex items-center justify-center border border-blue-400/30 text-blue-400">
+            <i data-lucide="map-pin" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-lg text-white">Mark Shipment Arrived</h3>
+            <p class="text-xs text-gray-300">Destination Hub Receipt Confirmation</p>
+          </div>
+        </div>
+        <button onclick="closeMarkArrivedModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-300 hover:text-white transition-all cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs">
+        <div class="p-3.5 bg-[#F8FAF9] rounded-2xl border border-[#E6ECE6] space-y-1">
+          <span class="text-secondary-text text-[11px] block">Order Reference</span>
+          <span id="arrival-order-id" class="font-mono font-bold text-sm text-deep-forest">FLD-1039</span>
+        </div>
+
+        <div>
+          <label class="font-bold text-deep-forest block mb-1.5">Arrival Remarks (Optional)</label>
+          <textarea id="arrival-remarks" rows="2" placeholder="e.g. Carrier arrived at Vashi Gate 4. Seals inspected and intact." class="w-full p-3 rounded-xl border border-[#E6ECE6] bg-[#F8FAF9] focus:bg-white focus:border-blue-600 outline-none text-xs transition-all"></textarea>
+        </div>
+      </div>
+
+      <div class="p-4 bg-gray-50 border-t border-[#E6ECE6] flex items-center justify-end gap-2.5">
+        <button onclick="closeMarkArrivedModal()" class="px-4 py-2 bg-white border border-[#E6ECE6] hover:bg-gray-100 text-gray-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+          Cancel
+        </button>
+        <button id="btn-confirm-arrival" onclick="submitMarkArrived()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i> Confirm Arrival
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 2: QUALITY & WEIGHMENT VERIFICATION -->
+  <!-- ========================================================================= -->
+  <div id="modal-verify-quality" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-[#E6ECE6] animate-in fade-in zoom-in duration-200">
+      <div class="p-6 bg-[#06240f] text-white flex items-center justify-between border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-purple-500/20 flex items-center justify-center border border-purple-400/30 text-purple-400">
+            <i data-lucide="scale" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-lg text-white">Quality & Weighment Verification</h3>
+            <p class="text-xs text-gray-300">Destination weighbridge & NABL assay verification</p>
+          </div>
+        </div>
+        <button onclick="closeVerifyQualityModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-300 hover:text-white transition-all cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs max-h-[75vh] overflow-y-auto">
+        <div class="grid grid-cols-2 gap-3 bg-[#F8FAF9] p-4 rounded-2xl border border-[#E6ECE6]">
+          <div>
+            <span class="text-secondary-text block text-[11px]">Order Reference</span>
+            <span id="verify-order-id" class="font-mono font-bold text-deep-forest">FLD-1039</span>
+          </div>
+          <div>
+            <span class="text-secondary-text block text-[11px]">Produce Lot</span>
+            <span id="verify-produce-name" class="font-bold text-deep-forest">Produce</span>
+          </div>
+          <div class="col-span-2 pt-2 border-t border-[#E6ECE6] flex justify-between items-center">
+            <span class="text-secondary-text">Contract Expected: <strong id="verify-expected-qty" class="text-deep-forest">50 Quintals</strong></span>
+            <span class="text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Simulated Escrow Active</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="font-bold text-deep-forest block mb-1">Actual Received Quantity *</label>
+          <div class="flex items-center gap-2">
+            <input type="number" id="verify-actual-qty" step="0.1" min="0.1" class="flex-1 p-3 rounded-xl border border-[#E6ECE6] bg-[#F8FAF9] focus:bg-white focus:border-purple-600 outline-none text-sm font-mono font-bold text-deep-forest" placeholder="e.g. 49.2" />
+            <span id="verify-unit-label" class="px-3.5 py-3 bg-gray-100 border border-[#E6ECE6] rounded-xl font-bold text-gray-600 text-xs">Quintals</span>
+          </div>
+          <p class="text-[10px] text-secondary-text mt-1">Final payout will be computed accurately on this verified net weight.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="font-bold text-deep-forest block mb-1">Quality Grade *</label>
+            <select id="verify-quality-grade" class="w-full p-2.5 rounded-xl border border-[#E6ECE6] bg-[#F8FAF9] focus:bg-white focus:border-purple-600 outline-none text-xs font-semibold">
+              <option value="Grade A" selected>Grade A (Premium)</option>
+              <option value="Grade B">Grade B (Standard)</option>
+              <option value="Grade C">Grade C (Commercial)</option>
+              <option value="Other">Other / Off-Spec</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-bold text-deep-forest block mb-1">Assay Result *</label>
+            <select id="verify-assay-result" class="w-full p-2.5 rounded-xl border border-[#E6ECE6] bg-[#F8FAF9] focus:bg-white focus:border-purple-600 outline-none text-xs font-semibold">
+              <option value="Passed" selected>Passed (Meets Standard)</option>
+              <option value="Failed">Failed (Dispute / Hold)</option>
+              <option value="Pending">Pending Lab Analysis</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="font-bold text-deep-forest block mb-1">Assay Notes (Optional)</label>
+          <textarea id="verify-assay-notes" rows="2" placeholder="e.g. Moisture 12.0%, standard quality check passed." class="w-full p-2.5 rounded-xl border border-[#E6ECE6] bg-[#F8FAF9] focus:bg-white focus:border-purple-600 outline-none text-xs"></textarea>
+        </div>
+
+        <div>
+          <label class="font-bold text-deep-forest block mb-1">Verification Remarks (Optional)</label>
+          <textarea id="verify-remarks" rows="2" placeholder="e.g. Weighbridge slip WB-492 verified by receiving manager." class="w-full p-2.5 rounded-xl border border-[#E6ECE6] bg-[#F8FAF9] focus:bg-white focus:border-purple-600 outline-none text-xs"></textarea>
+        </div>
+      </div>
+
+      <div class="p-4 bg-gray-50 border-t border-[#E6ECE6] flex items-center justify-end gap-2.5">
+        <button onclick="closeVerifyQualityModal()" class="px-4 py-2 bg-white border border-[#E6ECE6] hover:bg-gray-100 text-gray-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+          Cancel
+        </button>
+        <button id="btn-confirm-verify" onclick="submitVerifyQuality()" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5">
+          <i data-lucide="check-check" class="w-4 h-4"></i> Verify Weight & Quality
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 3: RELEASE PAYOUT -->
+  <!-- ========================================================================= -->
+  <div id="modal-release-payout" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-[#E6ECE6] animate-in fade-in zoom-in duration-200">
+      <div class="p-6 bg-[#06240f] text-white flex items-center justify-between border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-400/30 text-emerald-400">
+            <i data-lucide="banknote" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-lg text-white">Release Payout</h3>
+            <p class="text-xs text-emerald-300">Smart Escrow Vault Payout Authorization</p>
+          </div>
+        </div>
+        <button onclick="closeReleasePayoutModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-300 hover:text-white transition-all cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs">
+        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-secondary-text text-[11px]">Order Reference</span>
+            <span id="payout-order-id" class="font-mono font-bold text-deep-forest">FLD-1039</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-secondary-text text-[11px]">Verified Quantity</span>
+            <span id="payout-verified-qty" class="font-bold text-deep-forest">50 Quintals</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-secondary-text text-[11px]">Quality Grade</span>
+            <span id="payout-quality-grade" class="font-bold text-emerald-800">Grade A</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-secondary-text text-[11px]">NABL Assay Status</span>
+            <span id="payout-assay-result" class="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-[10px]">Passed</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-secondary-text text-[11px]">Escrow Vault</span>
+            <span class="font-bold text-emerald-800">Locked (Simulated Vault)</span>
+          </div>
+          <div class="pt-2 border-t border-emerald-200 flex justify-between items-baseline">
+            <span class="font-bold text-sm text-deep-forest">Final Calculated Payout</span>
+            <span id="payout-final-amount" class="font-mono font-extrabold text-xl text-[#166534]">₹1,40,000</span>
+          </div>
+        </div>
+
+        <p class="text-gray-600 text-center text-xs leading-relaxed">
+          Are you sure you want to release the final payout? Funds will be credited directly to the farmer's account and the order finalized.
+        </p>
+      </div>
+
+      <div class="p-4 bg-gray-50 border-t border-[#E6ECE6] flex items-center justify-end gap-2.5">
+        <button onclick="closeReleasePayoutModal()" class="px-4 py-2 bg-white border border-[#E6ECE6] hover:bg-gray-100 text-gray-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+          Cancel
+        </button>
+        <button id="btn-confirm-payout" onclick="submitReleasePayout()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Release Payout
+        </button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
