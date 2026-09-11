@@ -3314,7 +3314,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <a href="tel:+919822144550" class="px-3 py-1.5 border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-lg text-deep-forest">Call Driver</a>
-                  <button id="b-btn-next-milestone" onclick="advanceTransportMilestone()" class="px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity">Next: Start Transit ➔</button>
+                  <span id="b-tracking-live-status-badge" class="px-3 py-1.5 bg-[#E8F3EB] text-[#166534] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs border border-[#bbf7d0]"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Status: Vehicle Assigned</span></span>
                 </div>
               </div>
             </div>
@@ -4301,7 +4301,12 @@
       } else if (tabName === 'farmer-transport') {
         document.getElementById('f-view-transport').classList.remove('hidden');
         document.getElementById('f-tab-transport').className = 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl sidebar-active transition-all';
+        loadTransportState();
         recalculateTransportRoute();
+        updateMilestoneUI();
+        if (TransportState.latestTelemetry) {
+          renderTelemetryUI(TransportState.latestTelemetry);
+        }
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4367,7 +4372,12 @@
       } else if (tabName === 'buyer-transport') {
         document.getElementById('b-view-transport').classList.remove('hidden');
         document.getElementById('b-tab-transport').className = 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl sidebar-active transition-all';
+        loadTransportState();
         recalculateTransportRoute();
+        updateMilestoneUI();
+        if (TransportState.latestTelemetry) {
+          renderTelemetryUI(TransportState.latestTelemetry);
+        }
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4815,35 +4825,51 @@
       setMapRoute(TransportState.selectedRoute || 'optimal');
     }
 
-    function returnToTransportConfig() {
-      if (TransportState.animInterval) {
-        clearInterval(TransportState.animInterval);
-        TransportState.animInterval = null;
+    function saveTransportState() {
+      try {
+        const stateToSave = {
+          isTracking: TransportState.isTracking || false,
+          milestoneIndex: TransportState.milestoneIndex || 0,
+          selectedVehicle: TransportState.selectedVehicle,
+          selectedPickup: TransportState.selectedPickup,
+          selectedDelivery: TransportState.selectedDelivery,
+          orderWeight: TransportState.orderWeight,
+          cropName: TransportState.cropName,
+          selectedRoute: TransportState.selectedRoute,
+          latestTelemetry: TransportState.latestTelemetry,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('fieldora_transport_state', JSON.stringify(stateToSave));
+        if (typeof BroadcastChannel !== 'undefined') {
+          try {
+            const bc = new BroadcastChannel('fieldora_transport_channel');
+            bc.postMessage({ type: 'TRANSPORT_STATE_UPDATE', state: stateToSave });
+            bc.close();
+          } catch (e) {}
+        }
+      } catch (e) {
+        console.warn('Failed to save transport state:', e);
       }
-      ['f-', 'b-'].forEach(p => {
-        const cfg = document.getElementById(`${p}transport-config-view`);
-        const trk = document.getElementById(`${p}transport-tracking-view`);
-        if (cfg) cfg.classList.remove('hidden');
-        if (trk) trk.classList.add('hidden');
-      });
-      lucide.createIcons();
     }
 
-    function confirmDirectTransport() {
+    function syncTransportDriverUI() {
       const veh = TransportState.vehicles.find(v => v.id === TransportState.selectedVehicle) || TransportState.vehicles[0];
+      const isCompletedAll = (TransportState.milestoneIndex >= 4);
 
       ['f-', 'b-'].forEach(p => {
         const cfg = document.getElementById(`${p}transport-config-view`);
         const trk = document.getElementById(`${p}transport-tracking-view`);
-        if (cfg) cfg.classList.add('hidden');
-        if (trk) trk.classList.remove('hidden');
+        if (TransportState.isTracking) {
+          if (cfg) cfg.classList.add('hidden');
+          if (trk) trk.classList.remove('hidden');
+        } else {
+          if (cfg) cfg.classList.remove('hidden');
+          if (trk) trk.classList.add('hidden');
+        }
 
-        // Update driver details in tracking view
-        const driverNameEl = document.querySelector(`#${p}transport-tracking-view strong`);
         const step1Sub = document.querySelector(`#${p}m-step-1 p`);
         if (step1Sub) step1Sub.innerText = `${veh.model} ${veh.reg} assigned`;
 
-        // Update Driver card
         const driverBox = document.querySelector(`#${p}transport-tracking-view .pt-4.border-t`);
         if (driverBox) {
           const initials = veh.driver.split(' ').map(n => n[0]).join('');
@@ -4860,14 +4886,63 @@
             <div class="flex items-center gap-2">
               <button onclick="returnToTransportConfig()" class="px-3 py-1.5 border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-lg text-secondary-text">← Reconfigure</button>
               <a href="tel:${veh.phone}" class="px-3 py-1.5 border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-lg text-deep-forest">Call Driver</a>
-              <button id="${p}btn-next-milestone" onclick="advanceTransportMilestone()" class="px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity">Next: Start Transit ➔</button>
+              ${p === 'f-' ? `<button id="${p}btn-next-milestone" onclick="advanceTransportMilestone()" class="px-4 py-2 ${isCompletedAll ? 'bg-emerald-800 text-white cursor-default' : 'btn-buyer hover:opacity-90'} text-xs font-bold rounded-xl shadow-button transition-opacity">${isCompletedAll ? '✓ Delivered & Completed' : 'Next: Start Transit ➔'}</button>` : `<span id="b-tracking-live-status-badge" class="px-3 py-1.5 ${isCompletedAll ? 'bg-[#dcfce7] text-[#166534] border-[#86efac]' : 'bg-[#E8F3EB] text-[#166534] border-[#bbf7d0]'} text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs border">${isCompletedAll ? '<span class="text-emerald-700 font-bold">✓</span><span>Status: Delivered & Completed</span>' : '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Status: Vehicle Assigned</span>'}</span>`}
             </div>
           `;
         }
       });
+    }
 
+    function loadTransportState() {
+      try {
+        const raw = localStorage.getItem('fieldora_transport_state');
+        if (!raw) return false;
+        const saved = JSON.parse(raw);
+        if (saved && typeof saved.milestoneIndex === 'number') {
+          TransportState.isTracking = !!saved.isTracking;
+          TransportState.milestoneIndex = saved.milestoneIndex;
+          if (saved.selectedVehicle) TransportState.selectedVehicle = saved.selectedVehicle;
+          if (saved.selectedPickup) TransportState.selectedPickup = saved.selectedPickup;
+          if (saved.selectedDelivery) TransportState.selectedDelivery = saved.selectedDelivery;
+          if (saved.orderWeight) TransportState.orderWeight = saved.orderWeight;
+          if (saved.cropName) TransportState.cropName = saved.cropName;
+          if (saved.selectedRoute) TransportState.selectedRoute = saved.selectedRoute;
+          if (saved.latestTelemetry) TransportState.latestTelemetry = saved.latestTelemetry;
+          
+          syncTransportDriverUI();
+          return true;
+        }
+      } catch (e) {
+        console.warn('Failed to load transport state:', e);
+      }
+      return false;
+    }
+
+    function returnToTransportConfig() {
+      if (TransportState.animInterval) {
+        clearInterval(TransportState.animInterval);
+        TransportState.animInterval = null;
+      }
+      TransportState.isTracking = false;
+      TransportState.milestoneIndex = 0;
+      saveTransportState();
+      ['f-', 'b-'].forEach(p => {
+        const cfg = document.getElementById(`${p}transport-config-view`);
+        const trk = document.getElementById(`${p}transport-tracking-view`);
+        if (cfg) cfg.classList.remove('hidden');
+        if (trk) trk.classList.add('hidden');
+      });
+      lucide.createIcons();
+    }
+
+    function confirmDirectTransport() {
+      const veh = TransportState.vehicles.find(v => v.id === TransportState.selectedVehicle) || TransportState.vehicles[0];
+
+      TransportState.isTracking = true;
       TransportState.milestoneIndex = 1;
+      syncTransportDriverUI();
       updateMilestoneUI();
+      saveTransportState();
       sendGpsTelemetry(0.15, 0);
       lucide.createIcons();
 
@@ -4914,11 +4989,14 @@
       .then(result => {
         if (result && result.data) {
           TransportState.latestTelemetry = result.data;
+          saveTransportState();
           renderTelemetryUI(result.data, wp.x, wp.y);
         }
       })
       .catch(err => {
         console.warn('GPS Telemetry send error:', err);
+        TransportState.latestTelemetry = payload;
+        saveTransportState();
         renderTelemetryUI(payload, wp.x, wp.y);
       });
     }
@@ -5024,19 +5102,39 @@
       const nextDelivTxt = typeof t === 'function' ? t('btn_next_complete_delivery', 'Next: Complete Delivery ✓') : 'Next: Complete Delivery ✓';
       const completedTxt = typeof t === 'function' ? t('btn_delivered_completed', '✓ Delivered & Completed') : '✓ Delivered & Completed';
 
-      ['f-', 'b-'].forEach(p => {
-        const nextBtn = document.getElementById(`${p}btn-next-milestone`);
-        if (nextBtn) {
-          if (idx === 1) nextBtn.innerText = nextStartTxt;
-          else if (idx === 2) nextBtn.innerText = nextArriveTxt;
-          else if (idx === 3) nextBtn.innerText = nextDelivTxt;
-          else if (idx >= 4) {
-            nextBtn.innerText = completedTxt;
-            nextBtn.disabled = true;
-            nextBtn.className = 'px-4 py-2 bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-xs cursor-default';
-          }
+      const farmerNextBtn = document.getElementById('f-btn-next-milestone');
+      if (farmerNextBtn) {
+        if (idx === 1) {
+          farmerNextBtn.innerText = nextStartTxt;
+          farmerNextBtn.disabled = false;
+          farmerNextBtn.className = 'px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity';
+        } else if (idx === 2) {
+          farmerNextBtn.innerText = nextArriveTxt;
+          farmerNextBtn.disabled = false;
+          farmerNextBtn.className = 'px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity';
+        } else if (idx === 3) {
+          farmerNextBtn.innerText = nextDelivTxt;
+          farmerNextBtn.disabled = false;
+          farmerNextBtn.className = 'px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity';
+        } else if (idx >= 4) {
+          farmerNextBtn.innerText = completedTxt;
+          farmerNextBtn.disabled = true;
+          farmerNextBtn.className = 'px-4 py-2 bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-xs cursor-default';
         }
-      });
+      }
+
+      const buyerStatusBadge = document.getElementById('b-tracking-live-status-badge');
+      if (buyerStatusBadge) {
+        if (isCompletedAll) {
+          buyerStatusBadge.className = 'px-3 py-1.5 bg-[#dcfce7] text-[#166534] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs border border-[#86efac]';
+          buyerStatusBadge.innerHTML = `<span class="text-emerald-700 font-bold">✓</span><span>Status: Delivered & Completed</span>`;
+        } else {
+          buyerStatusBadge.className = 'px-3 py-1.5 bg-[#E8F3EB] text-[#166534] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs border border-[#bbf7d0]';
+          const currentMilestoneTitle = stepTitles[Math.min(3, Math.max(0, idx - 1))];
+          const statusClean = currentMilestoneTitle.replace(/^[0-9]\.\s*/, '');
+          buyerStatusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Status: ${statusClean}</span>`;
+        }
+      }
     }
 
     function advanceTransportMilestone() {
@@ -5047,7 +5145,9 @@
 
       if (TransportState.milestoneIndex < 4) {
         TransportState.milestoneIndex++;
+        TransportState.isTracking = true;
         updateMilestoneUI();
+        saveTransportState();
 
         const orderId = 'TR-1042';
         const wpMap = {
@@ -5084,8 +5184,10 @@
         { x: 420, y: 250 }
       ];
 
+      TransportState.isTracking = true;
       TransportState.milestoneIndex = 1;
       updateMilestoneUI();
+      saveTransportState();
       sendGpsTelemetry(0.08, 0);
 
       TransportState.animInterval = setInterval(() => {
@@ -5116,17 +5218,48 @@
         if (progress >= 0.25 && progress < 0.50 && TransportState.milestoneIndex < 2) {
           TransportState.milestoneIndex = 2;
           updateMilestoneUI();
+          saveTransportState();
           sendGpsTelemetry(progress, 2);
         } else if (progress >= 0.70 && progress < 0.95 && TransportState.milestoneIndex < 3) {
           TransportState.milestoneIndex = 3;
           updateMilestoneUI();
+          saveTransportState();
           sendGpsTelemetry(progress, 3);
         } else if (progress >= 0.98 && TransportState.milestoneIndex < 4) {
           TransportState.milestoneIndex = 4;
           updateMilestoneUI();
+          saveTransportState();
           sendGpsTelemetry(1.0, 4);
         }
       }, 150);
+    }
+
+    // Cross-Tab and Real-time Storage Listeners
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'fieldora_transport_state') {
+          loadTransportState();
+          updateMilestoneUI();
+          if (TransportState.latestTelemetry) {
+            renderTelemetryUI(TransportState.latestTelemetry);
+          }
+        }
+      });
+
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('fieldora_transport_channel');
+          bc.onmessage = (event) => {
+            if (event.data && event.data.type === 'TRANSPORT_STATE_UPDATE') {
+              loadTransportState();
+              updateMilestoneUI();
+              if (TransportState.latestTelemetry) {
+                renderTelemetryUI(TransportState.latestTelemetry);
+              }
+            }
+          };
+        } catch (e) {}
+      }
     }
 
     /* =========================================================================
@@ -6527,10 +6660,11 @@
       container.innerHTML = window.FIELDORA_PRODUCE_DATA.map(item => {
         const statusLabel = item.status === 'Under Negotiation' ? underNegTxt : activeTxt;
         const statusBadgeClass = item.status === 'Under Negotiation' ? 'bg-[#fef3c7] text-[#92400e]' : 'bg-[#dcfce7] text-[#166534]';
+        const itemImg = getProduceImage((item.crop || '') + ' ' + (item.variety || '') + ' ' + (item.name || ''));
         return `
         <div class="ref-card overflow-hidden flex flex-col justify-between">
           <div>
-            <img src="${item.image}" alt="${item.crop}" class="w-full h-40 object-cover" onerror="this.src='https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80'" />
+            <img src="${itemImg}" alt="${item.crop}" class="w-full h-40 object-cover" onerror="this.src='https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80'" />
             <div class="p-4 space-y-2">
               <div class="flex justify-between items-baseline">
                 <h4 class="font-bold text-base text-deep-forest">${item.variety || item.crop}</h4>
@@ -6571,11 +6705,13 @@
       const sendOfferTxt = typeof t === 'function' ? t('btn_send_offer', 'Send Purchase Offer') : 'Send Purchase Offer';
       const unitQtl = typeof t === 'function' ? t('unit_qtl', 'Qtl') : 'Qtl';
 
-      container.innerHTML = window.FIELDORA_PRODUCE_DATA.map((item, idx) => `
+      container.innerHTML = window.FIELDORA_PRODUCE_DATA.map((item, idx) => {
+        const itemImg = getProduceImage((item.crop || '') + ' ' + (item.variety || '') + ' ' + (item.name || ''));
+        return `
         <div class="portal-card overflow-hidden flex flex-col justify-between group b-item ${idx === 0 ? 'border-2 border-[#166534]/40' : ''}" data-crop="${(item.crop || '').toLowerCase()}">
           <div>
             <div class="relative">
-              <img src="${item.image}" alt="${item.crop}" class="w-full h-44 object-cover" onerror="this.src='https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80'" />
+              <img src="${itemImg}" alt="${item.crop}" class="w-full h-44 object-cover" onerror="this.src='https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80'" />
               ${idx === 0 ? `
                 <span class="absolute top-2.5 left-2.5 px-2.5 py-1 bg-[#166534] text-white text-[10px] font-extrabold rounded-full shadow-md flex items-center gap-1">
                   <span>${bestMatchTxt}</span>
@@ -6624,51 +6760,51 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function getProduceImage(crop) {
-      const lower = (crop || '').toLowerCase().trim();
-      if (lower.includes('onion') || lower.includes('pyaz') || lower.includes('kanda')) {
+    function getProduceImage(cropOrVariety) {
+      const lower = (cropOrVariety || '').toLowerCase().trim();
+      if (lower.includes('onion') || lower.includes('pyaz') || lower.includes('kanda') || lower.includes('garwa') || lower.includes('bhima')) {
         return 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('potato') || lower.includes('batata') || lower.includes('aaloo')) {
+      if (lower.includes('potato') || lower.includes('batata') || lower.includes('aaloo') || lower.includes('kufri') || lower.includes('chipsona')) {
         return 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('tomato') || lower.includes('tamatar')) {
+      if (lower.includes('tomato') || lower.includes('tamatar') || lower.includes('abhinav') || lower.includes('himsona') || lower.includes('roma')) {
         return 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('capsicum') || lower.includes('shimla') || lower.includes('bell pepper')) {
+      if (lower.includes('capsicum') || lower.includes('shimla') || lower.includes('bell pepper') || lower.includes('indra')) {
         return 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('chilli') || lower.includes('chili') || lower.includes('mirchi')) {
-        return 'https://images.unsplash.com/photo-1588252303782-cb80119abd6d?auto=format&fit=crop&w=800&q=80';
+      if (lower.includes('chilli') || lower.includes('chili') || lower.includes('mirchi') || lower.includes('jwala') || lower.includes('lavangi') || lower.includes('teja')) {
+        return 'https://images.unsplash.com/photo-1597362925123-77861d3fbac7?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('ginger') || lower.includes('adrak') || lower.includes('aale')) {
+      if (lower.includes('ginger') || lower.includes('adrak') || lower.includes('aale') || lower.includes('satara') || lower.includes('maran') || lower.includes('wayanad')) {
         return 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('garlic') || lower.includes('lahsun') || lower.includes('lasun')) {
+      if (lower.includes('garlic') || lower.includes('lahsun') || lower.includes('lasun') || lower.includes('yamuna safed')) {
         return 'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('lemon') || lower.includes('nimbu') || lower.includes('limbu') || lower.includes('lime')) {
-        return 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=800&q=80';
+      if (lower.includes('lemon') || lower.includes('nimbu') || lower.includes('limbu') || lower.includes('lime') || lower.includes('kagzi') || lower.includes('vikram') || lower.includes('balaji')) {
+        return 'https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('carrot') || lower.includes('gajar')) {
+      if (lower.includes('carrot') || lower.includes('gajar') || lower.includes('pusa kesar') || lower.includes('kuroda')) {
         return 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('rice') || lower.includes('paddy') || lower.includes('basmati') || lower.includes('chawal')) {
+      if (lower.includes('rice') || lower.includes('paddy') || lower.includes('basmati') || lower.includes('chawal') || lower.includes('sona masoori')) {
         return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('wheat') || lower.includes('gehun')) {
+      if (lower.includes('wheat') || lower.includes('gehun') || lower.includes('sharbati') || lower.includes('lokwan')) {
         return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('jowar') || lower.includes('sorghum') || lower.includes('maldandi')) {
-        return 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=800&q=80';
+      if (lower.includes('jowar') || lower.includes('sorghum') || lower.includes('maldandi') || lower.includes('csh-14') || lower.includes('suchitra')) {
+        return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('bajra') || lower.includes('millet')) {
-        return 'https://images.unsplash.com/photo-1607672632458-9eb56696346b?auto=format&fit=crop&w=800&q=80';
+      if (lower.includes('bajra') || lower.includes('millet') || lower.includes('pearl millet') || lower.includes('hhb-67') || lower.includes('proagro')) {
+        return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('masoor') || lower.includes('lentil') || lower.includes('dal')) {
-        return 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=800&q=80';
+      if (lower.includes('masoor') || lower.includes('lentil') || lower.includes('dal') || lower.includes('ipl-81')) {
+        return 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=800&q=80';
       }
-      if (lower.includes('soya') || lower.includes('soybean')) {
+      if (lower.includes('soya') || lower.includes('soybean') || lower.includes('js-335') || lower.includes('js-9560') || lower.includes('nrc-37')) {
         return 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=800&q=80';
       }
       return 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80';
@@ -8559,65 +8695,115 @@
         lucide.createIcons();
 
         const userData = currentAuthUser ? {
+          id: currentAuthUser.id,
           name: currentAuthUser.name,
           email: currentAuthUser.email,
           role: currentAuthUser.role,
           location: currentAuthUser.location || '',
           organization: currentAuthUser.organization || ''
-        } : { role: 'farmer', name: 'Guest' };
+        } : { role: 'farmer', name: 'Rajendra Patel (Farmer)' };
 
-        const produceData = (JSON.parse(localStorage.getItem('fieldora_produce_items') || '[]')).map(p => ({
-          crop: p.crop, variety: p.variety, quantity: p.qty + ' ' + p.unit,
-          price: '₹' + p.price + '/q', location: p.location, quality: p.grade, status: p.status, farmer: p.farmer
-        }));
+        const produceList = window.FIELDORA_PRODUCE_DATA || JSON.parse(localStorage.getItem('fieldora_produce_items') || '[]');
+        const offersList = window.FIELDORA_OFFERS_DATA || JSON.parse(localStorage.getItem('fieldora_offers_items') || '[]');
+        const rfqList = window.FIELDORA_RFQ_DATA || JSON.parse(localStorage.getItem('fieldora_rfq_items') || '[]');
+        const ordersList = window.FIELDORA_ORDERS_DATA || JSON.parse(localStorage.getItem('fieldora_orders_items') || '[]');
 
-        const rfqData = (JSON.parse(localStorage.getItem('fieldora_rfq_items') || '[]')).map(r => ({
-          crop: r.crop, buyer: r.buyer, quantity: r.qty + ' Quintals',
-          targetPrice: '₹' + r.price + '/q', deliveryLocation: r.dest, matchScore: r.match + '%'
-        }));
+        const activeListingsCount = produceList.length;
+        const pendingOffersCount = offersList.filter(o => !['rejected', 'declined', 'cancelled'].includes((o.status || '').toLowerCase())).length;
+        const activeOrdersCount = ordersList.length > 0 ? ordersList.filter(o => !['completed', 'cancelled'].includes((o.status || '').toLowerCase())).length : 1;
+        const totalValuationNum = produceList.reduce((acc, cur) => acc + ((Number(cur.price) || 0) * (Number(cur.qty) || 0)), 0);
+        const totalValuationStr = '₹' + (totalValuationNum > 0 ? totalValuationNum.toLocaleString('en-IN') : '3,77,500');
 
-        const offersData = (JSON.parse(localStorage.getItem('fieldora_offers_items') || '[]')).map(o => ({
-          buyer: o.buyer_name || o.buyer || o.buyerCompany || 'Unknown',
-          crop: o.crop_name || o.crop || 'Unknown',
-          quantity: (o.requested_quantity || o.quantity || 0) + ' Quintals',
-          offeredPrice: '₹' + (o.offered_price_per_unit || o.offered_price || 0) + '/q',
-          status: o.status,
-          date: o.created_at || o.date || '',
-          totalValue: '₹' + (o.total_offer_amount || o.totalVal || 0).toLocaleString('en-IN')
-        }));
+        const dashboardStats = {
+          activeListingsCount,
+          buyerOffersCount: pendingOffersCount,
+          activeOrdersCount,
+          totalValuation: totalValuationStr,
+          activeRfqsCount: rfqList.length
+        };
 
-        try {
-          const response = await fetch('http://localhost:5000/api/ai/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message: query,
-              userRole: currentAuthUser?.role || 'farmer',
-              userData: { ...userData, listings: produceData, requirements: rfqData, incomingOffers: offersData },
-              marketData: window.FIELDORA_PRODUCE_DATA || [],
-              history: aiChatHistory
-            })
-          });
+        const transportPayload = {
+          milestoneIndex: TransportState.milestoneIndex,
+          isTracking: TransportState.isTracking,
+          selectedVehicle: TransportState.selectedVehicle,
+          pickup: TransportState.selectedPickup,
+          delivery: TransportState.selectedDelivery,
+          orderWeight: TransportState.orderWeight,
+          crop: TransportState.cropName,
+          latestTelemetry: TransportState.latestTelemetry
+        };
 
-          const data = await response.json();
+        let data = null;
+        const candidateUrls = [
+          '/api/ai/chat',
+          'http://localhost:8080/api/ai/chat',
+          'http://localhost:5000/api/ai/chat',
+          'http://127.0.0.1:8080/api/ai/chat',
+          'http://127.0.0.1:5000/api/ai/chat'
+        ];
+
+        for (const url of candidateUrls) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message: query,
+                userRole: currentAuthUser?.role || 'farmer',
+                userId: currentAuthUser?.id,
+                userName: currentAuthUser?.name,
+                email: currentAuthUser?.email,
+                organization: currentAuthUser?.organization,
+                dashboardStats,
+                listings: produceList,
+                offers: offersList,
+                requirements: rfqList,
+                orders: ordersList,
+                transport: transportPayload,
+                userData: { ...userData, dashboardStats, listings: produceList, requirements: rfqList, incomingOffers: offersList, orders: ordersList, transport: transportPayload },
+                marketData: window.FIELDORA_PRODUCE_DATA || [],
+                history: aiChatHistory
+              }),
+              signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+              data = await response.json();
+              if (data && data.success) break;
+            }
+          } catch (e) {
+            // try next url
+          }
+        }
+
+        if (data && data.success && data.reply) {
           aiChatHistory.push({ sender: 'user', content: query });
-
           loadingMsg.remove();
           const aiMsg = document.createElement('div');
           aiMsg.className = 'p-3.5 bg-white border border-[#E6ECE6] rounded-2xl space-y-1.5 shadow-2xs text-xs';
 
-          const reply = data.success ? data.reply : 'Sorry, I could not process your request. Make sure the backend server is running on port 5000.';
+          const reply = data.reply;
           aiChatHistory.push({ sender: 'assistant', content: reply });
 
-          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed">${reply}</p>`;
+          const formattedReply = reply
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br/>');
+
+          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><div class="text-secondary-text leading-relaxed space-y-1">${formattedReply}</div>`;
           messagesContainer.appendChild(aiMsg);
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
           lucide.createIcons();
-        } catch (err) {
+        } else {
           loadingMsg.remove();
           const aiMsg = document.createElement('div');
           aiMsg.className = 'p-3.5 bg-white border border-[#E6ECE6] rounded-2xl space-y-1.5 shadow-2xs text-xs';
-          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed">Could not connect to AI service. Please make sure the backend is running on port 5000.</p>`;
+          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed">Could not connect to AI service. Please make sure the backend is running (e.g. on port 8080 or 5000).</p>`;
           messagesContainer.appendChild(aiMsg);
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
           lucide.createIcons();
@@ -8635,10 +8821,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      loadTransportState();
       saveAndRenderProduce();
       lucide.createIcons();
       renderDemandIntelligence();
       recalculateTransportRoute();
+      updateMilestoneUI();
+      if (TransportState.latestTelemetry) {
+        renderTelemetryUI(TransportState.latestTelemetry);
+      }
       if (currentAuthUser) {
         updateUserUIElements(currentAuthUser);
       }

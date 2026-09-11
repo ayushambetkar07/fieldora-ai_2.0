@@ -21,6 +21,7 @@ import {
   Check
 } from 'lucide-react';
 import { Button, Card, Badge, cn } from '../ui';
+import { useApp } from '../../context/AppContext';
 
 interface TransportTrackerProps {
   booking: TransportBooking;
@@ -35,6 +36,7 @@ export const TransportTracker: React.FC<TransportTrackerProps> = ({
   onSimulateFullTrip,
   isSimulatingLive = false
 }) => {
+  const { userRole } = useApp();
   const steps: { status: TransportStatus; label: string; hindiLabel: string; desc: string }[] = [
     {
       status: 'Vehicle Assigned',
@@ -300,20 +302,29 @@ export const TransportTracker: React.FC<TransportTrackerProps> = ({
             )}
           </div>
 
-          {currentIndex < 3 ? (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleAdvanceStep}
-              className="text-xs shadow-card"
-            >
-              <span>Advance to Next Step ({steps[currentIndex + 1]?.label.split(' ')[0]})</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
+          {userRole === 'buyer' ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[#166534] bg-[#E8F3EB] border border-[#bbf7d0] px-3.5 py-1.5 rounded-xl flex items-center gap-2 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span>Live Status: {steps[currentIndex]?.label}</span>
+              </span>
+            </div>
           ) : (
-            <span className="text-xs font-bold text-accent flex items-center gap-1">
-              <CheckCircle2 className="w-4 h-4" /> Order Fully Delivered & Completed!
-            </span>
+            currentIndex < 3 ? (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleAdvanceStep}
+                className="text-xs shadow-card"
+              >
+                <span>Advance to Next Step ({steps[currentIndex + 1]?.label.split(' ')[0]})</span>
+                <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Button>
+            ) : (
+              <span className="text-xs font-bold text-accent flex items-center gap-1">
+                <CheckCircle2 className="w-4 h-4" /> Order Fully Delivered & Completed!
+              </span>
+            )
           )}
         </div>
       </Card>

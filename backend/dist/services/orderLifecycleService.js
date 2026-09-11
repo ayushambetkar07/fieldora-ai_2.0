@@ -240,38 +240,86 @@ export async function dispatchOrderLogistics(order_id, dispatchInput, authInput)
     if (order.status === 'Cancelled' || order.status === 'Completed') {
         throw { status: 400, message: `Cannot dispatch order in terminal state: ${order.status}` };
     }
-    const dispatchPayload = {
-        id: `disp-${Date.now()}`,
-        order_id,
-        vehicle_id: dispatchInput.vehicle_id || 'veh-default',
-        vehicle_name: dispatchInput.vehicle_name,
-        vehicle_type: dispatchInput.vehicle_type,
-        vehicle_number: dispatchInput.vehicle_number,
-        driver_name: dispatchInput.driver_name,
-        driver_phone: dispatchInput.driver_phone,
-        pickup_location: dispatchInput.pickup_location || order.delivery_location || 'Origin Farm',
-        delivery_location: dispatchInput.delivery_location || order.delivery_location || 'Destination Mandi Hub',
-        pickup_node_id: dispatchInput.pickup_node_id || undefined,
-        delivery_node_id: dispatchInput.delivery_node_id || undefined,
-        route_id: dispatchInput.route_id || undefined,
-        estimated_distance_km: dispatchInput.estimated_distance_km || 0,
-        estimated_duration_minutes: dispatchInput.estimated_duration_minutes || 0,
-        estimated_toll_cost: dispatchInput.estimated_toll_cost || 0,
-        dispatched_at: new Date().toISOString(),
-        status: 'In Transit',
-        created_at: new Date().toISOString()
-    };
-    const { data: dispatchRecord, error: dispatchError } = await supabase
+    // Check if an active dispatch already exists for this order to prevent duplicates
+    const { data: existingDispatch } = await supabase
         .from('order_dispatches')
-        .insert([dispatchPayload])
-        .select()
-        .single();
-    let finalDispatch = dispatchRecord;
-    if (dispatchError || !finalDispatch) {
-        const list = memoryDispatches.get(order_id) || [];
-        list.push(dispatchPayload);
-        memoryDispatches.set(order_id, list);
-        finalDispatch = dispatchPayload;
+        .select('*')
+        .eq('order_id', order_id)
+        .neq('status', 'Delivered')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    let finalDispatch;
+    if (existingDispatch) {
+        const { data: updatedDispatch, error: updateDispError } = await supabase
+            .from('order_dispatches')
+            .update({
+            vehicle_id: dispatchInput.vehicle_id || existingDispatch.vehicle_id,
+            vehicle_name: dispatchInput.vehicle_name || existingDispatch.vehicle_name,
+            vehicle_type: dispatchInput.vehicle_type || existingDispatch.vehicle_type,
+            vehicle_number: dispatchInput.vehicle_number || existingDispatch.vehicle_number,
+            driver_name: dispatchInput.driver_name || existingDispatch.driver_name,
+            driver_phone: dispatchInput.driver_phone || existingDispatch.driver_phone,
+            pickup_location: dispatchInput.pickup_location || existingDispatch.pickup_location,
+            delivery_location: dispatchInput.delivery_location || existingDispatch.delivery_location,
+            pickup_node_id: dispatchInput.pickup_node_id || existingDispatch.pickup_node_id,
+            delivery_node_id: dispatchInput.delivery_node_id || existingDispatch.delivery_node_id,
+            route_id: dispatchInput.route_id || existingDispatch.route_id,
+            estimated_distance_km: dispatchInput.estimated_distance_km || existingDispatch.estimated_distance_km,
+            estimated_duration_minutes: dispatchInput.estimated_duration_minutes || existingDispatch.estimated_duration_minutes,
+            estimated_toll_cost: dispatchInput.estimated_toll_cost || existingDispatch.estimated_toll_cost,
+            status: 'In Transit'
+        })
+            .eq('id', existingDispatch.id)
+            .select()
+            .single();
+        if (updatedDispatch && !updateDispError) {
+            finalDispatch = updatedDispatch;
+        }
+        else {
+            finalDispatch = {
+                ...existingDispatch,
+                ...dispatchInput,
+                status: 'In Transit'
+            };
+        }
+    }
+    else {
+        const dispatchPayload = {
+            id: `disp-${Date.now()}`,
+            order_id,
+            vehicle_id: dispatchInput.vehicle_id || 'veh-default',
+            vehicle_name: dispatchInput.vehicle_name,
+            vehicle_type: dispatchInput.vehicle_type,
+            vehicle_number: dispatchInput.vehicle_number,
+            driver_name: dispatchInput.driver_name,
+            driver_phone: dispatchInput.driver_phone,
+            pickup_location: dispatchInput.pickup_location || order.delivery_location || 'Origin Farm',
+            delivery_location: dispatchInput.delivery_location || order.delivery_location || 'Destination Mandi Hub',
+            pickup_node_id: dispatchInput.pickup_node_id || undefined,
+            delivery_node_id: dispatchInput.delivery_node_id || undefined,
+            route_id: dispatchInput.route_id || undefined,
+            estimated_distance_km: dispatchInput.estimated_distance_km || 0,
+            estimated_duration_minutes: dispatchInput.estimated_duration_minutes || 0,
+            estimated_toll_cost: dispatchInput.estimated_toll_cost || 0,
+            dispatched_at: new Date().toISOString(),
+            status: 'In Transit',
+            created_at: new Date().toISOString()
+        };
+        const { data: dispatchRecord, error: dispatchError } = await supabase
+            .from('order_dispatches')
+            .insert([dispatchPayload])
+            .select()
+            .single();
+        if (dispatchError || !dispatchRecord) {
+            const list = memoryDispatches.get(order_id) || [];
+            list.push(dispatchPayload);
+            memoryDispatches.set(order_id, list);
+            finalDispatch = dispatchPayload;
+        }
+        else {
+            finalDispatch = dispatchRecord;
+        }
     }
     // Update Order Status to In Transit
     const updatedTrackingSteps = (order.tracking_steps || []).map((step, idx) => {

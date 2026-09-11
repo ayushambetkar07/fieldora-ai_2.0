@@ -3314,7 +3314,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <a href="tel:+919822144550" class="px-3 py-1.5 border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-lg text-deep-forest">Call Driver</a>
-                  <button id="b-btn-next-milestone" onclick="advanceTransportMilestone()" class="px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity">Next: Start Transit ➔</button>
+                  <span id="b-tracking-live-status-badge" class="px-3 py-1.5 bg-[#E8F3EB] text-[#166534] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs border border-[#bbf7d0]"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Status: Vehicle Assigned</span></span>
                 </div>
               </div>
             </div>
@@ -4301,7 +4301,12 @@
       } else if (tabName === 'farmer-transport') {
         document.getElementById('f-view-transport').classList.remove('hidden');
         document.getElementById('f-tab-transport').className = 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl sidebar-active transition-all';
+        loadTransportState();
         recalculateTransportRoute();
+        updateMilestoneUI();
+        if (TransportState.latestTelemetry) {
+          renderTelemetryUI(TransportState.latestTelemetry);
+        }
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4367,7 +4372,12 @@
       } else if (tabName === 'buyer-transport') {
         document.getElementById('b-view-transport').classList.remove('hidden');
         document.getElementById('b-tab-transport').className = 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl sidebar-active transition-all';
+        loadTransportState();
         recalculateTransportRoute();
+        updateMilestoneUI();
+        if (TransportState.latestTelemetry) {
+          renderTelemetryUI(TransportState.latestTelemetry);
+        }
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4815,35 +4825,51 @@
       setMapRoute(TransportState.selectedRoute || 'optimal');
     }
 
-    function returnToTransportConfig() {
-      if (TransportState.animInterval) {
-        clearInterval(TransportState.animInterval);
-        TransportState.animInterval = null;
+    function saveTransportState() {
+      try {
+        const stateToSave = {
+          isTracking: TransportState.isTracking || false,
+          milestoneIndex: TransportState.milestoneIndex || 0,
+          selectedVehicle: TransportState.selectedVehicle,
+          selectedPickup: TransportState.selectedPickup,
+          selectedDelivery: TransportState.selectedDelivery,
+          orderWeight: TransportState.orderWeight,
+          cropName: TransportState.cropName,
+          selectedRoute: TransportState.selectedRoute,
+          latestTelemetry: TransportState.latestTelemetry,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('fieldora_transport_state', JSON.stringify(stateToSave));
+        if (typeof BroadcastChannel !== 'undefined') {
+          try {
+            const bc = new BroadcastChannel('fieldora_transport_channel');
+            bc.postMessage({ type: 'TRANSPORT_STATE_UPDATE', state: stateToSave });
+            bc.close();
+          } catch (e) {}
+        }
+      } catch (e) {
+        console.warn('Failed to save transport state:', e);
       }
-      ['f-', 'b-'].forEach(p => {
-        const cfg = document.getElementById(`${p}transport-config-view`);
-        const trk = document.getElementById(`${p}transport-tracking-view`);
-        if (cfg) cfg.classList.remove('hidden');
-        if (trk) trk.classList.add('hidden');
-      });
-      lucide.createIcons();
     }
 
-    function confirmDirectTransport() {
+    function syncTransportDriverUI() {
       const veh = TransportState.vehicles.find(v => v.id === TransportState.selectedVehicle) || TransportState.vehicles[0];
+      const isCompletedAll = (TransportState.milestoneIndex >= 4);
 
       ['f-', 'b-'].forEach(p => {
         const cfg = document.getElementById(`${p}transport-config-view`);
         const trk = document.getElementById(`${p}transport-tracking-view`);
-        if (cfg) cfg.classList.add('hidden');
-        if (trk) trk.classList.remove('hidden');
+        if (TransportState.isTracking) {
+          if (cfg) cfg.classList.add('hidden');
+          if (trk) trk.classList.remove('hidden');
+        } else {
+          if (cfg) cfg.classList.remove('hidden');
+          if (trk) trk.classList.add('hidden');
+        }
 
-        // Update driver details in tracking view
-        const driverNameEl = document.querySelector(`#${p}transport-tracking-view strong`);
         const step1Sub = document.querySelector(`#${p}m-step-1 p`);
         if (step1Sub) step1Sub.innerText = `${veh.model} ${veh.reg} assigned`;
 
-        // Update Driver card
         const driverBox = document.querySelector(`#${p}transport-tracking-view .pt-4.border-t`);
         if (driverBox) {
           const initials = veh.driver.split(' ').map(n => n[0]).join('');
@@ -4860,14 +4886,63 @@
             <div class="flex items-center gap-2">
               <button onclick="returnToTransportConfig()" class="px-3 py-1.5 border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-lg text-secondary-text">← Reconfigure</button>
               <a href="tel:${veh.phone}" class="px-3 py-1.5 border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-lg text-deep-forest">Call Driver</a>
-              <button id="${p}btn-next-milestone" onclick="advanceTransportMilestone()" class="px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity">Next: Start Transit ➔</button>
+              ${p === 'f-' ? `<button id="${p}btn-next-milestone" onclick="advanceTransportMilestone()" class="px-4 py-2 ${isCompletedAll ? 'bg-emerald-800 text-white cursor-default' : 'btn-buyer hover:opacity-90'} text-xs font-bold rounded-xl shadow-button transition-opacity">${isCompletedAll ? '✓ Delivered & Completed' : 'Next: Start Transit ➔'}</button>` : `<span id="b-tracking-live-status-badge" class="px-3 py-1.5 ${isCompletedAll ? 'bg-[#dcfce7] text-[#166534] border-[#86efac]' : 'bg-[#E8F3EB] text-[#166534] border-[#bbf7d0]'} text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs border">${isCompletedAll ? '<span class="text-emerald-700 font-bold">✓</span><span>Status: Delivered & Completed</span>' : '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Status: Vehicle Assigned</span>'}</span>`}
             </div>
           `;
         }
       });
+    }
 
+    function loadTransportState() {
+      try {
+        const raw = localStorage.getItem('fieldora_transport_state');
+        if (!raw) return false;
+        const saved = JSON.parse(raw);
+        if (saved && typeof saved.milestoneIndex === 'number') {
+          TransportState.isTracking = !!saved.isTracking;
+          TransportState.milestoneIndex = saved.milestoneIndex;
+          if (saved.selectedVehicle) TransportState.selectedVehicle = saved.selectedVehicle;
+          if (saved.selectedPickup) TransportState.selectedPickup = saved.selectedPickup;
+          if (saved.selectedDelivery) TransportState.selectedDelivery = saved.selectedDelivery;
+          if (saved.orderWeight) TransportState.orderWeight = saved.orderWeight;
+          if (saved.cropName) TransportState.cropName = saved.cropName;
+          if (saved.selectedRoute) TransportState.selectedRoute = saved.selectedRoute;
+          if (saved.latestTelemetry) TransportState.latestTelemetry = saved.latestTelemetry;
+          
+          syncTransportDriverUI();
+          return true;
+        }
+      } catch (e) {
+        console.warn('Failed to load transport state:', e);
+      }
+      return false;
+    }
+
+    function returnToTransportConfig() {
+      if (TransportState.animInterval) {
+        clearInterval(TransportState.animInterval);
+        TransportState.animInterval = null;
+      }
+      TransportState.isTracking = false;
+      TransportState.milestoneIndex = 0;
+      saveTransportState();
+      ['f-', 'b-'].forEach(p => {
+        const cfg = document.getElementById(`${p}transport-config-view`);
+        const trk = document.getElementById(`${p}transport-tracking-view`);
+        if (cfg) cfg.classList.remove('hidden');
+        if (trk) trk.classList.add('hidden');
+      });
+      lucide.createIcons();
+    }
+
+    function confirmDirectTransport() {
+      const veh = TransportState.vehicles.find(v => v.id === TransportState.selectedVehicle) || TransportState.vehicles[0];
+
+      TransportState.isTracking = true;
       TransportState.milestoneIndex = 1;
+      syncTransportDriverUI();
       updateMilestoneUI();
+      saveTransportState();
       sendGpsTelemetry(0.15, 0);
       lucide.createIcons();
 
@@ -4914,11 +4989,14 @@
       .then(result => {
         if (result && result.data) {
           TransportState.latestTelemetry = result.data;
+          saveTransportState();
           renderTelemetryUI(result.data, wp.x, wp.y);
         }
       })
       .catch(err => {
         console.warn('GPS Telemetry send error:', err);
+        TransportState.latestTelemetry = payload;
+        saveTransportState();
         renderTelemetryUI(payload, wp.x, wp.y);
       });
     }
@@ -5024,19 +5102,39 @@
       const nextDelivTxt = typeof t === 'function' ? t('btn_next_complete_delivery', 'Next: Complete Delivery ✓') : 'Next: Complete Delivery ✓';
       const completedTxt = typeof t === 'function' ? t('btn_delivered_completed', '✓ Delivered & Completed') : '✓ Delivered & Completed';
 
-      ['f-', 'b-'].forEach(p => {
-        const nextBtn = document.getElementById(`${p}btn-next-milestone`);
-        if (nextBtn) {
-          if (idx === 1) nextBtn.innerText = nextStartTxt;
-          else if (idx === 2) nextBtn.innerText = nextArriveTxt;
-          else if (idx === 3) nextBtn.innerText = nextDelivTxt;
-          else if (idx >= 4) {
-            nextBtn.innerText = completedTxt;
-            nextBtn.disabled = true;
-            nextBtn.className = 'px-4 py-2 bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-xs cursor-default';
-          }
+      const farmerNextBtn = document.getElementById('f-btn-next-milestone');
+      if (farmerNextBtn) {
+        if (idx === 1) {
+          farmerNextBtn.innerText = nextStartTxt;
+          farmerNextBtn.disabled = false;
+          farmerNextBtn.className = 'px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity';
+        } else if (idx === 2) {
+          farmerNextBtn.innerText = nextArriveTxt;
+          farmerNextBtn.disabled = false;
+          farmerNextBtn.className = 'px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity';
+        } else if (idx === 3) {
+          farmerNextBtn.innerText = nextDelivTxt;
+          farmerNextBtn.disabled = false;
+          farmerNextBtn.className = 'px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity';
+        } else if (idx >= 4) {
+          farmerNextBtn.innerText = completedTxt;
+          farmerNextBtn.disabled = true;
+          farmerNextBtn.className = 'px-4 py-2 bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-xs cursor-default';
         }
-      });
+      }
+
+      const buyerStatusBadge = document.getElementById('b-tracking-live-status-badge');
+      if (buyerStatusBadge) {
+        if (isCompletedAll) {
+          buyerStatusBadge.className = 'px-3 py-1.5 bg-[#dcfce7] text-[#166534] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs border border-[#86efac]';
+          buyerStatusBadge.innerHTML = `<span class="text-emerald-700 font-bold">✓</span><span>Status: Delivered & Completed</span>`;
+        } else {
+          buyerStatusBadge.className = 'px-3 py-1.5 bg-[#E8F3EB] text-[#166534] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs border border-[#bbf7d0]';
+          const currentMilestoneTitle = stepTitles[Math.min(3, Math.max(0, idx - 1))];
+          const statusClean = currentMilestoneTitle.replace(/^[0-9]\.\s*/, '');
+          buyerStatusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Status: ${statusClean}</span>`;
+        }
+      }
     }
 
     function advanceTransportMilestone() {
@@ -5047,7 +5145,9 @@
 
       if (TransportState.milestoneIndex < 4) {
         TransportState.milestoneIndex++;
+        TransportState.isTracking = true;
         updateMilestoneUI();
+        saveTransportState();
 
         const orderId = 'TR-1042';
         const wpMap = {
@@ -5084,8 +5184,10 @@
         { x: 420, y: 250 }
       ];
 
+      TransportState.isTracking = true;
       TransportState.milestoneIndex = 1;
       updateMilestoneUI();
+      saveTransportState();
       sendGpsTelemetry(0.08, 0);
 
       TransportState.animInterval = setInterval(() => {
@@ -5116,17 +5218,48 @@
         if (progress >= 0.25 && progress < 0.50 && TransportState.milestoneIndex < 2) {
           TransportState.milestoneIndex = 2;
           updateMilestoneUI();
+          saveTransportState();
           sendGpsTelemetry(progress, 2);
         } else if (progress >= 0.70 && progress < 0.95 && TransportState.milestoneIndex < 3) {
           TransportState.milestoneIndex = 3;
           updateMilestoneUI();
+          saveTransportState();
           sendGpsTelemetry(progress, 3);
         } else if (progress >= 0.98 && TransportState.milestoneIndex < 4) {
           TransportState.milestoneIndex = 4;
           updateMilestoneUI();
+          saveTransportState();
           sendGpsTelemetry(1.0, 4);
         }
       }, 150);
+    }
+
+    // Cross-Tab and Real-time Storage Listeners
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'fieldora_transport_state') {
+          loadTransportState();
+          updateMilestoneUI();
+          if (TransportState.latestTelemetry) {
+            renderTelemetryUI(TransportState.latestTelemetry);
+          }
+        }
+      });
+
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('fieldora_transport_channel');
+          bc.onmessage = (event) => {
+            if (event.data && event.data.type === 'TRANSPORT_STATE_UPDATE') {
+              loadTransportState();
+              updateMilestoneUI();
+              if (TransportState.latestTelemetry) {
+                renderTelemetryUI(TransportState.latestTelemetry);
+              }
+            }
+          };
+        } catch (e) {}
+      }
     }
 
     /* =========================================================================
@@ -8586,38 +8719,67 @@
           totalValue: '₹' + (o.total_offer_amount || o.totalVal || 0).toLocaleString('en-IN')
         }));
 
-        try {
-          const response = await fetch('http://localhost:5000/api/ai/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message: query,
-              userRole: currentAuthUser?.role || 'farmer',
-              userData: { ...userData, listings: produceData, requirements: rfqData, incomingOffers: offersData },
-              marketData: window.FIELDORA_PRODUCE_DATA || [],
-              history: aiChatHistory
-            })
-          });
+        let data = null;
+        const candidateUrls = [
+          '/api/ai/chat',
+          'http://localhost:8080/api/ai/chat',
+          'http://localhost:5000/api/ai/chat',
+          'http://127.0.0.1:8080/api/ai/chat',
+          'http://127.0.0.1:5000/api/ai/chat'
+        ];
 
-          const data = await response.json();
+        for (const url of candidateUrls) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message: query,
+                userRole: currentAuthUser?.role || 'farmer',
+                userData: { ...userData, listings: produceData, requirements: rfqData, incomingOffers: offersData },
+                marketData: window.FIELDORA_PRODUCE_DATA || [],
+                history: aiChatHistory
+              }),
+              signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+              data = await response.json();
+              if (data && data.success) break;
+            }
+          } catch (e) {
+            // try next url
+          }
+        }
+
+        if (data && data.success && data.reply) {
           aiChatHistory.push({ sender: 'user', content: query });
-
           loadingMsg.remove();
           const aiMsg = document.createElement('div');
           aiMsg.className = 'p-3.5 bg-white border border-[#E6ECE6] rounded-2xl space-y-1.5 shadow-2xs text-xs';
 
-          const reply = data.success ? data.reply : 'Sorry, I could not process your request. Make sure the backend server is running on port 5000.';
+          const reply = data.reply;
           aiChatHistory.push({ sender: 'assistant', content: reply });
 
-          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed">${reply}</p>`;
+          const formattedReply = reply
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br/>');
+
+          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><div class="text-secondary-text leading-relaxed space-y-1">${formattedReply}</div>`;
           messagesContainer.appendChild(aiMsg);
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
           lucide.createIcons();
-        } catch (err) {
+        } else {
           loadingMsg.remove();
           const aiMsg = document.createElement('div');
           aiMsg.className = 'p-3.5 bg-white border border-[#E6ECE6] rounded-2xl space-y-1.5 shadow-2xs text-xs';
-          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed">Could not connect to AI service. Please make sure the backend is running on port 5000.</p>`;
+          aiMsg.innerHTML = `<span class="font-bold text-deep-forest flex items-center gap-1.5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Fieldora AI Intelligence</span><p class="text-secondary-text leading-relaxed">Could not connect to AI service. Please make sure the backend is running (e.g. on port 8080 or 5000).</p>`;
           messagesContainer.appendChild(aiMsg);
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
           lucide.createIcons();
@@ -8635,10 +8797,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      loadTransportState();
       saveAndRenderProduce();
       lucide.createIcons();
       renderDemandIntelligence();
       recalculateTransportRoute();
+      updateMilestoneUI();
+      if (TransportState.latestTelemetry) {
+        renderTelemetryUI(TransportState.latestTelemetry);
+      }
       if (currentAuthUser) {
         updateUserUIElements(currentAuthUser);
       }

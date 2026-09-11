@@ -1226,6 +1226,7 @@ export const fetchMarketPrices = async (): Promise<MarketPricePoint[]> => {
     // 1. Try Backend API first
     const endpoints = [
       '/api/market-prices',
+      'http://localhost:8080/api/market-prices',
       'http://localhost:5000/api/market-prices'
     ];
 
@@ -1314,6 +1315,7 @@ export const fetchTransportOptionsApi = async (params: {
 }): Promise<TransportOptionsResult> => {
   const endpoints = [
     '/api/transport/options',
+    'http://localhost:8080/api/transport/options',
     'http://localhost:5000/api/transport/options'
   ];
 

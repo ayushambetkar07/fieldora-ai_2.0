@@ -40,7 +40,7 @@ import { RouteVisualizerMap } from '../../components/transport/RouteVisualizerMa
 import { VehicleSelectionCard } from '../../components/transport/VehicleSelectionCard';
 import { AStarExplainerModal } from '../../components/transport/AStarExplainerModal';
 import { TransportTracker } from '../../components/transport/TransportTracker';
-import { fetchTransportOptionsApi, TransportOptionDto } from '../../services/supabaseService';
+import { fetchTransportOptionsApi, TransportOptionDto, fetchOrderDispatchApi } from '../../services/supabaseService';
 
 export const SmartTransportPage: React.FC = () => {
   const { userRole, ordersList, showToast, dispatchOrder } = useApp();
@@ -144,62 +144,116 @@ export const SmartTransportPage: React.FC = () => {
 
   // Load existing active booking if order is already dispatched / in transit
   useEffect(() => {
-    if (matchedOrder && (matchedOrder.status === 'In Transit' || matchedOrder.status === 'Arrived' || matchedOrder.status === 'Quality Verified' || matchedOrder.status === 'Completed')) {
-      const routes = calculateOptimizedRoutes(pickupNodeId, deliveryNodeId, aStarWeights);
-      const chosenRoute = routes[0] || selectedRoute;
-      const { recommendedVehicle } = matchVehiclesForPayload(quantityValue, chosenRoute?.totalDistanceKm || 165);
-      const vehicle = selectedVehicle || recommendedVehicle;
+    let isMounted = true;
+    const loadBookingForOrder = async () => {
+      if (!matchedOrder) return;
 
-      const progress = matchedOrder.status === 'In Transit' ? 50 : 100;
-      const initialBooking: TransportBooking = {
-        id: `TR-${matchedOrder.orderNumber.replace(/[^0-9]/g, '').slice(-4) || '1042'}`,
-        orderId: matchedOrder.id,
-        orderNumber: matchedOrder.orderNumber,
-        crop: matchedOrder.crop,
-        quantity: matchedOrder.quantity,
-        unit: matchedOrder.unit,
-        weightKg: quantityValue,
-        pickupLocation: 'Nashik Farm-Gate Origin',
-        pickupNodeId,
-        deliveryLocation: matchedOrder.deliveryLocation || 'Mumbai APMC Hub',
-        deliveryNodeId,
-        deliveryDate: matchedOrder.expectedDeliveryDate || 'Today',
-        farmerName: matchedOrder.farmerName,
-        farmerPhone: '+91 98234 11200',
-        buyerName: matchedOrder.buyerName,
-        buyerCompany: matchedOrder.buyerCompany,
-        buyerPhone: '+91 99870 54321',
-        selectedVehicle: vehicle,
-        selectedRoute: chosenRoute,
-        totalTransportCost: 2400,
-        status: matchedOrder.status === 'In Transit' ? 'In Transit' : 'Buyer Delivery',
-        currentProgressPercent: progress,
-        currentCheckpoint: matchedOrder.status === 'In Transit' ? 'In Transit - Express Corridor' : 'Delivered at Buyer APMC Hub',
-        eta: chosenRoute ? formatDurationHoursMins(chosenRoute.totalDurationMinutes) : '2h 45m',
-        currentSpeedKmH: matchedOrder.status === 'In Transit' ? 58 : 0,
-        temperatureControlled: false,
-        weighbridgeAssayVerified: true,
-        createdDate: matchedOrder.orderDate || new Date().toLocaleDateString('en-IN'),
-        trackingSteps: [
-          { status: 'Vehicle Assigned', label: 'Vehicle Assigned', hindiLabel: 'वाहन आवंटित', description: 'Driver confirmed trip', completed: true, current: false },
-          { status: 'Farmer Pickup', label: 'Farmer Pickup', hindiLabel: 'किसान खेत लोडिंग', description: 'Farm-gate pickup completed', completed: true, current: false },
-          { status: 'In Transit', label: 'In Transit', hindiLabel: 'रास्ते में', description: 'Direct highway transit', completed: matchedOrder.status !== 'In Transit', current: matchedOrder.status === 'In Transit' },
-          { status: 'Buyer Delivery', label: 'Buyer Delivery', hindiLabel: 'खरीदार डिलीवरी', description: 'Destination arrival & weighment', completed: matchedOrder.status !== 'In Transit', current: matchedOrder.status !== 'In Transit' },
-        ]
-      };
+      const isDispatched = matchedOrder.status === 'In Transit' || matchedOrder.status === 'Arrived' || matchedOrder.status === 'Quality Verified' || matchedOrder.status === 'Completed';
 
-      setActiveBooking(initialBooking);
-      setActiveStep('confirmed');
-      setSimulationProgress(progress);
-    }
+      if (isDispatched) {
+        // Fetch real dispatch from backend/supabase
+        const dbDispatch = await fetchOrderDispatchApi(matchedOrder.id);
+        
+        const routes = calculateOptimizedRoutes(pickupNodeId, deliveryNodeId, aStarWeights);
+        const chosenRoute = routes.find(r => r.id === dbDispatch?.route_id) || routes[0] || selectedRoute;
+        const { recommendedVehicle } = matchVehiclesForPayload(quantityValue, chosenRoute?.totalDistanceKm || 165);
+
+        let vehicle: TransportVehicle = recommendedVehicle;
+        if (dbDispatch) {
+          vehicle = {
+            ...recommendedVehicle,
+            id: dbDispatch.vehicle_id || recommendedVehicle.id,
+            name: dbDispatch.vehicle_name || recommendedVehicle.name,
+            type: (dbDispatch.vehicle_type as any) || recommendedVehicle.type,
+            driverName: dbDispatch.driver_name || recommendedVehicle.driverName,
+            driverPhone: dbDispatch.driver_phone || recommendedVehicle.driverPhone,
+            vehicleNumber: dbDispatch.vehicle_number || recommendedVehicle.vehicleNumber,
+            availability: 'Available'
+          };
+        } else if (selectedVehicle) {
+          vehicle = selectedVehicle;
+        }
+
+        let progress = matchedOrder.status === 'In Transit' ? 50 : 100;
+        let checkpoint = matchedOrder.status === 'In Transit' ? 'In Transit - Express Corridor' : 'Delivered at Buyer APMC Hub';
+
+        // Fetch latest GPS telemetry from API if available
+        try {
+          const defaultApi = (typeof window !== 'undefined' && window.location.origin)
+            ? window.location.origin
+            : 'http://localhost:8080';
+          const apiUrl = (import.meta as any).env?.VITE_API_URL || defaultApi;
+          const gpsRes = await fetch(`${apiUrl}/api/orders/${matchedOrder.id}/gps`);
+          if (gpsRes.ok) {
+            const gpsData = await gpsRes.json();
+            if (gpsData.success && gpsData.data) {
+              if (gpsData.data.progress_percent !== undefined) {
+                progress = Number(gpsData.data.progress_percent);
+              }
+              if (gpsData.data.checkpoint_name) {
+                checkpoint = gpsData.data.checkpoint_name;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('GPS load error:', e);
+        }
+
+        if (!isMounted) return;
+
+        const initialBooking: TransportBooking = {
+          id: dbDispatch?.id || `TR-${matchedOrder.orderNumber.replace(/[^0-9]/g, '').slice(-4) || '1042'}`,
+          orderId: matchedOrder.id,
+          orderNumber: matchedOrder.orderNumber,
+          crop: matchedOrder.crop,
+          quantity: matchedOrder.quantity,
+          unit: matchedOrder.unit,
+          weightKg: quantityValue,
+          pickupLocation: dbDispatch?.pickup_location || 'Nashik Farm-Gate Origin',
+          pickupNodeId: dbDispatch?.pickup_node_id || pickupNodeId,
+          deliveryLocation: dbDispatch?.delivery_location || matchedOrder.deliveryLocation || 'Mumbai APMC Hub',
+          deliveryNodeId: dbDispatch?.delivery_node_id || deliveryNodeId,
+          deliveryDate: matchedOrder.expectedDeliveryDate || 'Today',
+          farmerName: matchedOrder.farmerName,
+          farmerPhone: '+91 98234 11200',
+          buyerName: matchedOrder.buyerName,
+          buyerCompany: matchedOrder.buyerCompany,
+          buyerPhone: '+91 99870 54321',
+          selectedVehicle: vehicle,
+          selectedRoute: chosenRoute,
+          totalTransportCost: dbDispatch?.estimated_toll_cost ? (2400 + dbDispatch.estimated_toll_cost) : 2400,
+          status: matchedOrder.status === 'In Transit' ? 'In Transit' : 'Buyer Delivery',
+          currentProgressPercent: progress,
+          currentCheckpoint: checkpoint,
+          eta: chosenRoute ? formatDurationHoursMins(chosenRoute.totalDurationMinutes) : '2h 45m',
+          currentSpeedKmH: matchedOrder.status === 'In Transit' ? 58 : 0,
+          temperatureControlled: false,
+          weighbridgeAssayVerified: true,
+          createdDate: matchedOrder.orderDate || new Date().toLocaleDateString('en-IN'),
+          trackingSteps: [
+            { status: 'Vehicle Assigned', label: 'Vehicle Assigned', hindiLabel: 'वाहन आवंटित', description: 'Driver confirmed trip', completed: true, current: false },
+            { status: 'Farmer Pickup', label: 'Farmer Pickup', hindiLabel: 'किसान खेत लोडिंग', description: 'Farm-gate pickup completed', completed: true, current: false },
+            { status: 'In Transit', label: 'In Transit', hindiLabel: 'रास्ते में', description: 'Direct highway transit', completed: matchedOrder.status !== 'In Transit', current: matchedOrder.status === 'In Transit' },
+            { status: 'Buyer Delivery', label: 'Buyer Delivery', hindiLabel: 'खरीदार डिलीवरी', description: 'Destination arrival & weighment', completed: matchedOrder.status !== 'In Transit', current: matchedOrder.status !== 'In Transit' },
+          ]
+        };
+
+        setActiveBooking(initialBooking);
+        setActiveStep('confirmed');
+        setSimulationProgress(progress);
+      }
+    };
+
+    loadBookingForOrder();
+    return () => { isMounted = false; };
   }, [matchedOrder?.id, matchedOrder?.status]);
 
   // Task 4: Ingest real-time GPS telemetry to backend
   const sendGpsTelemetry = async (progressPercent: number, checkpointName: string, lat: number, lng: number, speed: number) => {
     try {
-      const defaultApi = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-        ? 'http://localhost:5000'
-        : (typeof window !== 'undefined' ? window.location.origin : '');
+      const defaultApi = (typeof window !== 'undefined' && window.location.origin)
+        ? window.location.origin
+        : 'http://localhost:8080';
       const apiUrl = (import.meta as any).env?.VITE_API_URL || defaultApi;
       const orderId = matchedOrder?.id || activeBooking?.orderId || activeBooking?.id || orderIdParam || 'TR-1042';
       await fetch(`${apiUrl}/api/orders/${orderId}/gps`, {
