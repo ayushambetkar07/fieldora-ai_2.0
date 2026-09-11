@@ -43,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCloseMobile }) => {
     { label: 'Smart Transport', path: '/buyer/transport', icon: Truck },
     { label: 'My Requirements', path: '/buyer/requirements', icon: ClipboardList },
     { label: 'Post Requirement', path: '/buyer/requirements/new', icon: PlusCircle },
-    { label: 'My Orders', path: '/buyer/orders', icon: PackageCheck },
+    { label: 'Orders & Escrow', path: '/buyer/orders', icon: PackageCheck },
   ];
 
   const navItems = userRole === 'farmer' ? farmerNav : buyerNav;

@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   Lock
 } from 'lucide-react';
-import { Card, StatusBadge, Button } from '../../components/ui';
+import { Card, StatusBadge, Button, cn } from '../../components/ui';
 import { OrderTimeline } from '../../components/ui/OrderTimeline';
 import { EmptyState } from '../../components/ui/feedback';
 import { 
@@ -83,16 +83,16 @@ export const BuyerOrdersPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-main tracking-tight">
-            Procurement Orders & Shipments
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#166534] tracking-tight font-heading">
+            Procurement Orders & Logistics
           </h1>
           <p className="text-xs sm:text-sm text-secondary mt-0.5">
-            Track transit checkpoints, weighbridge inspections, and electronic escrow release status.
+            Track weighbridge delivery inspections and electronic escrow release status.
           </p>
         </div>
 
         <Link to="/buyer/transport">
-          <Button variant="primary" size="sm" className="flex items-center gap-1.5 shadow-card">
+          <Button variant="primary" size="sm" className="flex items-center gap-1.5 shadow-card bg-[#166534] hover:bg-[#14532d]">
             <Truck className="w-4 h-4 text-[#4ade80]" />
             <span>Smart Direct Transport</span>
           </Button>
@@ -111,16 +111,21 @@ export const BuyerOrdersPage: React.FC = () => {
         <div className="space-y-5">
           {myOrders.map((order) => {
             const isExpanded = expandedOrderId === order.id;
+            const isTransportConfirmed = order.status === 'Transport Confirmed' || order.transportConfirmed === true || ['Escrow Locked', 'In Transit', 'Arrived', 'Quality Verified', 'Completed'].includes(order.status);
             const isAwaitingFarmerConfirm = order.status === 'Confirmed' && !order.transportConfirmed;
-            const canLockEscrow = (order.status === 'Transport Confirmed' || order.transportConfirmed === true) && order.paymentStatus === 'Pending';
-            const canDispatch = (order.status === 'Escrow Locked' || order.paymentStatus === 'Escrow Locked') && order.status !== 'In Transit' && order.status !== 'Arrived' && order.status !== 'Quality Verified' && order.status !== 'Completed';
+            const isEscrowLocked = order.paymentStatus === 'Escrow Locked' || order.paymentStatus === 'Released' || ['In Transit', 'Arrived', 'Quality Verified', 'Completed'].includes(order.status);
+            const isInTransit = ['In Transit', 'in_transit', 'Arrived', 'Quality Verified', 'Completed'].includes(order.status);
+            const isQualityVerified = ['Quality Verified', 'Completed'].includes(order.status);
+            const isCompleted = order.status === 'Completed' || order.paymentStatus === 'Released';
+
+            const canLockEscrow = isTransportConfirmed && order.paymentStatus === 'Pending' && !isEscrowLocked;
+            const canDispatch = isEscrowLocked && !isInTransit && !isCompleted;
             const canMarkArrived = order.status === 'In Transit';
             const canVerify = order.status === 'Arrived';
             const canReleasePayout = order.status === 'Quality Verified';
-            const isCompleted = order.status === 'Completed' || order.paymentStatus === 'Released';
 
             return (
-              <Card key={order.id} className="p-6 space-y-5 border-border hover:shadow-hover transition-shadow">
+              <Card key={order.id} className="p-6 space-y-5 border-border hover:shadow-hover transition-shadow bg-white rounded-2xl">
                 
                 {/* Order Top Bar */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
@@ -129,30 +134,73 @@ export const BuyerOrdersPage: React.FC = () => {
                       <span className="font-mono font-bold text-base text-primary">
                         Order #{order.orderNumber}
                       </span>
-                      <StatusBadge status={order.status} />
-                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-accent-light text-primary border border-[#bbf7d0] flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-accent" /> {order.paymentStatus}
+                      <span className="text-xs text-secondary font-medium">
+                        {order.quantity} {order.unit} {order.crop} (₹{(order.payoutAmount || order.totalAmount).toLocaleString('en-IN')}) • Producer: {order.farmerName}
                       </span>
                     </div>
-                    <p className="text-xs text-secondary">
-                      Ordered on {order.orderDate} • Delivery Hub: {order.deliveryLocation}
-                    </p>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="text-left sm:text-right">
-                      <span className="text-[11px] text-muted uppercase font-semibold block">Total Contract Value</span>
-                      <span className="text-xl font-bold font-mono text-main">
-                        ₹{(order.payoutAmount || order.totalAmount).toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                    
+                  <div className="flex items-center gap-3">
+                    <StatusBadge status={order.status} />
                     <Link to={`/buyer/transport?orderId=${order.id}`}>
                       <Button variant="primary" size="sm" className="bg-[#166534] hover:bg-[#14532d] flex items-center gap-1.5 shadow-card shrink-0">
                         <Truck className="w-4 h-4 text-[#4ade80]" />
                         <span>Find Transport</span>
                       </Button>
                     </Link>
+                  </div>
+                </div>
+
+                {/* 6-Stage Progress Milestones (Matching Reference) */}
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs pt-1">
+                  <div className="p-2.5 bg-[#dcfce7] border border-[#a7f3d0] rounded-xl text-center text-deep-forest">
+                    <span className="font-bold text-xs block">1. Confirmed</span>
+                    <span className="text-[10px] text-emerald-800">{order.orderDate || '11 Sept 2026'}</span>
+                  </div>
+                  <div className={cn(
+                    "p-2.5 rounded-xl text-center",
+                    isTransportConfirmed 
+                      ? "bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest" 
+                      : (isAwaitingFarmerConfirm ? "bg-amber-50 border border-amber-300 text-amber-900 font-bold" : "bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400")
+                  )}>
+                    <span className="font-bold text-xs block">2. Transport Confirmed</span>
+                    <span className="text-[10px] block">{isTransportConfirmed ? 'Confirmed by Farmer' : 'Awaiting Farmer'}</span>
+                  </div>
+                  <div className={cn(
+                    "p-2.5 rounded-xl text-center",
+                    isEscrowLocked
+                      ? "bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest"
+                      : (canLockEscrow ? "bg-amber-50 border border-amber-300 text-amber-900 font-bold" : "bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400")
+                  )}>
+                    <span className="font-bold text-xs block">3. Escrow Locked</span>
+                    <span className="text-[10px] block">{isEscrowLocked ? `₹${order.totalAmount.toLocaleString('en-IN')} Locked` : 'Pending Escrow'}</span>
+                  </div>
+                  <div className={cn(
+                    "p-2.5 rounded-xl text-center",
+                    isInTransit
+                      ? "bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest"
+                      : (canDispatch ? "bg-amber-50 border border-amber-300 text-amber-900 font-bold" : "bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400")
+                  )}>
+                    <span className="font-bold text-xs block">4. In Transit</span>
+                    <span className="text-[10px] block">{isInTransit ? 'In Transit' : 'Pending Dispatch'}</span>
+                  </div>
+                  <div className={cn(
+                    "p-2.5 rounded-xl text-center",
+                    isQualityVerified
+                      ? "bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest"
+                      : (order.status === 'Arrived' ? "bg-blue-100 border border-blue-300 text-blue-900 font-bold" : "bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400")
+                  )}>
+                    <span className="font-bold text-xs block">5. Quality Verified</span>
+                    <span className="text-[10px] block">{isQualityVerified ? (order.qualityGrade ? `${order.qualityGrade} Verified` : 'Grade A Verified') : 'Pending Arrival'}</span>
+                  </div>
+                  <div className={cn(
+                    "p-2.5 rounded-xl text-center",
+                    isCompleted
+                      ? "bg-[#dcfce7] border border-[#a7f3d0] text-deep-forest"
+                      : "bg-[#F8FAF9] border border-[#E6ECE6] text-gray-400"
+                  )}>
+                    <span className="font-bold text-xs block">6. Completed</span>
+                    <span className="text-[10px] block">{isCompleted ? `₹${(order.payoutAmount || order.totalAmount).toLocaleString('en-IN')} Settled` : 'Bank Payout'}</span>
                   </div>
                 </div>
 
