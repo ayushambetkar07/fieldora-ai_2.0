@@ -391,7 +391,7 @@ export const MOCK_PRODUCE: ProduceListing[] = [
     deliveryOption: 'Farm-gate Pickup',
     status: 'Active',
     description: 'Pearly white Maldandi sorghum grain with sweet taste and high fiber. Graded and cleaned for premium flour production.',
-    imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=800&q=80',
     moisturePercentage: 10.2,
     createdDate: '2026-08-20',
   },
