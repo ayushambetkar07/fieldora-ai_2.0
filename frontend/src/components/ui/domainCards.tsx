@@ -18,6 +18,7 @@ import {
   User
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getCropImage, getCropByName } from '../../data/cropMaster';
 
 // 1. StatCard
 interface StatCardProps {
@@ -26,44 +27,59 @@ interface StatCardProps {
   subtitle?: string;
   change?: string;
   isPositive?: boolean;
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: any;
   iconColor?: string;
   iconBgColor?: string;
+  period?: string;
+  variant?: 'default' | 'accent' | 'primary';
 }
 
-export const StatCard: React.FC<StatCardProps> = ({
-  title,
-  value,
+export const StatCard: React.FC<StatCardProps> = ({ 
+  title, 
+  value, 
   subtitle,
-  change,
-  isPositive = true,
-  icon: Icon,
-  iconColor = "text-primary",
-  iconBgColor = "bg-primary-light"
+  change, 
+  isPositive = true, 
+  icon: Icon = Wheat,
+  iconColor,
+  iconBgColor,
+  period = "vs last month",
+  variant = 'default' 
 }) => {
   return (
-    <div className="ref-card p-5 space-y-3 flex flex-col justify-between">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-secondary">{title}</span>
-        <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", iconBgColor, iconColor)}>
-          <Icon className="w-5 h-5" />
+    <Card className="p-4 sm:p-5 flex items-start justify-between relative overflow-hidden group hover:border-primary/40 transition-colors">
+      <div className="space-y-1">
+        <span className="text-xs font-medium text-secondary">{title}</span>
+        <div className="text-2xl sm:text-3xl font-bold font-mono text-main tracking-tight">
+          {value}
         </div>
-      </div>
-      <div>
-        <div className="text-3xl font-heading font-extrabold text-main tracking-tight font-mono">{value}</div>
-        {(subtitle || change) && (
-          <div className="flex items-center gap-1.5 mt-1 text-xs text-secondary">
-            {change && (
-              <span className={cn("font-bold inline-flex items-center", isPositive ? "text-accent" : "text-error")}>
-                {isPositive ? <TrendingUp className="w-3.5 h-3.5 mr-0.5" /> : <TrendingDown className="w-3.5 h-3.5 mr-0.5" />}
-                {change}
-              </span>
-            )}
-            {subtitle && <span>{subtitle}</span>}
+        {change && (
+          <div className="flex items-center gap-1 text-[11px] pt-1">
+            <span className={cn(
+              "font-bold flex items-center gap-0.5",
+              isPositive ? "text-primary" : "text-error"
+            )}>
+              {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+              {change}
+            </span>
+            <span className="text-muted">{period}</span>
           </div>
         )}
+        {subtitle && (
+          <p className="text-[11px] text-muted">{subtitle}</p>
+        )}
       </div>
-    </div>
+
+      <div className={cn(
+        "p-2.5 rounded-input transition-transform group-hover:scale-110",
+        iconBgColor && iconColor ? cn(iconBgColor, iconColor) :
+        variant === 'primary' ? "bg-primary-light text-primary" :
+        variant === 'accent' ? "bg-accent-light text-accent" :
+        "bg-[#F0FDF4] text-primary"
+      )}>
+        <Icon className="w-5 h-5" />
+      </div>
+    </Card>
   );
 };
 
@@ -75,16 +91,24 @@ interface ProduceCardProps {
 }
 
 export const ProduceCard: React.FC<ProduceCardProps> = ({ produce, onContact, showActions = true }) => {
+  const photoSrc = getCropImage(produce.crop, produce.imageUrl);
+
   return (
     <div className="ref-card overflow-hidden flex flex-col justify-between group">
       <div>
         {/* Produce Image with Badges */}
         <div className="relative h-44 w-full bg-[#EAEFEA] overflow-hidden">
           <img 
-            src={produce.imageUrl} 
+            src={photoSrc} 
             alt={produce.crop} 
             className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
             loading="lazy"
+            onError={(e) => {
+              const fallback = getCropImage(produce.crop);
+              if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                (e.currentTarget as HTMLImageElement).src = fallback;
+              }
+            }}
           />
           <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
             {produce.isFarmerVerified && (

@@ -17,54 +17,72 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ order }) => {
 
   const steps = [
     {
-      title: '1. Deal Confirmed',
-      description: 'Terms accepted by both parties. Contract generated.',
+      title: '1. Deal Agreed & Order Confirmed',
+      description: 'Terms accepted by both parties. Legally binding digital contract generated.',
       date: order.orderDate || 'Confirmed',
       completed: true,
       current: order.status === 'Confirmed' && !order.transportConfirmed
     },
     {
-      title: '2. Transport Confirmed (Farmer)',
+      title: '2. Transport Readiness Confirmed (Farmer)',
       description: isTransportConfirmed 
-        ? `Farmer (${order.farmerName}) confirmed transport readiness.`
-        : 'Action required: Farmer must confirm transport readiness before escrow deposit.',
+        ? `Farmer (${order.farmerName}) confirmed lot ready for farm-gate dispatch.`
+        : 'Action required: Farmer must confirm crop lot readiness before buyer locks escrow.',
       date: isTransportConfirmed ? 'Confirmed' : undefined,
       completed: isTransportConfirmed,
       current: order.status === 'Confirmed' && !order.transportConfirmed
     },
     {
-      title: '3. Smart Escrow Locked (Buyer)',
+      title: '3. Smart Escrow Deposit Secured (Buyer)',
       description: isEscrowLocked 
-        ? `Contract deposit of ₹${order.totalAmount.toLocaleString('en-IN')} secured in smart escrow vault.`
-        : 'Buyer must deposit contract funds into simulated escrow vault.',
-      date: isEscrowLocked ? 'Escrow Secured' : undefined,
+        ? `Contract deposit of ₹${order.totalAmount.toLocaleString('en-IN')} locked safely in escrow vault.`
+        : 'Buyer locks contract funds into smart escrow before transport assignment.',
+      date: isEscrowLocked ? 'Escrow Locked' : undefined,
       completed: isEscrowLocked,
       current: isTransportConfirmed && !isEscrowLocked
     },
     {
-      title: '4. Logistics & In Transit (Buyer)',
+      title: '4. Vehicle Assigned & Dispatched (A* Optimized)',
       description: isInTransit
-        ? 'Assigned carrier en route to destination delivery hub.'
-        : 'Buyer initiates vehicle dispatch from farm-gate.',
-      date: isInTransit ? 'In Transit' : undefined,
+        ? 'Assigned carrier en route from farm origin to destination APMC hub.'
+        : 'Direct transport booked and vehicle dispatched.',
+      date: isInTransit ? 'Dispatched' : undefined,
       completed: isInTransit,
       current: isEscrowLocked && !isInTransit
     },
     {
-      title: '5. Arrival & Quality Verification (Buyer)',
-      description: isQualityVerified
-        ? `Verified: ${order.actualReceivedQuantity || order.quantity} ${order.actualQuantityUnit || order.unit} (${order.qualityGrade || 'Grade A'}) • Assay: ${order.assayResult || 'Passed'}.`
-        : (isArrived ? 'Shipment arrived at hub. Ready for weighbridge & NABL assay inspection.' : 'Awaiting destination hub arrival and inspection.'),
-      date: isQualityVerified ? 'Verified' : (isArrived ? 'Arrived' : undefined),
-      completed: isQualityVerified,
-      current: (isInTransit && !isArrived) || (isArrived && !isQualityVerified)
+      title: '5. In Transit & Live GPS Telemetry',
+      description: isArrived
+        ? 'Highway transit completed along optimized corridor.'
+        : (isInTransit ? 'Vehicle in transit with real-time GPS telemetry and checkpoint updates.' : 'Awaiting transit start.'),
+      date: isArrived ? 'Transit Done' : (isInTransit ? 'In Transit' : undefined),
+      completed: isArrived,
+      current: isInTransit && !isArrived
     },
     {
-      title: '6. Smart Payout Released & Completed',
+      title: '6. Destination Arrival at Delivery Hub',
+      description: isArrived
+        ? (order.arrivedBy ? `Arrived and logged by ${order.arrivedBy}.` : 'Shipment arrived at destination facility.')
+        : 'Awaiting arrival at destination APMC mandi hub.',
+      date: isArrived ? 'Arrived' : undefined,
+      completed: isArrived,
+      current: isInTransit && !isArrived
+    },
+    {
+      title: '7. Dual Weighbridge & NABL Quality Verification',
+      description: isQualityVerified
+        ? `Verified: ${order.actualReceivedQuantity || order.quantity} ${order.actualQuantityUnit || order.unit} (${order.qualityGrade || 'Grade A'}) • NABL Assay: ${order.assayResult || 'Passed'}.`
+        : (isArrived ? 'Ready for automated weighbridge gross/tare and on-site NABL assay certification.' : 'Awaiting destination inspection.'),
+      date: isQualityVerified ? 'Verified' : undefined,
+      completed: isQualityVerified,
+      current: isArrived && !isQualityVerified
+    },
+    {
+      title: '8. Smart Escrow Released & Farmer Paid',
       description: isCompleted
-        ? `₹${(order.payoutAmount || order.totalAmount).toLocaleString('en-IN')} disbursed to ${order.farmerName}. Ref: ${order.payoutReference || 'TX-SETTLED'}.`
-        : 'Buyer authorizes escrow disbursement upon dual verification.',
-      date: isCompleted ? 'Completed' : undefined,
+        ? `Payout of ₹${(order.payoutAmount || order.totalAmount).toLocaleString('en-IN')} disbursed to ${order.farmerName}. Ref: ${order.payoutReference || 'TX-SETTLED'}.`
+        : 'Smart contract disburses farmer payout upon dual assay & weighment verification.',
+      date: isCompleted ? 'Settled' : undefined,
       completed: isCompleted,
       current: isQualityVerified && !isCompleted
     }

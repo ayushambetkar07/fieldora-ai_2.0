@@ -9,6 +9,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import marketPriceRoutes from './routes/marketPriceRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import transportRoutes from './routes/transportRoutes.js';
 dotenv.config();
 const app = express();
 // Middleware: Standard CORS and JSON body parser
@@ -44,6 +45,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/market-prices', marketPriceRoutes);
 app.use('/api/demand-intelligence', demandAlertRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/transport', transportRoutes);
 // Direct function path fallback if Netlify invokes /.netlify/functions/api/... directly
 app.use('/.netlify/functions/api/health', (req, res) => {
     res.json({
@@ -64,4 +66,5 @@ app.use('/.netlify/functions/api/orders', orderRoutes);
 app.use('/.netlify/functions/api/reviews', reviewRoutes);
 app.use('/.netlify/functions/api/market-prices', marketPriceRoutes);
 app.use('/.netlify/functions/api/ai', aiRoutes);
+app.use('/.netlify/functions/api/transport', transportRoutes);
 export default app;

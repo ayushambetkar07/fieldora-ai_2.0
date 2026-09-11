@@ -98,27 +98,36 @@ export const RouteVisualizerMap: React.FC<RouteVisualizerMapProps> = ({
       <div className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         
         {/* Route Selector Badges */}
-        <div className="flex items-center gap-1.5 pointer-events-auto bg-[#07130a]/85 backdrop-blur-md px-2.5 py-1.5 rounded-input border border-[#1b3e23] shadow-md">
-          <Navigation className="w-3.5 h-3.5 text-primary-light" />
-          <span className="text-[11px] font-bold text-gray-200">Routes:</span>
-          {allRoutes.map((route, idx) => {
-            const isSelected = selectedRoute.id === route.id;
-            return (
-              <button
-                key={route.id}
-                onClick={() => onSelectRoute && onSelectRoute(route)}
-                className={cn(
-                  "px-2 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
-                  isSelected
-                    ? "bg-[#166534] text-white shadow-xs border border-[#22c55e]"
-                    : "bg-[#112417] text-gray-400 hover:text-white border border-transparent hover:border-[#1b3e23]"
-                )}
-              >
-                <span>{route.isRecommended ? '🟢 Optimal Direct' : `Alt ${idx}`}</span>
-                <span className="text-[9px] opacity-80">({route.totalDistanceKm}km)</span>
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-2 pointer-events-auto bg-[#07130a]/90 backdrop-blur-md px-3 py-1.5 rounded-input border border-[#1b3e23] shadow-md flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e] inline-block shrink-0" />
+            <span className="text-xs font-bold text-white">Optimal Corridor:</span>
+            <span className="text-xs text-gray-300 font-medium hidden sm:inline">
+              {startNode.name.split(' ')[0]} ➔ Igatpuri ➔ {goalNode.name.split(' ')[0]}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {allRoutes.slice(0, 2).map((route, idx) => {
+              const isSelected = selectedRoute.id === route.id;
+              const isOptimal = idx === 0;
+              return (
+                <button
+                  key={route.id}
+                  onClick={() => onSelectRoute && onSelectRoute(route)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1",
+                    isSelected
+                      ? "bg-[#166534] text-white shadow-xs border border-[#22c55e]"
+                      : "bg-[#112417] text-gray-300 hover:text-white border border-[#1b3e23]"
+                  )}
+                >
+                  {isOptimal && <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80]" />}
+                  <span>{isOptimal ? 'Recommended' : 'Alt Route'}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Map Control Buttons */}

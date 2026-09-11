@@ -863,12 +863,22 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block font-bold text-deep-forest mb-1" data-i18n="lbl_commodity_crop">Commodity / Crop *</label>
-                  <select id="fp-crop" class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-medium">
-                    <option value="Tomato">Tomato (Hybrid Red)</option>
-                    <option value="Wheat">Wheat (Sharbati Gold)</option>
-                    <option value="Onion">Onion (Nashik Red)</option>
-                    <option value="Potato">Potato (Kufri Jyoti)</option>
-                    <option value="Soybean">Soybean (Yellow)</option>
+                  <select id="fp-crop" onchange="handleFarmerCropSelect(this.value)" class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-medium">
+                    <option value="Onion">Onion</option>
+                    <option value="Potato">Potato</option>
+                    <option value="Tomato" selected>Tomato</option>
+                    <option value="Capsicum">Capsicum</option>
+                    <option value="Green Chilli">Green Chilli</option>
+                    <option value="Ginger">Ginger</option>
+                    <option value="Garlic">Garlic</option>
+                    <option value="Lemon">Lemon</option>
+                    <option value="Carrot">Carrot</option>
+                    <option value="Rice / Paddy">Rice / Paddy</option>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Jowar">Jowar</option>
+                    <option value="Bajra">Bajra</option>
+                    <option value="Masoor">Masoor</option>
+                    <option value="Soybean">Soybean</option>
                   </select>
                 </div>
 
@@ -1453,30 +1463,30 @@
                     <path d="M 80 60 L 160 100 L 250 150 L 350 200 L 420 250" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="6,12" stroke-linecap="round" class="animate-pulse" />
 
                     <!-- Waypoint Nodes -->
-                    <!-- Nashik (Origin) -->
+                    <!-- Origin (Farm) -->
                     <circle cx="80" cy="60" r="12" fill="#22c55e" opacity="0.3" class="animate-ping" />
                     <circle cx="80" cy="60" r="7" fill="#22c55e" stroke="#ffffff" stroke-width="2" />
-                    <text x="75" y="40" fill="#86efac" font-size="11" font-weight="bold">Nashik (Farm)</text>
+                    <text id="f-svg-origin-name" x="75" y="40" fill="#86efac" font-size="11" font-weight="bold">Nashik (Farm)</text>
 
                     <!-- Igatpuri -->
                     <circle cx="160" cy="100" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="170" y="100" fill="#d1d5db" font-size="9">Igatpuri</text>
+                    <text id="f-svg-wp1-name" x="175" y="96" fill="#d1d5db" font-size="9">Igatpuri</text>
 
                     <!-- Kasara -->
                     <circle cx="250" cy="150" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="260" y="150" fill="#d1d5db" font-size="9">Kasara</text>
+                    <text id="f-svg-wp2-name" x="265" y="146" fill="#d1d5db" font-size="9">Kasara</text>
 
                     <!-- Shahapur / Thane -->
                     <circle cx="350" cy="200" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="360" y="200" fill="#d1d5db" font-size="9">Thane</text>
+                    <text id="f-svg-wp3-name" x="365" y="196" fill="#d1d5db" font-size="9">Thane</text>
 
-                    <!-- Mumbai APMC (Goal) -->
+                    <!-- Destination (Goal) -->
                     <circle cx="420" cy="250" r="12" fill="#3b82f6" opacity="0.3" class="animate-ping" />
                     <circle cx="420" cy="250" r="7" fill="#3b82f6" stroke="#ffffff" stroke-width="2" />
-                    <text x="390" y="275" fill="#93c5fd" font-size="11" font-weight="bold">Mumbai APMC (Buyer)</text>
+                    <text id="f-svg-dest-name" x="390" y="275" fill="#93c5fd" font-size="11" font-weight="bold">Mumbai APMC (Buyer)</text>
 
                     <!-- Moving Animated Truck -->
-                    <g id="f-svg-truck-marker" transform="translate(160, 100)">
+                    <g id="f-svg-truck-marker" transform="translate(80, 60)">
                       <circle r="11" fill="#166534" stroke="#ffffff" stroke-width="2" />
                       <text x="-5" y="4" font-size="10">🚚</text>
                     </g>
@@ -1492,28 +1502,28 @@
                     <span class="font-bold text-deep-forest flex items-center gap-1">
                       <span class="text-emerald-600 font-bold">🟢 Recommended</span> (Direct Optimal)
                     </span>
-                    <span class="font-mono font-extrabold text-deep-forest text-sm">₹2,400</span>
+                    <span id="f-card-route-opt-cost" class="font-mono font-extrabold text-deep-forest text-sm">₹2,400</span>
                   </div>
                   <div class="flex items-center gap-3 text-secondary-text font-semibold">
-                    <span>📏 165 km</span>
-                    <span>⏱️ 4 hr 15 min</span>
+                    <span id="f-card-route-opt-dist">📏 165 km</span>
+                    <span id="f-card-route-opt-dur">⏱️ 4 hr 15 min</span>
                     <span>🚦 Moderate</span>
                   </div>
-                  <span class="text-[10px] text-emerald-700 font-semibold block">Nashik ➔ Igatpuri ➔ Mumbai (Direct Highway)</span>
+                  <span id="f-card-route-opt-desc" class="text-[10px] text-emerald-700 font-semibold block">Nashik ➔ Igatpuri ➔ Mumbai (Direct Highway)</span>
                 </div>
 
                 <!-- Alternative -->
                 <div id="f-card-route-alt" onclick="setMapRoute('alt')" class="p-4 rounded-xl border border-[#E6ECE6] bg-white hover:bg-[#F8FAF9] cursor-pointer transition-all space-y-1.5">
                   <div class="flex items-center justify-between">
                     <span class="font-bold text-gray-700">⚡ Alternative (Kalyan Bypass)</span>
-                    <span class="font-mono font-bold text-gray-700 text-sm">₹2,650</span>
+                    <span id="f-card-route-alt-cost" class="font-mono font-bold text-gray-700 text-sm">₹2,650</span>
                   </div>
                   <div class="flex items-center gap-3 text-secondary-text font-semibold">
-                    <span>📏 178 km</span>
-                    <span>⏱️ 4 hr 45 min</span>
+                    <span id="f-card-route-alt-dist">📏 178 km</span>
+                    <span id="f-card-route-alt-dur">⏱️ 4 hr 45 min</span>
                     <span>🚦 Low Traffic</span>
                   </div>
-                  <span class="text-[10px] text-gray-500 font-semibold block">Bypasses urban bottleneck with higher distance</span>
+                  <span id="f-card-route-alt-desc" class="text-[10px] text-gray-500 font-semibold block">Bypasses urban bottleneck with higher distance</span>
                 </div>
               </div>
 
@@ -1613,7 +1623,7 @@
                     <text x="390" y="275" fill="#93c5fd" font-size="10" font-weight="bold">Mumbai APMC</text>
 
                     <!-- Moving Animated Truck Marker -->
-                    <g id="f-track-truck-marker" transform="translate(160, 100)">
+                    <g id="f-track-truck-marker" transform="translate(80, 60)">
                       <circle r="12" fill="#166534" stroke="#ffffff" stroke-width="2" />
                       <text x="-6" y="5" font-size="11">🚚</text>
                     </g>
@@ -2643,10 +2653,21 @@
                 <div>
                   <label class="block font-bold text-deep-forest mb-1">Target Commodity / Crop *</label>
                   <select id="brfq-crop" onchange="updateRfqDemandBadge(this.value)" class="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#E6ECE6] rounded-xl font-medium">
-                    <option value="Tomato" selected>Tomato (Hybrid Red)</option>
-                    <option value="Wheat">Wheat (Sharbati Gold)</option>
-                    <option value="Onion">Onion (Nashik Red)</option>
-                    <option value="Potato">Potato (Kufri Jyoti)</option>
+                    <option value="Onion">Onion</option>
+                    <option value="Potato">Potato</option>
+                    <option value="Tomato" selected>Tomato</option>
+                    <option value="Capsicum">Capsicum</option>
+                    <option value="Green Chilli">Green Chilli</option>
+                    <option value="Ginger">Ginger</option>
+                    <option value="Garlic">Garlic</option>
+                    <option value="Lemon">Lemon</option>
+                    <option value="Carrot">Carrot</option>
+                    <option value="Rice / Paddy">Rice / Paddy</option>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Jowar">Jowar</option>
+                    <option value="Bajra">Bajra</option>
+                    <option value="Masoor">Masoor</option>
+                    <option value="Soybean">Soybean</option>
                   </select>
                   
                   <div id="brfq-demand-badge" class="mt-2 p-2.5 bg-[#F4F9F5] border border-[#166534]/30 rounded-lg flex items-center justify-between text-xs">
@@ -3035,30 +3056,30 @@
                     <path d="M 80 60 L 160 100 L 250 150 L 350 200 L 420 250" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="6,12" stroke-linecap="round" class="animate-pulse" />
 
                     <!-- Waypoint Nodes -->
-                    <!-- Nashik (Origin) -->
+                    <!-- Origin (Farm) -->
                     <circle cx="80" cy="60" r="12" fill="#22c55e" opacity="0.3" class="animate-ping" />
                     <circle cx="80" cy="60" r="7" fill="#22c55e" stroke="#ffffff" stroke-width="2" />
-                    <text x="75" y="40" fill="#86efac" font-size="11" font-weight="bold">Nashik (Farm)</text>
+                    <text id="b-svg-origin-name" x="75" y="40" fill="#86efac" font-size="11" font-weight="bold">Nashik (Farm)</text>
 
                     <!-- Igatpuri -->
                     <circle cx="160" cy="100" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="170" y="100" fill="#d1d5db" font-size="9">Igatpuri</text>
+                    <text id="b-svg-wp1-name" x="175" y="96" fill="#d1d5db" font-size="9">Igatpuri</text>
 
                     <!-- Kasara -->
                     <circle cx="250" cy="150" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="260" y="150" fill="#d1d5db" font-size="9">Kasara</text>
+                    <text id="b-svg-wp2-name" x="265" y="146" fill="#d1d5db" font-size="9">Kasara</text>
 
                     <!-- Shahapur / Thane -->
                     <circle cx="350" cy="200" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="360" y="200" fill="#d1d5db" font-size="9">Thane</text>
+                    <text id="b-svg-wp3-name" x="365" y="196" fill="#d1d5db" font-size="9">Thane</text>
 
-                    <!-- Mumbai APMC (Goal) -->
+                    <!-- Destination (Goal) -->
                     <circle cx="420" cy="250" r="12" fill="#3b82f6" opacity="0.3" class="animate-ping" />
                     <circle cx="420" cy="250" r="7" fill="#3b82f6" stroke="#ffffff" stroke-width="2" />
-                    <text x="390" y="275" fill="#93c5fd" font-size="11" font-weight="bold">Mumbai APMC (Buyer)</text>
+                    <text id="b-svg-dest-name" x="390" y="275" fill="#93c5fd" font-size="11" font-weight="bold">Mumbai APMC (Buyer)</text>
 
                     <!-- Moving Animated Truck -->
-                    <g id="b-svg-truck-marker" transform="translate(160, 100)">
+                    <g id="b-svg-truck-marker" transform="translate(80, 60)">
                       <circle r="11" fill="#166534" stroke="#ffffff" stroke-width="2" />
                       <text x="-5" y="4" font-size="10">🚚</text>
                     </g>
@@ -3074,120 +3095,116 @@
                     <span class="font-bold text-deep-forest flex items-center gap-1">
                       <span class="text-emerald-600 font-bold">🟢 Recommended</span> (Direct Optimal)
                     </span>
-                    <span class="font-mono font-extrabold text-deep-forest text-sm">₹2,400</span>
+                    <span id="b-card-route-opt-cost" class="font-mono font-extrabold text-deep-forest text-sm">₹2,400</span>
                   </div>
                   <div class="flex items-center gap-3 text-secondary-text font-semibold">
-                    <span>📏 165 km</span>
-                    <span>⏱️ 4 hr 15 min</span>
+                    <span id="b-card-route-opt-dist">📏 165 km</span>
+                    <span id="b-card-route-opt-dur">⏱️ 4 hr 15 min</span>
                     <span>🚦 Moderate</span>
                   </div>
-                  <span class="text-[10px] text-emerald-700 font-semibold block">Nashik ➔ Igatpuri ➔ Mumbai (Direct Highway)</span>
+                  <span id="b-card-route-opt-desc" class="text-[10px] text-emerald-700 font-semibold block">Nashik ➔ Igatpuri ➔ Mumbai (Direct Highway)</span>
                 </div>
-
                 <!-- Alternative -->
                 <div id="b-card-route-alt" onclick="setMapRoute('alt')" class="p-4 rounded-xl border border-[#E6ECE6] bg-white hover:bg-[#F8FAF9] cursor-pointer transition-all space-y-1.5">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-gray-700">⚡ Alternative (Kalyan Bypass)</span>
-                    <span class="font-mono font-bold text-gray-700 text-sm">₹2,650</span>
+                    <span class="font-bold text-deep-forest">Alternative (Kalyan Bypass)</span>
+                    <span id="b-card-route-alt-cost" class="font-mono font-bold text-secondary-text text-sm">₹2,650</span>
                   </div>
                   <div class="flex items-center gap-3 text-secondary-text font-semibold">
-                    <span>📏 178 km</span>
-                    <span>⏱️ 4 hr 45 min</span>
+                    <span id="b-card-route-alt-dist">📏 178 km</span>
+                    <span id="b-card-route-alt-dur">⏱️ 4 hr 45 min</span>
                     <span>🚦 Low Traffic</span>
                   </div>
-                  <span class="text-[10px] text-gray-500 font-semibold block">Bypasses urban bottleneck with higher distance</span>
+                  <span id="b-card-route-alt-desc" class="text-[10px] text-secondary-text font-semibold block">NH-60 via Kalyan (178 km, ~4 hr 45 min)</span>
                 </div>
               </div>
 
-              <!-- ✨ Fieldora Smart Recommendation Card -->
-              <div class="p-5 bg-gradient-to-br from-[#166534] to-[#0d3b1e] text-white rounded-2xl shadow-card space-y-3 border border-[#22c55e]/30">
-                <div class="flex items-start gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
-                    <i data-lucide="sparkles" class="w-5 h-5 text-[#4ade80]"></i>
-                  </div>
-                  <div class="space-y-1">
-                    <h4 class="font-heading font-extrabold text-sm text-white">
-                      ✨ Fieldora Recommendation
-                    </h4>
-                    <p class="text-xs text-gray-200 leading-relaxed">
-                      This vehicle has enough capacity for your order and provides the lowest estimated transportation cost while meeting the delivery deadline.
-                    </p>
-                  </div>
+              <!-- Transporter Selection -->
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-secondary-text flex items-center gap-1.5">
+                    <i data-lucide="truck" class="w-3.5 h-3.5 text-[#166534]"></i> Available Verified Fleet
+                  </h4>
+                  <span id="b-suitable-count" class="text-[11px] font-bold text-[#166534] bg-[#E8F3EB] px-2 py-0.5 rounded-full">4 Suitable</span>
                 </div>
 
-                <div class="pt-2 border-t border-white/15 flex items-center justify-between">
-                  <div class="text-xs text-gray-300">
-                    <span>Selected: <strong id="b-tp-rec-veh-name">Tata Ace Gold (Tempo)</strong></span>
-                  </div>
-                  <button onclick="confirmDirectTransport()" class="px-6 py-2.5 bg-[#22c55e] hover:bg-[#4ade80] text-[#06240f] font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition-all transform hover:scale-102">
-                    <i data-lucide="truck" class="w-4 h-4"></i>
-                    <span>Confirm Transport</span>
-                  </button>
+                <div id="b-transport-vehicles-list" class="space-y-3">
+                  <!-- Dynamically rendered by updateVehicleCardsUI() -->
                 </div>
               </div>
-
             </div>
 
+            <!-- Booking Sticky Footer Bar -->
+            <div class="p-4 bg-[#0a180d] text-white flex flex-wrap items-center justify-between gap-4 border-t border-[#1b3e23]">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#166534] flex items-center justify-center text-lg shrink-0">
+                  🚚
+                </div>
+                <div>
+                  <div class="text-[11px] text-gray-400">Selected Transport</div>
+                  <div class="text-sm font-bold text-white flex items-center gap-2">
+                    <span id="b-tp-rec-veh-name">Tata Ace Gold (Tempo)</span>
+                    <span id="b-tp-rec-tag" class="bg-[#22c55e] text-deep-forest text-[10px] font-extrabold px-1.5 py-0.2 rounded">BEST MATCH</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <div class="text-right">
+                  <div class="text-[10px] text-gray-400">Estimated Total Freight</div>
+                  <div id="b-tp-rec-total-cost" class="text-base font-extrabold text-[#4ade80] font-mono">₹2,400</div>
+                </div>
+                <button onclick="confirmDirectTransport()" class="px-5 py-2.5 bg-[#22c55e] hover:bg-[#16a34a] text-deep-forest font-extrabold text-xs rounded-xl shadow-btn transition-transform active:scale-95 flex items-center gap-2">
+                  Confirm & Dispatch Transporter ➔
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- Confirmed & Tracking View (Revealed after confirmation) -->
-          <div id="b-transport-tracking-view" class="hidden space-y-6">
-            
-            <div class="p-4 bg-[#F4F9F5] border border-[#166534]/30 rounded-xl flex items-center justify-between">
+          <!-- Active Transport Tracking View (Shown after booking) -->
+          <div id="b-transport-tracking-view" class="hidden space-y-4">
+            <div class="bg-[#07130a] text-white p-3 rounded-xl border border-[#1b3e23] flex items-center justify-between text-xs">
               <div class="flex items-center gap-2">
-                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
-                <div>
-                  <span class="font-bold text-sm text-deep-forest block">Transport Confirmed & Driver Assigned!</span>
-                  <span class="text-xs text-secondary-text">Shipment #TR-1042 • Direct Farm-to-Buyer Delivery</span>
-                </div>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#22c55e] animate-ping"></span>
+                <span class="font-bold text-[#4ade80]">Consignment #TR-1042 Active</span>
+                <span class="text-gray-400 font-mono hidden sm:inline">| Nashik ➔ Mumbai APMC</span>
               </div>
-              <button onclick="simulateContinuousTransit()" class="px-4 py-2 bg-deep-forest text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 hover:bg-[#12361d] transition-colors">
-                <i data-lucide="play" class="w-3.5 h-3.5 text-[#4ade80]"></i> Simulate Live Transit
-              </button>
+              <div class="flex items-center gap-2">
+                <span id="b-track-gps-badge" class="px-2 py-0.5 rounded bg-[#166534] text-[10px] font-bold text-[#86efac]">🟢 Live GPS Active</span>
+                <button onclick="returnToTransportConfig()" class="text-[11px] text-gray-400 hover:text-white underline">Change Vehicle</button>
+              </div>
             </div>
 
-            <!-- Live Vehicle GPS Route Map & Real-time Telemetry -->
+            <!-- Tracking Visualizer & Telemetry -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              <!-- Vector Highway Map -->
-              <div class="lg:col-span-7 bg-[#0b1b10] border border-[#1b3e23] rounded-2xl p-4 shadow-card space-y-3">
-                <div class="flex items-center justify-between text-xs border-b border-[#1b3e23] pb-2">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span class="font-bold text-white uppercase tracking-wider text-[11px]">Live Vehicle GPS Location</span>
-                  </div>
-                  <span id="b-track-gps-badge" class="font-mono text-[10px] text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/80">🟢 GPS Synced (HTTP 201)</span>
-                </div>
-
-                <div class="w-full h-56 bg-[#061208] rounded-xl relative overflow-hidden flex items-center justify-center border border-[#1b3e23]/60">
+              <!-- Live Map -->
+              <div class="lg:col-span-7 bg-[#0d1f12] rounded-2xl border border-[#1b3e23] overflow-hidden shadow-card flex items-center justify-center p-2">
+                <div class="h-64 sm:h-72 w-full relative">
                   <svg viewBox="0 0 500 300" class="w-full h-full">
-                    <!-- Grid Background -->
-                    <defs>
-                      <pattern id="b-track-grid" width="25" height="25" patternUnits="userSpaceOnUse">
-                        <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#132c19" stroke-width="0.7" />
-                      </pattern>
-                    </defs>
-                    <rect width="500" height="300" fill="url(#b-track-grid)" />
+                    <line x1="80" y1="60" x2="160" y2="100" stroke="#1c3823" stroke-width="4" stroke-linecap="round" />
+                    <line x1="160" y1="100" x2="250" y2="150" stroke="#1c3823" stroke-width="4" stroke-linecap="round" />
+                    <line x1="250" y1="150" x2="350" y2="200" stroke="#1c3823" stroke-width="4" stroke-linecap="round" />
+                    <line x1="350" y1="200" x2="420" y2="250" stroke="#1c3823" stroke-width="4" stroke-linecap="round" />
 
-                    <!-- Highway Corridors -->
-                    <path d="M 80 60 L 160 100 L 250 150 L 350 200 L 420 250" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Live Active Route Path -->
+                    <path d="M 80 60 L 160 100 L 250 150 L 350 200 L 420 250" fill="none" stroke="#22c55e" stroke-width="6" stroke-linecap="round" opacity="0.9" />
+                    <path d="M 80 60 L 160 100 L 250 150 L 350 200 L 420 250" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="6,12" stroke-linecap="round" class="animate-pulse" />
 
-                    <!-- Waypoint Nodes -->
-                    <!-- Nashik (Origin) -->
+                    <!-- Waypoints -->
                     <circle cx="80" cy="60" r="10" fill="#22c55e" opacity="0.3" class="animate-ping" />
                     <circle cx="80" cy="60" r="6" fill="#22c55e" stroke="#ffffff" stroke-width="2" />
-                    <text x="75" y="42" fill="#86efac" font-size="10" font-weight="bold">Nashik (Farm)</text>
+                    <text x="75" y="40" fill="#86efac" font-size="10" font-weight="bold">Nashik (Farm)</text>
 
-                    <!-- Igatpuri -->
                     <circle cx="160" cy="100" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="170" y="100" fill="#d1d5db" font-size="9">Igatpuri</text>
+                    <text x="175" y="96" fill="#d1d5db" font-size="9">Igatpuri</text>
 
                     <!-- Kasara -->
                     <circle cx="250" cy="150" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="260" y="150" fill="#d1d5db" font-size="9">Kasara</text>
+                    <text x="265" y="146" fill="#d1d5db" font-size="9">Kasara</text>
 
                     <!-- Thane -->
                     <circle cx="350" cy="200" r="5" fill="#166534" stroke="#4ade80" stroke-width="1.5" />
-                    <text x="360" y="200" fill="#d1d5db" font-size="9">Thane</text>
+                    <text x="365" y="196" fill="#d1d5db" font-size="9">Thane</text>
 
                     <!-- Mumbai APMC (Goal) -->
                     <circle cx="420" cy="250" r="10" fill="#3b82f6" opacity="0.3" class="animate-ping" />
@@ -4287,6 +4304,7 @@
       } else if (tabName === 'farmer-transport') {
         document.getElementById('f-view-transport').classList.remove('hidden');
         document.getElementById('f-tab-transport').className = 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl sidebar-active transition-all';
+        recalculateTransportRoute();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4352,6 +4370,7 @@
       } else if (tabName === 'buyer-transport') {
         document.getElementById('b-view-transport').classList.remove('hidden');
         document.getElementById('b-tab-transport').className = 'flex items-center gap-3 px-3.5 py-2.5 rounded-xl sidebar-active transition-all';
+        recalculateTransportRoute();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4380,47 +4399,328 @@
     /* =========================================================================
      * SMART DIRECT TRANSPORT & ROUTE OPTIMIZATION CONTROLLER
      * ========================================================================= */
-    const TransportState = {
+     const TransportState = {
       orderWeight: 800,
+      cropName: 'Onion (Nashik Garwa)',
+      selectedPickup: 'Nashik',
+      selectedDelivery: 'Mumbai',
       selectedVehicle: 'tempo',
       selectedRoute: 'optimal',
       milestoneIndex: 0,
       animInterval: null,
       vehicles: [
-        { id: 'tempo', name: 'Tata Ace Gold (Tempo)', capacity: 1000, cost: 2400, driver: 'Suresh More', reg: 'MH-15-EG-4412', phone: '+919822144550' },
-        { id: 'mini-truck', name: 'Bolero Maxi Truck (Mini Truck)', capacity: 1500, cost: 3000, driver: 'Balasaheb Shinde', reg: 'MH-15-BT-8901', phone: '+919822144551' },
-        { id: 'pickup', name: 'Mahindra Bolero Pickup (Pickup)', capacity: 700, cost: 2100, driver: 'Ganesh Jadhav', reg: 'MH-15-PK-3390', phone: '+919822144552' }
+        { id: 'tempo', name: 'Tata Ace Gold (Tempo)', model: 'Tata Ace Gold', type: 'Tempo', capacity: 1000, ratePerKm: 14.5, baseCost: 300, driver: 'Suresh More', reg: 'MH-15-EG-4412', phone: '+919822144550', status: 'Available', rating: 4.9 },
+        { id: 'mini-truck', name: 'Bolero Maxi Truck (Mini Truck)', model: 'Bolero Maxi Truck', type: 'Mini Truck', capacity: 1500, ratePerKm: 18.0, baseCost: 400, driver: 'Balasaheb Shinde', reg: 'MH-15-BT-8901', phone: '+919822144551', status: 'Available', rating: 4.8 },
+        { id: 'pickup', name: 'Mahindra Jeeto (Mini Truck)', model: 'Mahindra Jeeto', type: 'Mini Truck', capacity: 700, ratePerKm: 12.5, baseCost: 250, driver: 'Rahul Patil', reg: 'MH-15-KQ-6274', phone: '+919822144552', status: 'Available', rating: 4.7 },
+        { id: 'truck-407', name: 'Tata 407 (Light Commercial Truck)', model: 'Tata 407', type: 'Light Commercial Truck', capacity: 2500, ratePerKm: 22.0, baseCost: 600, driver: 'Amit Jadhav', reg: 'MH-15-CR-3158', phone: '+919822144553', status: 'Available', rating: 4.9 },
+        { id: 'dost', name: 'Ashok Leyland Dost (Light Commercial Vehicle)', model: 'Ashok Leyland Dost', type: 'Light Commercial Vehicle', capacity: 1500, ratePerKm: 18.0, baseCost: 400, driver: 'Nitin Pawar', reg: 'MH-15-HL-7286', phone: '+919822144554', status: 'Busy', rating: 4.6 }
       ]
     };
 
+    function getRouteDetails(pickupKey, deliveryKey) {
+      const pickup = pickupKey || TransportState.selectedPickup || 'Nashik';
+      const delivery = deliveryKey || TransportState.selectedDelivery || 'Mumbai';
+      
+      // Base distances from Nashik cluster
+      let baseDist = 165;
+      let originLabel = 'Nashik (Farm)';
+      if (pickup === 'Lasalgaon') { baseDist = 195; originLabel = 'Lasalgaon (Farm)'; }
+      else if (pickup === 'Pimpalgaon') { baseDist = 185; originLabel = 'Pimpalgaon (Farm)'; }
+      else if (pickup === 'Sinnar') { baseDist = 150; originLabel = 'Sinnar (Farm)'; }
+      else { originLabel = 'Nashik (Farm)'; }
+
+      let destLabel = 'Mumbai APMC (Buyer)';
+      let destClean = 'Mumbai APMC';
+      let deltaDist = 0;
+      let viaOpt = 'Igatpuri';
+      let viaAlt = 'Kalyan Bypass';
+      let isPune = false;
+
+      if (delivery === 'Mumbai-Central') {
+        destLabel = 'Mumbai Central (Buyer)';
+        destClean = 'Mumbai Central';
+        deltaDist = 10;
+      } else if (delivery === 'Thane') {
+        destLabel = 'Thane Hub (Buyer)';
+        destClean = 'Thane';
+        deltaDist = -25;
+      } else if (delivery === 'Bhiwandi') {
+        destLabel = 'Bhiwandi Depot (Buyer)';
+        destClean = 'Bhiwandi';
+        deltaDist = -20;
+      } else if (delivery === 'Pune') {
+        destLabel = 'Pune APMC (Buyer)';
+        destClean = 'Pune';
+        isPune = true;
+        baseDist = (pickup === 'Lasalgaon') ? 235 : (pickup === 'Pimpalgaon') ? 225 : (pickup === 'Sinnar') ? 185 : 210;
+        deltaDist = 0;
+        viaOpt = 'Sangamner';
+        viaAlt = 'Narayangaon Bypass';
+      }
+
+      const optDist = Math.max(80, baseDist + deltaDist);
+      const altDist = optDist + 13;
+
+      const optMins = Math.round((optDist / 42) * 60);
+      const altMins = Math.round((altDist / 40) * 60);
+
+      const formatDur = (mins) => {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return `${h} hr ${m < 10 ? '0' : ''}${m} min`;
+      };
+
+      return {
+        pickup,
+        delivery,
+        originLabel,
+        destLabel,
+        destClean,
+        isPune,
+        optimal: {
+          name: isPune ? 'NH-60 Highway' : 'Direct Highway',
+          via: viaOpt,
+          distanceKm: optDist,
+          durationMins: optMins,
+          durationText: formatDur(optMins),
+          traffic: 'Moderate',
+          path: 'M 80 60 L 160 100 L 250 150 L 350 200 L 420 250',
+          stroke: '#22c55e'
+        },
+        alt: {
+          name: isPune ? 'Narayangaon Bypass' : 'Kalyan Bypass',
+          via: viaAlt,
+          distanceKm: altDist,
+          durationMins: altMins,
+          durationText: formatDur(altMins),
+          traffic: 'Low Traffic',
+          path: 'M 80 60 L 160 100 L 300 110 L 420 250',
+          stroke: '#38bdf8'
+        }
+      };
+    }
+
+    function getActiveRouteData() {
+      const details = getRouteDetails(TransportState.selectedPickup, TransportState.selectedDelivery);
+      return (TransportState.selectedRoute === 'alt') ? details.alt : details.optimal;
+    }
+
+    function calculateVehicleCost(veh, routeData) {
+      if (!veh || !routeData) return 2400;
+      const base = veh.baseCost + Math.round(routeData.distanceKm * veh.ratePerKm);
+      return Math.round(base / 50) * 50; // Round to nearest 50
+    }
+
+    function calculateVehicleMatchScore(veh, routeData) {
+      if (!veh || !routeData) return 0;
+      const weight = TransportState.orderWeight;
+      const isSuitable = weight <= veh.capacity;
+      if (!isSuitable) return 0;
+
+      // 1. Capacity (40%)
+      const loadPct = (weight / veh.capacity) * 100;
+      let capScore = 100;
+      if (loadPct < 75) {
+        capScore = Math.max(20, Math.round(100 - (75 - loadPct) * 1.1));
+      } else if (loadPct > 92) {
+        capScore = Math.max(75, Math.round(100 - (loadPct - 92) * 2.5));
+      }
+
+      // 2. Freight (30%)
+      const cost = calculateVehicleCost(veh, routeData);
+      const costPerKg = cost / weight;
+      let freightScore = 100;
+      if (costPerKg > 3.0) {
+        freightScore = Math.max(40, Math.round(100 - (costPerKg - 3.0) * 30));
+      }
+
+      // 3. Availability (20%)
+      const availScore = veh.status === 'Available' ? 100 : 0;
+
+      // 4. Route (10%)
+      const routeScore = veh.type === 'Tempo' ? 95 : 90;
+
+      return Math.round(capScore * 0.40 + freightScore * 0.30 + availScore * 0.20 + routeScore * 0.10);
+    }
+
     function selectTransportVehicle(vehId) {
-      TransportState.selectedVehicle = vehId;
       const veh = TransportState.vehicles.find(v => v.id === vehId);
       if (!veh) return;
 
-      const fName = document.getElementById('f-tp-rec-veh-name');
-      if (fName) fName.innerText = veh.name;
-      const bName = document.getElementById('b-tp-rec-veh-name');
-      if (bName) bName.innerText = veh.name;
+      if (TransportState.orderWeight > veh.capacity) {
+        if (typeof showFieldoraToast === 'function') {
+          showFieldoraToast(`Cannot select ${veh.name}: Capacity (${veh.capacity} kg) is less than order payload (${TransportState.orderWeight} kg)`, 'error');
+        }
+        return;
+      }
 
-      ['tempo', 'mini-truck', 'pickup'].forEach(id => {
-        ['f-', 'b-'].forEach(prefix => {
-          const card = document.getElementById(`${prefix}card-veh-${id}`);
-          if (card) {
-            if (id === vehId) {
-              card.className = 'p-4 rounded-xl border-2 border-[#166534] bg-[#F4F9F5] cursor-pointer transition-all space-y-2';
-            } else if (id === 'pickup' && TransportState.orderWeight > 700) {
-              card.className = 'p-4 rounded-xl border border-[#E6ECE6] bg-[#fafafa] opacity-70 space-y-2 cursor-not-allowed';
-            } else {
-              card.className = 'p-4 rounded-xl border border-[#E6ECE6] bg-white hover:bg-[#F8FAF9] cursor-pointer transition-all space-y-2';
-            }
+      TransportState.selectedVehicle = vehId;
+      updateVehicleCardsUI();
+    }
+
+    function updateVehicleCardsUI() {
+      const details = getRouteDetails(TransportState.selectedPickup, TransportState.selectedDelivery);
+      const routeData = (TransportState.selectedRoute === 'alt') ? details.alt : details.optimal;
+
+      // Find suitable & available vehicles
+      const suitableVehs = TransportState.vehicles.filter(v => TransportState.orderWeight <= v.capacity && v.status === 'Available');
+      
+      let bestMatchVeh = null;
+      if (suitableVehs.length > 0) {
+        bestMatchVeh = suitableVehs.reduce((prev, curr) => {
+          const scorePrev = calculateVehicleMatchScore(prev, routeData);
+          const scoreCurr = calculateVehicleMatchScore(curr, routeData);
+          if (scoreCurr !== scorePrev) return scoreCurr > scorePrev ? curr : prev;
+          const prevCost = calculateVehicleCost(prev, routeData);
+          const currCost = calculateVehicleCost(curr, routeData);
+          return currCost < prevCost ? curr : prev;
+        }, suitableVehs[0]);
+      }
+
+      // Ensure valid selected vehicle
+      let currentVeh = TransportState.vehicles.find(v => v.id === TransportState.selectedVehicle);
+      if (!currentVeh || TransportState.orderWeight > currentVeh.capacity || currentVeh.status !== 'Available') {
+        currentVeh = bestMatchVeh || TransportState.vehicles[0];
+        TransportState.selectedVehicle = currentVeh.id;
+      }
+
+      const activeCost = calculateVehicleCost(currentVeh, routeData);
+      const optBestCost = bestMatchVeh ? calculateVehicleCost(bestMatchVeh, details.optimal) : activeCost;
+      const altBestCost = bestMatchVeh ? calculateVehicleCost(bestMatchVeh, details.alt) : Math.round(activeCost * 1.1);
+
+      // Update route comparison card costs
+      ['f-', 'b-'].forEach(p => {
+        const optCostEl = document.getElementById(`${p}card-route-opt-cost`);
+        if (optCostEl) optCostEl.innerText = `₹${optBestCost.toLocaleString()}`;
+        const altCostEl = document.getElementById(`${p}card-route-alt-cost`);
+        if (altCostEl) altCostEl.innerText = `₹${altBestCost.toLocaleString()}`;
+
+        const optDistEl = document.getElementById(`${p}card-route-opt-dist`);
+        if (optDistEl) optDistEl.innerText = `📏 ${details.optimal.distanceKm} km`;
+        const optDurEl = document.getElementById(`${p}card-route-opt-dur`);
+        if (optDurEl) optDurEl.innerText = `⏱️ ${details.optimal.durationText}`;
+        const optDescEl = document.getElementById(`${p}card-route-opt-desc`);
+        if (optDescEl) optDescEl.innerText = `${details.pickup} ➔ ${details.optimal.via} ➔ ${details.destClean} (${details.optimal.name})`;
+
+        const altDistEl = document.getElementById(`${p}card-route-alt-dist`);
+        if (altDistEl) altDistEl.innerText = `📏 ${details.alt.distanceKm} km`;
+        const altDurEl = document.getElementById(`${p}card-route-alt-dur`);
+        if (altDurEl) altDurEl.innerText = `⏱️ ${details.alt.durationText}`;
+        const altDescEl = document.getElementById(`${p}card-route-alt-desc`);
+        if (altDescEl) altDescEl.innerText = `${details.alt.name} via ${details.alt.via} (${details.alt.distanceKm} km, ~${details.alt.durationText})`;
+      });
+
+      // Update recommendation footer & sticky bar
+      ['f-', 'b-'].forEach(prefix => {
+        const fName = document.getElementById(`${prefix}tp-rec-veh-name`);
+        if (fName) fName.innerText = currentVeh.name;
+        const totalCostEl = document.getElementById(`${prefix}tp-rec-total-cost`);
+        if (totalCostEl) totalCostEl.innerText = `₹${activeCost.toLocaleString()}`;
+      });
+
+      // Update counts dynamically (e.g., 3 Suitable or No Suitable Vehicles)
+      ['f-', 'b-'].forEach(prefix => {
+        const countEl = document.getElementById(`${prefix}tp-suitable-count`) || document.getElementById(`${prefix}suitable-count`);
+        if (countEl) {
+          countEl.innerText = suitableVehs.length > 0 ? `${suitableVehs.length} Suitable` : 'No Suitable Vehicles';
+        }
+      });
+
+      // Render cards dynamically into containers
+      ['f-', 'b-'].forEach(prefix => {
+        const container = document.getElementById(`${prefix}tp-vehicle-cards`) || document.getElementById(`${prefix}transport-vehicles-list`);
+        if (!container) return;
+
+        let html = '';
+        TransportState.vehicles.forEach(veh => {
+          const cost = calculateVehicleCost(veh, routeData);
+          const isSelected = TransportState.selectedVehicle === veh.id;
+          const isSuitable = TransportState.orderWeight <= veh.capacity;
+          const isAvailable = veh.status === 'Available';
+          const isBestMatch = bestMatchVeh && bestMatchVeh.id === veh.id && isAvailable;
+          const matchScore = isSuitable && isAvailable ? calculateVehicleMatchScore(veh, routeData) : 0;
+          const loadPct = Math.min(100, Math.round((TransportState.orderWeight / veh.capacity) * 100));
+
+          if (isSuitable && isAvailable) {
+            const isOptimalLoad = loadPct >= 70 && loadPct <= 95;
+            const loadBadgeText = isOptimalLoad ? `${loadPct}% Loaded (Optimal)` : `${loadPct}% Loaded`;
+            const borderClass = isSelected ? 'border-2 border-[#166534] bg-[#F4F9F5] shadow-xs' : 'border border-[#E6ECE6] bg-white hover:bg-[#F8FAF9]';
+
+            html += `
+              <div onclick="selectTransportVehicle('${veh.id}')" id="${prefix}card-veh-${veh.id}" class="p-4 rounded-xl ${borderClass} cursor-pointer transition-all space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-deep-forest">${veh.name}</span>
+                    ${isBestMatch ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#166534] text-white">✨ Best Match</span>' : ''}
+                    ${!isBestMatch && matchScore > 0 ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F0FDF4] text-[#166534] border border-[#bbf7d0]">${matchScore}% Match</span>` : ''}
+                  </div>
+                  <span class="font-mono font-extrabold text-deep-forest text-base">₹${cost.toLocaleString()}</span>
+                </div>
+                <div class="flex items-center justify-between text-xs text-secondary-text">
+                  <span>Capacity: <strong class="text-deep-forest">${veh.capacity.toLocaleString()} kg</strong></span>
+                  <span class="text-emerald-700 font-bold">${loadBadgeText}</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div class="h-full bg-[#166534] rounded-full transition-all duration-300" style="width: ${loadPct}%"></div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] pt-1 text-secondary-text">
+                  <span>Driver: <strong>${veh.driver}</strong> (${veh.reg}) ⭐ ${veh.rating}</span>
+                  <span class="text-emerald-700 font-bold">✓ Available</span>
+                </div>
+              </div>
+            `;
+          } else if (!isAvailable) {
+            html += `
+              <div id="${prefix}card-veh-${veh.id}" class="p-4 rounded-xl border border-[#E6ECE6] bg-[#fafafa] opacity-75 space-y-2 cursor-not-allowed">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sm text-gray-600">${veh.name}</span>
+                  <span class="font-mono font-bold text-gray-500 text-base">₹${cost.toLocaleString()}</span>
+                </div>
+                <div class="flex items-center justify-between text-xs text-secondary-text">
+                  <span>Capacity: <strong class="text-gray-600">${veh.capacity.toLocaleString()} kg</strong></span>
+                  <span class="text-amber-700 font-bold">⏳ Busy on Route</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] pt-1 text-secondary-text">
+                  <span>Driver: <strong>${veh.driver}</strong> (${veh.reg})</span>
+                  <span class="text-amber-700 font-bold">Unavailable</span>
+                </div>
+              </div>
+            `;
+          } else {
+            const excess = TransportState.orderWeight - veh.capacity;
+            html += `
+              <div id="${prefix}card-veh-${veh.id}" class="p-4 rounded-xl border border-[#E6ECE6] bg-[#fafafa] opacity-75 space-y-2 cursor-not-allowed">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sm text-gray-600">${veh.name}</span>
+                  <span class="font-mono font-bold text-gray-500 text-base">₹${cost.toLocaleString()}</span>
+                </div>
+                <div class="flex items-center justify-between text-xs text-secondary-text">
+                  <span>Capacity: <strong class="text-gray-600">${veh.capacity.toLocaleString()} kg</strong></span>
+                  <span class="text-red-600 font-bold">⚠️ Insufficient capacity</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div class="w-full h-full bg-red-500 rounded-full"></div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] pt-1 text-secondary-text">
+                  <span>Driver: <strong>${veh.driver}</strong></span>
+                  <span class="text-red-600 font-bold">Exceeds by ${excess.toLocaleString()} kg</span>
+                </div>
+              </div>
+            `;
           }
         });
+
+        container.innerHTML = html;
       });
     }
 
     function setMapRoute(routeType) {
       TransportState.selectedRoute = routeType;
+      const details = getRouteDetails(TransportState.selectedPickup, TransportState.selectedDelivery);
+      const opt = details.optimal;
+      const alt = details.alt;
+      const selected = routeType === 'optimal' ? opt : alt;
+
       ['f-', 'b-'].forEach(p => {
         const btnOpt = document.getElementById(`${p}btn-route-opt`);
         const btnAlt = document.getElementById(`${p}btn-route-alt`);
@@ -4428,6 +4728,13 @@
         const cardAlt = document.getElementById(`${p}card-route-alt`);
         const pathEl = document.getElementById(`${p}svg-active-route`);
         const corridor = document.getElementById(`${p}tp-corridor-label`);
+        const originEl = document.getElementById(`${p}svg-origin-name`);
+        const destEl = document.getElementById(`${p}svg-dest-name`);
+        const wp1El = document.getElementById(`${p}svg-wp1-name`);
+
+        if (originEl) originEl.innerText = details.originLabel;
+        if (destEl) destEl.innerText = details.destLabel;
+        if (wp1El) wp1El.innerText = selected.via;
 
         if (routeType === 'optimal') {
           if (btnOpt) btnOpt.className = 'px-2.5 py-1 rounded text-[10px] font-bold bg-[#166534] text-white border border-[#22c55e]';
@@ -4435,55 +4742,141 @@
           if (cardOpt) cardOpt.className = 'p-4 rounded-xl border-2 border-[#166534] bg-[#F4F9F5] cursor-pointer transition-all space-y-1.5 shadow-xs';
           if (cardAlt) cardAlt.className = 'p-4 rounded-xl border border-[#E6ECE6] bg-white hover:bg-[#F8FAF9] cursor-pointer transition-all space-y-1.5';
           if (pathEl) {
-            pathEl.setAttribute('d', 'M 80 60 L 160 100 L 250 150 L 350 200 L 420 250');
-            pathEl.setAttribute('stroke', '#22c55e');
+            pathEl.setAttribute('d', opt.path);
+            pathEl.setAttribute('stroke', opt.stroke);
           }
-          if (corridor) corridor.innerText = 'Nashik ➔ Igatpuri ➔ Mumbai';
+          if (corridor) corridor.innerText = `${details.pickup} ➔ ${opt.via} ➔ ${details.destClean}`;
         } else {
           if (btnOpt) btnOpt.className = 'px-2.5 py-1 rounded text-[10px] font-bold bg-[#112417] text-gray-400 border border-transparent';
           if (btnAlt) btnAlt.className = 'px-2.5 py-1 rounded text-[10px] font-bold bg-[#166534] text-white border border-[#22c55e]';
           if (cardOpt) cardOpt.className = 'p-4 rounded-xl border border-[#E6ECE6] bg-white hover:bg-[#F8FAF9] cursor-pointer transition-all space-y-1.5';
           if (cardAlt) cardAlt.className = 'p-4 rounded-xl border-2 border-[#166534] bg-[#F4F9F5] cursor-pointer transition-all space-y-1.5 shadow-xs';
           if (pathEl) {
-            pathEl.setAttribute('d', 'M 80 60 L 160 100 L 300 110 L 420 250');
-            pathEl.setAttribute('stroke', '#38bdf8');
+            pathEl.setAttribute('d', alt.path);
+            pathEl.setAttribute('stroke', alt.stroke);
           }
-          if (corridor) corridor.innerText = 'Nashik ➔ Kalyan Bypass ➔ Mumbai';
+          if (corridor) corridor.innerText = `${details.pickup} ➔ ${alt.via} ➔ ${details.destClean}`;
         }
       });
+
+      updateVehicleCardsUI();
     }
 
     function updateTransportPayload(val) {
       const weight = parseInt(val) || 0;
       TransportState.orderWeight = weight;
       
-      const suitableCount = (weight <= 700) ? 3 : ((weight <= 1000) ? 2 : ((weight <= 1500) ? 1 : 0));
-      ['f-', 'b-'].forEach(p => {
-        const countEl = document.getElementById(`${p}tp-suitable-count`);
-        if (countEl) countEl.innerText = `${suitableCount} Suitable`;
-      });
+      // Sync input values across farmer and buyer portals
+      const fWeight = document.getElementById('f-tp-weight');
+      const bWeight = document.getElementById('b-tp-weight');
+      if (fWeight && parseInt(fWeight.value) !== weight) fWeight.value = weight;
+      if (bWeight && parseInt(bWeight.value) !== weight) bWeight.value = weight;
 
-      if (weight > 700 && TransportState.selectedVehicle === 'pickup') {
-        selectTransportVehicle('tempo');
+      const currentVeh = TransportState.vehicles.find(v => v.id === TransportState.selectedVehicle);
+      if (!currentVeh || weight > currentVeh.capacity) {
+        const nextSuitable = TransportState.vehicles.find(v => weight <= v.capacity && v.status === 'Available');
+        if (nextSuitable) {
+          TransportState.selectedVehicle = nextSuitable.id;
+        }
       }
+
+      updateVehicleCardsUI();
+    }
+
+    function updateTransportCrop(val) {
+      TransportState.cropName = val || '';
+      const fCrop = document.getElementById('f-tp-crop');
+      const bCrop = document.getElementById('b-tp-crop');
+      if (fCrop && fCrop.value !== val) fCrop.value = val;
+      if (bCrop && bCrop.value !== val) bCrop.value = val;
     }
 
     function recalculateTransportRoute() {
-      setMapRoute('optimal');
+      const activePrefix = (currentRole === 'buyer') ? 'b-' : 'f-';
+      const otherPrefix = (currentRole === 'buyer') ? 'f-' : 'b-';
+
+      const pickEl = document.getElementById(`${activePrefix}tp-pickup`) || document.getElementById('f-tp-pickup');
+      const delivEl = document.getElementById(`${activePrefix}tp-delivery`) || document.getElementById('f-tp-delivery');
+      const weightEl = document.getElementById(`${activePrefix}tp-weight`) || document.getElementById('f-tp-weight');
+      const cropEl = document.getElementById(`${activePrefix}tp-crop`) || document.getElementById('f-tp-crop');
+
+      if (pickEl) TransportState.selectedPickup = pickEl.value;
+      if (delivEl) TransportState.selectedDelivery = delivEl.value;
+      if (weightEl) TransportState.orderWeight = parseInt(weightEl.value) || 800;
+      if (cropEl) TransportState.cropName = cropEl.value;
+
+      // Sync other portal dropdowns
+      const otherPick = document.getElementById(`${otherPrefix}tp-pickup`);
+      if (otherPick && otherPick.value !== TransportState.selectedPickup) otherPick.value = TransportState.selectedPickup;
+      const otherDeliv = document.getElementById(`${otherPrefix}tp-delivery`);
+      if (otherDeliv && otherDeliv.value !== TransportState.selectedDelivery) otherDeliv.value = TransportState.selectedDelivery;
+      const otherWeight = document.getElementById(`${otherPrefix}tp-weight`);
+      if (otherWeight && parseInt(otherWeight.value) !== TransportState.orderWeight) otherWeight.value = TransportState.orderWeight;
+      const otherCrop = document.getElementById(`${otherPrefix}tp-crop`);
+      if (otherCrop && otherCrop.value !== TransportState.cropName) otherCrop.value = TransportState.cropName;
+
+      setMapRoute(TransportState.selectedRoute || 'optimal');
+    }
+
+    function returnToTransportConfig() {
+      if (TransportState.animInterval) {
+        clearInterval(TransportState.animInterval);
+        TransportState.animInterval = null;
+      }
+      ['f-', 'b-'].forEach(p => {
+        const cfg = document.getElementById(`${p}transport-config-view`);
+        const trk = document.getElementById(`${p}transport-tracking-view`);
+        if (cfg) cfg.classList.remove('hidden');
+        if (trk) trk.classList.add('hidden');
+      });
+      lucide.createIcons();
     }
 
     function confirmDirectTransport() {
+      const veh = TransportState.vehicles.find(v => v.id === TransportState.selectedVehicle) || TransportState.vehicles[0];
+
       ['f-', 'b-'].forEach(p => {
         const cfg = document.getElementById(`${p}transport-config-view`);
         const trk = document.getElementById(`${p}transport-tracking-view`);
         if (cfg) cfg.classList.add('hidden');
         if (trk) trk.classList.remove('hidden');
+
+        // Update driver details in tracking view
+        const driverNameEl = document.querySelector(`#${p}transport-tracking-view strong`);
+        const step1Sub = document.querySelector(`#${p}m-step-1 p`);
+        if (step1Sub) step1Sub.innerText = `${veh.model} ${veh.reg} assigned`;
+
+        // Update Driver card
+        const driverBox = document.querySelector(`#${p}transport-tracking-view .pt-4.border-t`);
+        if (driverBox) {
+          const initials = veh.driver.split(' ').map(n => n[0]).join('');
+          driverBox.innerHTML = `
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-deep-forest text-white flex items-center justify-center font-bold text-xs">
+                ${initials}
+              </div>
+              <div>
+                <span class="font-bold text-xs text-deep-forest block">${veh.driver} (Driver) ⭐ ${veh.rating}</span>
+                <span class="text-[10px] text-secondary-text">${veh.model} • ${veh.reg}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="returnToTransportConfig()" class="px-3 py-1.5 border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-lg text-secondary-text">← Reconfigure</button>
+              <a href="tel:${veh.phone}" class="px-3 py-1.5 border border-[#E6ECE6] hover:bg-[#F8FAF9] text-xs font-bold rounded-lg text-deep-forest">Call Driver</a>
+              <button id="${p}btn-next-milestone" onclick="advanceTransportMilestone()" class="px-4 py-2 btn-buyer text-xs font-bold rounded-xl shadow-button hover:opacity-90 transition-opacity">Next: Start Transit ➔</button>
+            </div>
+          `;
+        }
       });
 
       TransportState.milestoneIndex = 1;
       updateMilestoneUI();
       sendGpsTelemetry(0.15, 0);
       lucide.createIcons();
+
+      if (typeof showFieldoraToast === 'function') {
+        showFieldoraToast(`Smart Transport Confirmed! Driver ${veh.driver} (${veh.reg}) dispatched.`, 'success');
+      }
     }
 
     // Global FIELDORA_API_BASE
@@ -4491,7 +4884,7 @@
     function sendGpsTelemetry(pct, wpIdx) {
       const orderId = 'TR-1042';
       const gpsWaypoints = [
-        { lat: 19.9975, lng: 73.7898, checkpoint: 'Nashik Agro Hub - Vehicle Assigned & Loading', speed: 25, x: 80, y: 60 },
+        { lat: 19.9975, lng: 73.7898, checkpoint: `${TransportState.selectedPickup} Agro Hub - Vehicle Assigned & Loading`, speed: 25, x: 80, y: 60 },
         { lat: 19.8516, lng: 73.9967, checkpoint: 'Farmer Farm-Gate Pickup - Tare Weighment', speed: 30, x: 160, y: 100 },
         { lat: 19.6967, lng: 73.5638, checkpoint: 'In Transit - Igatpuri Express Corridor', speed: 58, x: 250, y: 150 },
         { lat: 19.2183, lng: 72.9781, checkpoint: 'Thane Freight Bypass - Approaching Hub', speed: 45, x: 350, y: 200 },
@@ -4574,6 +4967,7 @@
     function updateMilestoneUI() {
       const idx = TransportState.milestoneIndex;
       const isCompletedAll = (idx >= 4);
+      const veh = TransportState.vehicles.find(v => v.id === TransportState.selectedVehicle) || TransportState.vehicles[0];
 
       const stepTitles = [
         typeof t === 'function' ? t('ms_step1_title', '1. Vehicle Assigned') : '1. Vehicle Assigned',
@@ -4583,7 +4977,7 @@
       ];
 
       const stepSubtitles = [
-        typeof t === 'function' ? t('ms_step1_sub', 'Tempo MH-15-EG-4412 assigned') : 'Tempo MH-15-EG-4412 assigned',
+        typeof t === 'function' ? t('ms_step1_sub', `${veh.model} ${veh.reg} assigned`) : `${veh.model} ${veh.reg} assigned`,
         typeof t === 'function' ? t('ms_step2_sub', 'Farm-gate weighbridge tare measured') : 'Farm-gate weighbridge tare measured',
         typeof t === 'function' ? t('ms_step3_sub', 'Direct expressway transit via Igatpuri') : 'Direct expressway transit via Igatpuri',
         typeof t === 'function' ? t('ms_step4_sub', 'Destination arrival & assay inspection') : 'Destination arrival & assay inspection'
@@ -6234,14 +6628,82 @@
     }
 
     function getProduceImage(crop) {
-      const lower = (crop || '').toLowerCase();
-      if (lower.includes('tomato')) return 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80';
-      if (lower.includes('onion')) return 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=80';
-      if (lower.includes('wheat')) return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80';
-      if (lower.includes('potato')) return 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80';
-      if (lower.includes('soya') || lower.includes('soybean')) return 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=600&q=80';
-      return 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80';
+      const lower = (crop || '').toLowerCase().trim();
+      if (lower.includes('onion') || lower.includes('pyaz') || lower.includes('kanda')) {
+        return 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('potato') || lower.includes('batata') || lower.includes('aaloo')) {
+        return 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('tomato') || lower.includes('tamatar')) {
+        return 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('capsicum') || lower.includes('shimla') || lower.includes('bell pepper')) {
+        return 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('chilli') || lower.includes('chili') || lower.includes('mirchi')) {
+        return 'https://images.unsplash.com/photo-1588252303782-cb80119abd6d?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('ginger') || lower.includes('adrak') || lower.includes('aale')) {
+        return 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('garlic') || lower.includes('lahsun') || lower.includes('lasun')) {
+        return 'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('lemon') || lower.includes('nimbu') || lower.includes('limbu') || lower.includes('lime')) {
+        return 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('carrot') || lower.includes('gajar')) {
+        return 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('rice') || lower.includes('paddy') || lower.includes('basmati') || lower.includes('chawal')) {
+        return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('wheat') || lower.includes('gehun')) {
+        return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('jowar') || lower.includes('sorghum') || lower.includes('maldandi')) {
+        return 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('bajra') || lower.includes('millet')) {
+        return 'https://images.unsplash.com/photo-1607672632458-9eb56696346b?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('masoor') || lower.includes('lentil') || lower.includes('dal')) {
+        return 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=800&q=80';
+      }
+      if (lower.includes('soya') || lower.includes('soybean')) {
+        return 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=800&q=80';
+      }
+      return 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80';
     }
+
+    function handleFarmerCropSelect(cropName) {
+      const varietyInput = document.getElementById('fp-variety');
+      const priceInput = document.getElementById('fp-price');
+      const defaults = {
+        'Onion': { variety: 'Nashik Garwa', price: 2400 },
+        'Potato': { variety: 'Kufri Jyoti', price: 2100 },
+        'Tomato': { variety: 'Abhinav Hybrid Grade A', price: 2800 },
+        'Capsicum': { variety: 'Green Blocky Hybrid', price: 3200 },
+        'Green Chilli': { variety: 'Jwala Spicy Green', price: 3800 },
+        'Ginger': { variety: 'Satara Fresh Washed', price: 9500 },
+        'Garlic': { variety: 'Yamuna Safed (G-1)', price: 12000 },
+        'Lemon': { variety: 'Kagzi Juicy Lime', price: 5000 },
+        'Carrot': { variety: 'Pusa Kesar Orange-Red', price: 2200 },
+        'Rice / Paddy': { variety: 'Basmati 1121 Traditional', price: 4200 },
+        'Wheat': { variety: 'Sharbati Gold', price: 2750 },
+        'Jowar': { variety: 'Maldandi M-35-1 (White)', price: 3400 },
+        'Bajra': { variety: 'Desi Pearl Millet (Bold)', price: 2450 },
+        'Masoor': { variety: 'Small Bold Brown Masoor', price: 6800 },
+        'Soybean': { variety: 'JS-335 Yellow Bold', price: 4700 }
+      };
+      const d = defaults[cropName];
+      if (d) {
+        if (varietyInput) varietyInput.value = d.variety;
+        if (priceInput) priceInput.value = d.price;
+      }
+    }
+    window.handleFarmerCropSelect = handleFarmerCropSelect;
 
     async function loadProduceListings() {
       try {
@@ -8179,6 +8641,7 @@
       saveAndRenderProduce();
       lucide.createIcons();
       renderDemandIntelligence();
+      recalculateTransportRoute();
       if (currentAuthUser) {
         updateUserUIElements(currentAuthUser);
       }

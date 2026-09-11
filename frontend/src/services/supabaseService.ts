@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 import { ProduceListing, BuyerRequirement, PurchaseRequest, OrderItem, MarketPricePoint } from '../types';
 import { MOCK_PRODUCE, MOCK_REQUIREMENTS, MOCK_REQUESTS, MOCK_ORDERS } from '../data/mockData';
+import { getCropImage } from '../data/cropMaster';
 
 // --- PRODUCE LISTINGS ---
 
@@ -19,8 +20,8 @@ export const fetchProduceListings = async (): Promise<ProduceListing[]> => {
     return data.map((item: any) => ({
       id: item.id,
       farmerId: item.farmer_id || 'FARMER-01',
-      farmerName: item.farmer_name,
-      farmName: item.farm_name,
+      farmerName: item.farmer_name || 'Rajendra Patel',
+      farmName: item.farm_name || 'Raj Farms & Agro Cooperative',
       isFarmerVerified: item.is_farmer_verified ?? true,
       crop: item.crop,
       variety: item.variety,
@@ -28,14 +29,14 @@ export const fetchProduceListings = async (): Promise<ProduceListing[]> => {
       quantity: Number(item.quantity),
       unit: item.unit || 'quintal',
       expectedPrice: Number(item.expected_price),
-      marketReferencePrice: Number(item.market_reference_price),
+      marketReferencePrice: Number(item.market_reference_price || item.expected_price),
       location: item.location,
       quality: item.quality,
       harvestDate: item.harvest_date,
       deliveryOption: item.delivery_option,
-      status: item.status,
+      status: item.status || 'Active',
       description: item.description,
-      imageUrl: item.image_url,
+      imageUrl: getCropImage(item.crop, item.image_url),
       moisturePercentage: item.moisture_percentage ? Number(item.moisture_percentage) : undefined,
       createdDate: item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     }));
@@ -47,24 +48,26 @@ export const fetchProduceListings = async (): Promise<ProduceListing[]> => {
 
 export const createProduceListing = async (produce: Omit<ProduceListing, 'id' | 'createdDate'>): Promise<ProduceListing | null> => {
   try {
+    const resolvedImageUrl = getCropImage(produce.crop, produce.imageUrl);
     const payload = {
-      farmer_name: produce.farmerName,
-      farm_name: produce.farmName,
-      is_farmer_verified: produce.isFarmerVerified,
+      farmer_id: produce.farmerId || 'FARMER-01',
+      farmer_name: produce.farmerName || 'Rajendra Patel',
+      farm_name: produce.farmName || 'Raj Farms & Agro Cooperative',
+      is_farmer_verified: produce.isFarmerVerified ?? true,
       crop: produce.crop,
       variety: produce.variety,
       category: produce.category,
       quantity: produce.quantity,
       unit: produce.unit,
       expected_price: produce.expectedPrice,
-      market_reference_price: produce.marketReferencePrice,
+      market_reference_price: produce.marketReferencePrice || produce.expectedPrice,
       location: produce.location,
       quality: produce.quality,
       harvest_date: produce.harvestDate || new Date().toISOString().split('T')[0],
       delivery_option: produce.deliveryOption,
-      status: produce.status,
+      status: produce.status || 'Active',
       description: produce.description,
-      image_url: produce.imageUrl,
+      image_url: resolvedImageUrl,
       moisture_percentage: produce.moisturePercentage,
     };
 
@@ -81,24 +84,24 @@ export const createProduceListing = async (produce: Omit<ProduceListing, 'id' | 
 
     return {
       id: data.id,
-      farmerId: data.farmer_id || produce.farmerId,
-      farmerName: data.farmer_name,
-      farmName: data.farm_name,
-      isFarmerVerified: data.is_farmer_verified,
+      farmerId: data.farmer_id || produce.farmerId || 'FARMER-01',
+      farmerName: data.farmer_name || produce.farmerName,
+      farmName: data.farm_name || produce.farmName,
+      isFarmerVerified: data.is_farmer_verified ?? true,
       crop: data.crop,
       variety: data.variety,
       category: data.category,
       quantity: Number(data.quantity),
       unit: data.unit,
       expectedPrice: Number(data.expected_price),
-      marketReferencePrice: Number(data.market_reference_price),
+      marketReferencePrice: Number(data.market_reference_price || data.expected_price),
       location: data.location,
       quality: data.quality,
       harvestDate: data.harvest_date,
       deliveryOption: data.delivery_option,
-      status: data.status,
+      status: data.status || 'Active',
       description: data.description,
-      imageUrl: data.image_url,
+      imageUrl: getCropImage(data.crop, data.image_url || resolvedImageUrl),
       moisturePercentage: data.moisture_percentage ? Number(data.moisture_percentage) : undefined,
       createdDate: new Date(data.created_at).toISOString().split('T')[0],
     };
@@ -980,7 +983,22 @@ export const confirmFarmerTransportApi = async (orderId: string, data?: { confir
   }
 };
 
-export const dispatchOrderTransportApi = async (orderId: string, dispatchData?: { vehicleName?: string; vehicleType?: string; vehicleNumber?: string; driverName?: string; driverPhone?: string }): Promise<OrderItem | null> => {
+export const dispatchOrderTransportApi = async (orderId: string, dispatchData?: {
+  vehicleId?: string;
+  vehicleName?: string;
+  vehicleType?: string;
+  vehicleNumber?: string;
+  driverName?: string;
+  driverPhone?: string;
+  pickupLocation?: string;
+  deliveryLocation?: string;
+  pickupNodeId?: string;
+  deliveryNodeId?: string;
+  routeId?: string;
+  estimatedDistanceKm?: number;
+  estimatedDurationMinutes?: number;
+  estimatedTollCost?: number;
+}): Promise<OrderItem | null> => {
   try {
     try {
       const res = await fetch(`/api/orders/${orderId}/dispatch`, {
@@ -988,11 +1006,20 @@ export const dispatchOrderTransportApi = async (orderId: string, dispatchData?: 
         headers: { 'Content-Type': 'application/json', 'x-user-role': 'buyer' },
         body: JSON.stringify({
           user_role: 'buyer',
+          vehicle_id: dispatchData?.vehicleId || 'veh-default',
           vehicle_name: dispatchData?.vehicleName || 'Fieldora Smart Logistics',
           vehicle_type: dispatchData?.vehicleType || 'Eicher 14ft Closed Container',
           vehicle_number: dispatchData?.vehicleNumber || 'MH-04-AZ-2084',
           driver_name: dispatchData?.driverName || 'Suresh Jadhav',
           driver_phone: dispatchData?.driverPhone || '+91 98201 54321',
+          pickup_location: dispatchData?.pickupLocation,
+          delivery_location: dispatchData?.deliveryLocation,
+          pickup_node_id: dispatchData?.pickupNodeId,
+          delivery_node_id: dispatchData?.deliveryNodeId,
+          route_id: dispatchData?.routeId,
+          estimated_distance_km: dispatchData?.estimatedDistanceKm,
+          estimated_duration_minutes: dispatchData?.estimatedDurationMinutes,
+          estimated_toll_cost: dispatchData?.estimatedTollCost,
         })
       });
       if (res.ok) {
@@ -1068,7 +1095,30 @@ export const dispatchOrderTransportApi = async (orderId: string, dispatchData?: 
       trackingSteps: updated.tracking_steps,
     };
   } catch (err) {
-    console.error('Dispatch order error:', err);
+    console.error('Dispatch transport error:', err);
+    return null;
+  }
+};
+
+export const fetchOrderDispatchApi = async (orderId: string): Promise<any | null> => {
+  try {
+    const res = await fetch(`/api/orders/${orderId}/dispatch`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) return json.data;
+    }
+  } catch {}
+
+  try {
+    const { data } = await supabase
+      .from('order_dispatches')
+      .select('*')
+      .eq('order_id', orderId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return data || null;
+  } catch {
     return null;
   }
 };
@@ -1213,3 +1263,186 @@ export const fetchMarketPrices = async (): Promise<MarketPricePoint[]> => {
     throw err;
   }
 };
+
+// --- DYNAMIC SMART DIRECT TRANSPORT OPTIONS API ---
+
+export interface TransportOptionDto {
+  id: string;
+  vehicleName: string;
+  vehicleType: string;
+  capacityKg: number;
+  currentLoadKg: number;
+  loadingPercentage: number;
+  estimatedFreight: number;
+  driverName: string;
+  driverPhone: string;
+  vehicleNumber: string;
+  availabilityStatus: 'Available' | 'Busy' | 'Maintenance';
+  distanceKm: number;
+  estimatedTime: string;
+  matchScore: number;
+  isBestMatch: boolean;
+  isSuitable: boolean;
+  scoreBreakdown?: {
+    capacityScore: number;
+    freightScore: number;
+    availabilityScore: number;
+    routeScore: number;
+  };
+}
+
+export interface TransportOptionsResult {
+  options: TransportOptionDto[];
+  suitableCount: number;
+  totalAvailable: number;
+  pickupLocation: string;
+  destination: string;
+  distanceKm: number;
+  estimatedTime: string;
+  crop: string;
+  requestedQuantityKg: number;
+  dataSource: 'database' | 'seed_demo';
+}
+
+export const fetchTransportOptionsApi = async (params: {
+  pickupLocation: string;
+  destination: string;
+  crop?: string;
+  quantity?: number;
+  quantityKg?: number;
+  unit?: string;
+}): Promise<TransportOptionsResult> => {
+  const endpoints = [
+    '/api/transport/options',
+    'http://localhost:5000/api/transport/options'
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          return json.data;
+        }
+      }
+    } catch {
+      // Continue to next endpoint or fallback
+    }
+  }
+
+  // Graceful client-side fallback calculation if backend is temporarily unreachable
+  const qty = params.quantityKg || (params.quantity ? (params.unit === 'quintal' ? params.quantity * 100 : params.quantity) : 800);
+  const dist = params.destination.toLowerCase().includes('pune') ? 210 : 165;
+  
+  const seedList: TransportOptionDto[] = [
+    {
+      id: 'veh-tata-ace-01',
+      vehicleName: 'Tata Ace Gold',
+      vehicleType: 'Tempo',
+      capacityKg: 1000,
+      currentLoadKg: qty,
+      loadingPercentage: Math.min(100, Math.round((qty / 1000) * 100)),
+      estimatedFreight: Math.round((300 + 14.5 * dist) / 50) * 50,
+      driverName: 'Suresh More',
+      driverPhone: '+919822144550',
+      vehicleNumber: 'MH-15-EG-4412',
+      availabilityStatus: 'Available',
+      distanceKm: dist,
+      estimatedTime: '4 - 5 hours',
+      matchScore: qty <= 1000 ? (qty >= 750 ? 96 : 82) : 0,
+      isBestMatch: qty <= 1000 && qty > 700,
+      isSuitable: qty <= 1000
+    },
+    {
+      id: 'veh-bolero-maxi-02',
+      vehicleName: 'Bolero Maxi Truck',
+      vehicleType: 'Mini Truck',
+      capacityKg: 1500,
+      currentLoadKg: qty,
+      loadingPercentage: Math.min(100, Math.round((qty / 1500) * 100)),
+      estimatedFreight: Math.round((400 + 18.0 * dist) / 50) * 50,
+      driverName: 'Balasaheb Shinde',
+      driverPhone: '+919822144551',
+      vehicleNumber: 'MH-15-BT-8901',
+      availabilityStatus: 'Available',
+      distanceKm: dist,
+      estimatedTime: '4 - 5 hours',
+      matchScore: qty <= 1500 ? (qty > 1000 ? 95 : 78) : 0,
+      isBestMatch: qty > 1000 && qty <= 1500,
+      isSuitable: qty <= 1500
+    },
+    {
+      id: 'veh-mahindra-jeeto-03',
+      vehicleName: 'Mahindra Jeeto',
+      vehicleType: 'Mini Truck',
+      capacityKg: 700,
+      currentLoadKg: qty,
+      loadingPercentage: Math.min(100, Math.round((qty / 700) * 100)),
+      estimatedFreight: Math.round((250 + 12.5 * dist) / 50) * 50,
+      driverName: 'Rahul Patil',
+      driverPhone: '+919822144552',
+      vehicleNumber: 'MH-15-KQ-6274',
+      availabilityStatus: 'Available',
+      distanceKm: dist,
+      estimatedTime: '4 - 5 hours',
+      matchScore: qty <= 700 ? 98 : 0,
+      isBestMatch: qty <= 700,
+      isSuitable: qty <= 700
+    },
+    {
+      id: 'veh-tata-407-04',
+      vehicleName: 'Tata 407',
+      vehicleType: 'Light Commercial Truck',
+      capacityKg: 2500,
+      currentLoadKg: qty,
+      loadingPercentage: Math.min(100, Math.round((qty / 2500) * 100)),
+      estimatedFreight: Math.round((600 + 22.0 * dist) / 50) * 50,
+      driverName: 'Amit Jadhav',
+      driverPhone: '+919822144553',
+      vehicleNumber: 'MH-15-CR-3158',
+      availabilityStatus: 'Available',
+      distanceKm: dist,
+      estimatedTime: '4 - 5 hours',
+      matchScore: qty <= 2500 ? (qty > 1500 ? 94 : 65) : 0,
+      isBestMatch: qty > 1500 && qty <= 2500,
+      isSuitable: qty <= 2500
+    },
+    {
+      id: 'veh-ashok-leyland-05',
+      vehicleName: 'Ashok Leyland Dost',
+      vehicleType: 'Light Commercial Vehicle',
+      capacityKg: 1500,
+      currentLoadKg: qty,
+      loadingPercentage: Math.min(100, Math.round((qty / 1500) * 100)),
+      estimatedFreight: Math.round((400 + 18.0 * dist) / 50) * 50,
+      driverName: 'Nitin Pawar',
+      driverPhone: '+919822144554',
+      vehicleNumber: 'MH-15-HL-7286',
+      availabilityStatus: 'Busy',
+      distanceKm: dist,
+      estimatedTime: '4 - 5 hours',
+      matchScore: 0,
+      isBestMatch: false,
+      isSuitable: qty <= 1500
+    }
+  ];
+
+  return {
+    options: seedList,
+    suitableCount: seedList.filter(s => s.isSuitable && s.availabilityStatus === 'Available').length,
+    totalAvailable: seedList.filter(s => s.availabilityStatus === 'Available').length,
+    pickupLocation: params.pickupLocation,
+    destination: params.destination,
+    distanceKm: dist,
+    estimatedTime: '4 - 5 hours',
+    crop: params.crop || 'Produce',
+    requestedQuantityKg: qty,
+    dataSource: 'seed_demo'
+  };
+};
+

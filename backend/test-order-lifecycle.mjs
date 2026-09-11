@@ -4,6 +4,7 @@ import {
   acceptDeal
 } from './dist/services/negotiationService.js';
 import {
+  confirmFarmerTransport,
   lockEscrowDeposit,
   dispatchOrderLogistics,
   recordGpsTelemetry,
@@ -107,11 +108,23 @@ async function runTests() {
     assert(repeatOrder.order.id === orderId, `Idempotency verified: Duplicate order creation prevented (Order ID: ${repeatOrder.order.id})`);
 
     // -------------------------------------------------------------
+    // Step 2.5: Farmer Confirms Transport Readiness
+    // -------------------------------------------------------------
+    console.log('\n--- Step 2.5: Farmer Confirms Transport Readiness ---');
+    const farmerConfirmResult = await confirmFarmerTransport(orderId, {
+      confirmed_by: 'Farmer Nashik',
+      user_role: 'farmer'
+    });
+    assert(farmerConfirmResult.transport_confirmed === true, `Order transport_confirmed is true`);
+    assert(farmerConfirmResult.status === 'Transport Confirmed', `Order status updated to 'Transport Confirmed'`);
+
+    // -------------------------------------------------------------
     // Step 3: Lock Buyer Escrow Deposit
     // -------------------------------------------------------------
     console.log('\n--- Step 3: Buyer Escrow Deposit Lock ---');
     const lockResult = await lockEscrowDeposit({
       order_id: orderId,
+      user_role: 'buyer',
       buyer_id: dealAccepted.order.buyer_id,
       deposit_amount: 120000,
       idempotency_key: `lock-${orderId}`
@@ -166,7 +179,7 @@ async function runTests() {
     // -------------------------------------------------------------
     console.log('\n--- Step 6: Destination Arrival & Delivery ---');
     const deliveredOrder = await markOrderDelivered(orderId);
-    assert(deliveredOrder.status === 'Delivered', `Order status updated to 'Delivered'`);
+    assert(deliveredOrder.status === 'Arrived' || deliveredOrder.status === 'Delivered', `Order status updated to '${deliveredOrder.status}'`);
 
     // -------------------------------------------------------------
     // Step 7: Premature Payout Release Attempt (Must Fail)

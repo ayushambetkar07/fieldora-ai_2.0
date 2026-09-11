@@ -5,6 +5,7 @@ import { extractRequirementFromPrompt } from '../../services/aiService';
 import { QualityGrade } from '../../types';
 import { Sparkles, ArrowLeft, Send, CheckCircle2, ClipboardList, Wand2 } from 'lucide-react';
 import { Button, Input, Select, Card } from '../../components/ui';
+import { getCropOptions, getCropByName } from '../../data/cropMaster';
 
 export const CreateRequirementPage: React.FC = () => {
   const { addRequirement } = useApp();
@@ -153,15 +154,16 @@ export const CreateRequirementPage: React.FC = () => {
             <Select
               label="Commodity / Crop *"
               value={crop}
-              onChange={(e) => setCrop(e.target.value)}
-              options={[
-                { value: 'Potato', label: 'Potato' },
-                { value: 'Tomato', label: 'Tomato' },
-                { value: 'Onion', label: 'Onion' },
-                { value: 'Wheat', label: 'Wheat' },
-                { value: 'Rice', label: 'Rice' },
-                { value: 'Soybean', label: 'Soybean' },
-              ]}
+              onChange={(e) => {
+                const selectedCrop = e.target.value;
+                setCrop(selectedCrop);
+                const matched = getCropByName(selectedCrop);
+                if (matched) {
+                  setVariety(matched.defaultVariety);
+                  setTargetPrice(matched.defaultPrice.toString());
+                }
+              }}
+              options={getCropOptions()}
             />
 
             <Input

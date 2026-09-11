@@ -197,3 +197,24 @@ export interface AIAssistantMessage {
   };
   suggestedActions?: string[];
 }
+
+export interface CropVariety {
+  id: string;
+  name: string;
+  defaultGrade?: string;
+  benchmarkPrice?: number;
+  description?: string;
+}
+
+export interface CropItem {
+  id: string;
+  name: string;
+  category: 'Vegetables' | 'Grains' | 'Pulses' | 'Oilseeds' | 'Spices' | 'Cash Crops';
+  image: string;
+  fallbackImage: string;
+  defaultVariety: string;
+  defaultPrice: number;
+  varieties: CropVariety[];
+  isActive: boolean;
+}
+

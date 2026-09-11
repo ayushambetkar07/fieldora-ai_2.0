@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase.js';
+import { toKg, UNIT_TO_KG_MAP } from '../utils/unitConversion.js';
 // In-memory fallback stores for auxiliary lifecycle data if tables are pending migration
 const memoryDispatches = new Map();
 const memoryTelemetry = new Map();
@@ -462,8 +463,10 @@ export async function verifyOrderQualityAndWeight(order_id, input) {
     }
     // Save Weighment Record
     const contractedQty = Number(order.quantity);
-    const varianceWeight = Math.round((actualQty - contractedQty) * 100) / 100;
-    const variancePercentage = contractedQty > 0 ? Math.round((varianceWeight / contractedQty) * 10000) / 100 : 0;
+    const contractedInKg = toKg(contractedQty, order.unit || 'kg');
+    const actualInKg = toKg(actualQty, unit || order.unit || 'kg');
+    const varianceWeight = Math.round((actualInKg - contractedInKg) * 100) / 100;
+    const variancePercentage = contractedInKg > 0 ? Math.round((varianceWeight / contractedInKg) * 10000) / 100 : 0;
     const weighmentPayload = {
         id: `wb-${Date.now()}`,
         order_id,
@@ -591,13 +594,37 @@ export async function recordQualityAssay(order_id, assayInput) {
         .insert([payload])
         .select()
         .single();
-    if (error || !data) {
+    let finalAssay = data;
+    if (error || !finalAssay) {
         const list = memoryAssays.get(order_id) || [];
         list.push(payload);
         memoryAssays.set(order_id, list);
-        return payload;
+        finalAssay = payload;
     }
-    return data;
+    // Check if weighment already exists; if so, promote order to Quality Verified
+    const { data: existingWb } = await supabase
+        .from('order_weighments')
+        .select('*')
+        .eq('order_id', order_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    const wb = existingWb || (memoryWeighments.get(order_id)?.[memoryWeighments.get(order_id)?.length - 1]);
+    if (wb && finalAssay.assay_passed) {
+        await supabase
+            .from('orders')
+            .update({
+            status: 'Quality Verified',
+            actual_received_quantity: wb.net_weight,
+            actual_quantity_unit: wb.unit || order.unit || 'kg',
+            quality_grade: finalAssay.tested_grade,
+            assay_result: 'Passed',
+            verified_at: new Date().toISOString(),
+            verified_by: finalAssay.inspector_name
+        })
+            .eq('id', order_id);
+    }
+    return finalAssay;
 }
 // =========================================================================
 // 7. RECORD WEIGHMENT (GATEKEEPER 2)
@@ -612,9 +639,14 @@ export async function recordOrderWeighment(order_id, weighmentInput) {
         throw { status: 404, message: 'Order not found' };
     }
     const contractedQty = Number(order.quantity);
-    const netWeight = Number(weighmentInput.net_weight);
-    const varianceWeight = Math.round((netWeight - contractedQty) * 100) / 100;
-    const variancePercentage = contractedQty > 0 ? Math.round((varianceWeight / contractedQty) * 10000) / 100 : 0;
+    const netWeight = weighmentInput.net_weight !== undefined && !isNaN(Number(weighmentInput.net_weight))
+        ? Number(weighmentInput.net_weight)
+        : (Number(weighmentInput.gross_weight || 0) - Number(weighmentInput.tare_weight || 0));
+    const weighmentUnit = weighmentInput.unit || order.unit || 'kg';
+    const contractedInKg = toKg(contractedQty, order.unit || 'kg');
+    const netWeightInKg = toKg(netWeight, weighmentUnit);
+    const varianceWeight = Math.round((netWeightInKg - contractedInKg) * 100) / 100;
+    const variancePercentage = contractedInKg > 0 ? Math.round((varianceWeight / contractedInKg) * 10000) / 100 : 0;
     const isWeightVerified = Math.abs(variancePercentage) <= 5.0;
     const payload = {
         id: `wb-${Date.now()}`,
@@ -625,10 +657,10 @@ export async function recordOrderWeighment(order_id, weighmentInput) {
         weighbridge_slip_url: weighmentInput.weighbridge_slip_url || undefined,
         operator_name: weighmentInput.operator_name,
         contracted_weight: contractedQty,
-        gross_weight: Number(weighmentInput.gross_weight),
-        tare_weight: Number(weighmentInput.tare_weight),
+        gross_weight: Number(weighmentInput.gross_weight || 0),
+        tare_weight: Number(weighmentInput.tare_weight || 0),
         net_weight: netWeight,
-        unit: weighmentInput.unit || order.unit || 'kg',
+        unit: weighmentUnit,
         variance_weight: varianceWeight,
         variance_percentage: variancePercentage,
         weight_verified: isWeightVerified,
@@ -641,11 +673,49 @@ export async function recordOrderWeighment(order_id, weighmentInput) {
         .insert([payload])
         .select()
         .single();
-    if (error || !data) {
+    let finalWb = data;
+    if (error || !finalWb) {
         const list = memoryWeighments.get(order_id) || [];
         list.push(payload);
         memoryWeighments.set(order_id, list);
-        return payload;
+        finalWb = payload;
+    }
+    // Check if quality assay already exists; if so, promote order to Quality Verified
+    const { data: existingAssay } = await supabase
+        .from('order_quality_assays')
+        .select('*')
+        .eq('order_id', order_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    const assay = existingAssay || (memoryAssays.get(order_id)?.[memoryAssays.get(order_id)?.length - 1]);
+    if (assay && assay.assay_passed) {
+        await supabase
+            .from('orders')
+            .update({
+            status: 'Quality Verified',
+            actual_received_quantity: finalWb.net_weight,
+            actual_quantity_unit: finalWb.unit || order.unit || 'kg',
+            quality_grade: assay.tested_grade,
+            assay_result: 'Passed',
+            verified_at: new Date().toISOString(),
+            verified_by: assay.inspector_name
+        })
+            .eq('id', order_id);
+    }
+    return finalWb;
+}
+export async function getOrderDispatch(order_id) {
+    const { data, error } = await supabase
+        .from('order_dispatches')
+        .select('*')
+        .eq('order_id', order_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    if (error || !data) {
+        const list = memoryDispatches.get(order_id) || [];
+        return list[list.length - 1] || null;
     }
     return data;
 }
@@ -683,18 +753,50 @@ export async function releaseSmartPayout(input) {
     if (order.payment_status !== 'Escrow Locked') {
         throw { status: 400, message: `Cannot release payout: Escrow status is '${order.payment_status}'. Escrow must be locked before payout can be released.` };
     }
-    if (order.status !== 'Quality Verified') {
+    // Check Gatekeepers (Quality Assay & Weighment)
+    const { data: dbAssay } = await supabase
+        .from('order_quality_assays')
+        .select('*')
+        .eq('order_id', order_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    const assay = dbAssay || (memoryAssays.get(order_id)?.[memoryAssays.get(order_id)?.length - 1]);
+    const { data: dbWb } = await supabase
+        .from('order_weighments')
+        .select('*')
+        .eq('order_id', order_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    const weighment = dbWb || (memoryWeighments.get(order_id)?.[memoryWeighments.get(order_id)?.length - 1]);
+    if (!assay && order.status !== 'Quality Verified') {
+        throw { status: 400, message: 'Cannot release payout: Destination quality assay report is missing.' };
+    }
+    if (!weighment && order.status !== 'Quality Verified') {
+        throw { status: 400, message: 'Cannot release payout: Weighment verification is required.' };
+    }
+    if (order.status !== 'Quality Verified' && (!assay || !weighment)) {
         throw { status: 400, message: `Cannot release payout: Order status is '${order.status}'. Weight & quality must be verified before releasing payout.` };
     }
     // Check Assay result directly from order or assay records
-    const orderAssayResult = order.assay_result || 'Passed';
-    if (orderAssayResult.toLowerCase() === 'failed') {
+    const orderAssayResult = order.assay_result || (assay?.assay_passed ? 'Passed' : 'Failed');
+    if (orderAssayResult.toLowerCase() === 'failed' || (assay && !assay.assay_passed)) {
         throw { status: 400, message: 'Quality verification failed. Payout cannot be released.' };
     }
-    // 3. Calculate Final Payout Amount based on verified received quantity
-    const verifiedQty = order.actual_received_quantity ? Number(order.actual_received_quantity) : Number(order.quantity);
+    // 3. Calculate Final Payout Amount based on verified received quantity and unit normalization
+    let normalizedQty = order.actual_received_quantity ? Number(order.actual_received_quantity) : Number(order.quantity);
+    if (order.actual_received_quantity && order.actual_quantity_unit) {
+        const orderUnit = (order.unit || 'kg').toLowerCase();
+        const actualUnit = (order.actual_quantity_unit || 'kg').toLowerCase();
+        if (orderUnit !== actualUnit) {
+            const inKg = toKg(normalizedQty, actualUnit);
+            const factor = UNIT_TO_KG_MAP[orderUnit] || 1;
+            normalizedQty = inKg / factor;
+        }
+    }
     const pricePerUnit = Number(order.price_per_unit);
-    const calculatedPayout = Math.round(verifiedQty * pricePerUnit * 100) / 100;
+    const calculatedPayout = Math.round(normalizedQty * pricePerUnit * 100) / 100;
     const payoutAmount = calculatedPayout > 0 ? calculatedPayout : Number(order.total_amount);
     const idempotencyKey = input.idempotency_key || `payout-${order_id}-${Date.now()}`;
     const txRef = `TX-PAY-${Date.now().toString().slice(-8)}`;
@@ -782,7 +884,17 @@ export async function generateOrderInvoice(order_id) {
     const pricePerUnit = Number(order.price_per_unit);
     const grossContractAmount = Number(order.total_amount);
     const deliveredNetWeight = weighment ? Number(weighment.net_weight) : undefined;
-    const verifiedDeliveryAmount = deliveredNetWeight ? Math.round(deliveredNetWeight * pricePerUnit * 100) / 100 : grossContractAmount;
+    let normalizedDeliveredQty = deliveredNetWeight;
+    if (deliveredNetWeight !== undefined) {
+        const orderUnit = (order.unit || 'kg').toLowerCase();
+        const weighmentUnit = (weighment?.unit || order.unit || 'kg').toLowerCase();
+        if (orderUnit !== weighmentUnit) {
+            const inKg = toKg(deliveredNetWeight, weighmentUnit);
+            const factor = UNIT_TO_KG_MAP[orderUnit] || 1;
+            normalizedDeliveredQty = inKg / factor;
+        }
+    }
+    const verifiedDeliveryAmount = normalizedDeliveredQty !== undefined ? Math.round(normalizedDeliveredQty * pricePerUnit * 100) / 100 : grossContractAmount;
     const logisticsCost = dispatch ? Number(dispatch.estimated_toll_cost || 0) : 0;
     const payoutTx = transactions.find(t => t.transaction_type === 'farmer_payout');
     const netFarmerPayout = payoutTx ? Number(payoutTx.amount) : (order.payment_status === 'Released' ? verifiedDeliveryAmount : 0);

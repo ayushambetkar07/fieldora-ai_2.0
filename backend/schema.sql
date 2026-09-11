@@ -350,6 +350,27 @@ CREATE INDEX IF NOT EXISTS idx_order_transactions_type ON order_transactions(tra
 CREATE INDEX IF NOT EXISTS idx_order_transactions_idempotency ON order_transactions(idempotency_key);
 CREATE INDEX IF NOT EXISTS idx_order_transactions_created_at ON order_transactions(created_at DESC);
 
+-- 12. Transport Vehicles (Logistics Fleet & Direct Transport)
+CREATE TABLE IF NOT EXISTS transport_vehicles (
+  id VARCHAR PRIMARY KEY,
+  vehicle_name VARCHAR NOT NULL,
+  vehicle_type VARCHAR NOT NULL,
+  capacity_kg NUMERIC NOT NULL CHECK (capacity_kg > 0),
+  base_cost NUMERIC NOT NULL DEFAULT 300 CHECK (base_cost >= 0),
+  rate_per_km NUMERIC NOT NULL DEFAULT 15 CHECK (rate_per_km > 0),
+  driver_name VARCHAR NOT NULL,
+  driver_phone VARCHAR NOT NULL,
+  vehicle_number VARCHAR NOT NULL,
+  availability_status VARCHAR NOT NULL DEFAULT 'Available' CHECK (availability_status IN ('Available', 'Busy', 'Maintenance')),
+  rating NUMERIC DEFAULT 4.8 CHECK (rating >= 1.0 AND rating <= 5.0),
+  trips_completed INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_transport_vehicles_status ON transport_vehicles(availability_status);
+CREATE INDEX IF NOT EXISTS idx_transport_vehicles_capacity ON transport_vehicles(capacity_kg);
+
 -- RLS Configuration
 ALTER TABLE produce_listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE buyer_requirements ENABLE ROW LEVEL SECURITY;
@@ -362,6 +383,10 @@ ALTER TABLE order_gps_telemetry ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_quality_assays ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_weighments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transport_vehicles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public view transport_vehicles" ON transport_vehicles;
+CREATE POLICY "Public view transport_vehicles" ON transport_vehicles FOR SELECT USING (true);
 
 -- Policies for public demo / authenticated access
 DROP POLICY IF EXISTS "Public view produce_listings" ON produce_listings;

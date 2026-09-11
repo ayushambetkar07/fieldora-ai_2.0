@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { supabase } from '../config/supabase.js';
 import { requireAuth } from '../middleware/auth.js';
-import { confirmFarmerTransport, lockEscrowDeposit, dispatchOrderLogistics, recordGpsTelemetry, getLatestGpsTelemetry, markOrderArrived, verifyOrderQualityAndWeight, markOrderDelivered, recordQualityAssay, recordOrderWeighment, releaseSmartPayout, generateOrderInvoice, getOrderAuditTrail } from '../services/orderLifecycleService.js';
+import { confirmFarmerTransport, lockEscrowDeposit, dispatchOrderLogistics, getOrderDispatch, recordGpsTelemetry, getLatestGpsTelemetry, markOrderArrived, verifyOrderQualityAndWeight, markOrderDelivered, recordQualityAssay, recordOrderWeighment, releaseSmartPayout, generateOrderInvoice, getOrderAuditTrail } from '../services/orderLifecycleService.js';
 const router = Router();
 // =========================================================================
 // 1. GET /api/orders (List Orders with Filtering & Pagination)
@@ -188,6 +188,19 @@ router.post('/:id/dispatch', requireAuth, async (req, res) => {
     catch (error) {
         const status = error.status || 400;
         res.status(status).json({ success: false, message: error.message });
+    }
+});
+router.get('/:id/dispatch', requireAuth, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const dispatch = await getOrderDispatch(id);
+        res.json({
+            success: true,
+            data: dispatch
+        });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 // =========================================================================

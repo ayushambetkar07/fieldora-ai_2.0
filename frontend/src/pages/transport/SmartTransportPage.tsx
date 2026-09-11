@@ -31,16 +31,19 @@ import {
   ChevronRight, 
   Layers, 
   RotateCcw,
-  Zap
+  Zap,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { Button, Card, Input, Select, Badge, cn } from '../../components/ui';
 import { RouteVisualizerMap } from '../../components/transport/RouteVisualizerMap';
 import { VehicleSelectionCard } from '../../components/transport/VehicleSelectionCard';
 import { AStarExplainerModal } from '../../components/transport/AStarExplainerModal';
 import { TransportTracker } from '../../components/transport/TransportTracker';
+import { fetchTransportOptionsApi, TransportOptionDto } from '../../services/supabaseService';
 
 export const SmartTransportPage: React.FC = () => {
-  const { userRole, ordersList, showToast } = useApp();
+  const { userRole, ordersList, showToast, dispatchOrder } = useApp();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -68,10 +71,14 @@ export const SmartTransportPage: React.FC = () => {
   const [selectedRoute, setSelectedRoute] = useState<RouteOptimizationResult | null>(null);
 
   // -------------------------------------------------------------
-  // 3. Vehicles State
+  // 3. Vehicles & Backend Dynamic Transport State
   // -------------------------------------------------------------
   const [availableVehicles, setAvailableVehicles] = useState<TransportVehicle[]>([]);
-  const [selectedVehicle, setSelectedVehicle] = useState<TransportVehicle | null>(null);
+  const [transportOptions, setTransportOptions] = useState<TransportOptionDto[]>([]);
+  const [suitableCount, setSuitableCount] = useState<number>(0);
+  const [isLoadingTransport, setIsLoadingTransport] = useState<boolean>(false);
+  const [transportError, setTransportError] = useState<string | null>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null);
   const [vehicleCosts, setVehicleCosts] = useState<Map<string, number>>(new Map());
 
   // -------------------------------------------------------------
@@ -94,23 +101,98 @@ export const SmartTransportPage: React.FC = () => {
     }
   }, [pickupNodeId, deliveryNodeId, aStarWeights]);
 
-  // Re-match vehicles when quantity or route changes
-  useEffect(() => {
-    if (!selectedRoute) return;
+  // Dynamic Backend Transport Options Fetching
+  const loadDynamicTransportOptions = async () => {
+    setIsLoadingTransport(true);
+    setTransportError(null);
+    try {
+      const pNode = ROAD_NODES.find(n => n.id === pickupNodeId);
+      const dNode = ROAD_NODES.find(n => n.id === deliveryNodeId);
+      const pickupLoc = pNode ? pNode.name : 'Nashik';
+      const destLoc = dNode ? dNode.name : 'Mumbai';
 
-    const { vehicles, recommendedVehicle, calculatedCosts } = matchVehiclesForPayload(
-      quantityValue,
-      selectedRoute.totalDistanceKm
-    );
+      const result = await fetchTransportOptionsApi({
+        pickupLocation: pickupLoc,
+        destination: destLoc,
+        crop: commodity,
+        quantityKg: quantityValue
+      });
 
-    setAvailableVehicles(vehicles);
-    setVehicleCosts(calculatedCosts);
+      if (result && Array.isArray(result.options)) {
+        setTransportOptions(result.options);
+        setSuitableCount(result.suitableCount);
 
-    // Auto-select recommended vehicle if none or invalid
-    if (!selectedVehicle || selectedVehicle.capacityKg < quantityValue) {
-      setSelectedVehicle(recommendedVehicle);
+        // Find Best Match from backend response
+        const best = result.options.find(o => o.isBestMatch) || result.options.find(o => o.isSuitable);
+        if (best) {
+          setSelectedVehicle(best);
+        } else if (result.options.length > 0) {
+          setSelectedVehicle(result.options[0]);
+        }
+      }
+    } catch (err: any) {
+      console.warn('Transport options load warning:', err);
+      setTransportError(err?.message || 'Failed to fetch transport fleet options');
+    } finally {
+      setIsLoadingTransport(false);
     }
-  }, [quantityValue, selectedRoute]);
+  };
+
+  useEffect(() => {
+    loadDynamicTransportOptions();
+  }, [pickupNodeId, deliveryNodeId, commodity, quantityValue]);
+
+  // Load existing active booking if order is already dispatched / in transit
+  useEffect(() => {
+    if (matchedOrder && (matchedOrder.status === 'In Transit' || matchedOrder.status === 'Arrived' || matchedOrder.status === 'Quality Verified' || matchedOrder.status === 'Completed')) {
+      const routes = calculateOptimizedRoutes(pickupNodeId, deliveryNodeId, aStarWeights);
+      const chosenRoute = routes[0] || selectedRoute;
+      const { recommendedVehicle } = matchVehiclesForPayload(quantityValue, chosenRoute?.totalDistanceKm || 165);
+      const vehicle = selectedVehicle || recommendedVehicle;
+
+      const progress = matchedOrder.status === 'In Transit' ? 50 : 100;
+      const initialBooking: TransportBooking = {
+        id: `TR-${matchedOrder.orderNumber.replace(/[^0-9]/g, '').slice(-4) || '1042'}`,
+        orderId: matchedOrder.id,
+        orderNumber: matchedOrder.orderNumber,
+        crop: matchedOrder.crop,
+        quantity: matchedOrder.quantity,
+        unit: matchedOrder.unit,
+        weightKg: quantityValue,
+        pickupLocation: 'Nashik Farm-Gate Origin',
+        pickupNodeId,
+        deliveryLocation: matchedOrder.deliveryLocation || 'Mumbai APMC Hub',
+        deliveryNodeId,
+        deliveryDate: matchedOrder.expectedDeliveryDate || 'Today',
+        farmerName: matchedOrder.farmerName,
+        farmerPhone: '+91 98234 11200',
+        buyerName: matchedOrder.buyerName,
+        buyerCompany: matchedOrder.buyerCompany,
+        buyerPhone: '+91 99870 54321',
+        selectedVehicle: vehicle,
+        selectedRoute: chosenRoute,
+        totalTransportCost: 2400,
+        status: matchedOrder.status === 'In Transit' ? 'In Transit' : 'Buyer Delivery',
+        currentProgressPercent: progress,
+        currentCheckpoint: matchedOrder.status === 'In Transit' ? 'In Transit - Express Corridor' : 'Delivered at Buyer APMC Hub',
+        eta: chosenRoute ? formatDurationHoursMins(chosenRoute.totalDurationMinutes) : '2h 45m',
+        currentSpeedKmH: matchedOrder.status === 'In Transit' ? 58 : 0,
+        temperatureControlled: false,
+        weighbridgeAssayVerified: true,
+        createdDate: matchedOrder.orderDate || new Date().toLocaleDateString('en-IN'),
+        trackingSteps: [
+          { status: 'Vehicle Assigned', label: 'Vehicle Assigned', hindiLabel: 'वाहन आवंटित', description: 'Driver confirmed trip', completed: true, current: false },
+          { status: 'Farmer Pickup', label: 'Farmer Pickup', hindiLabel: 'किसान खेत लोडिंग', description: 'Farm-gate pickup completed', completed: true, current: false },
+          { status: 'In Transit', label: 'In Transit', hindiLabel: 'रास्ते में', description: 'Direct highway transit', completed: matchedOrder.status !== 'In Transit', current: matchedOrder.status === 'In Transit' },
+          { status: 'Buyer Delivery', label: 'Buyer Delivery', hindiLabel: 'खरीदार डिलीवरी', description: 'Destination arrival & weighment', completed: matchedOrder.status !== 'In Transit', current: matchedOrder.status !== 'In Transit' },
+        ]
+      };
+
+      setActiveBooking(initialBooking);
+      setActiveStep('confirmed');
+      setSimulationProgress(progress);
+    }
+  }, [matchedOrder?.id, matchedOrder?.status]);
 
   // Task 4: Ingest real-time GPS telemetry to backend
   const sendGpsTelemetry = async (progressPercent: number, checkpointName: string, lat: number, lng: number, speed: number) => {
@@ -188,7 +270,7 @@ export const SmartTransportPage: React.FC = () => {
     : 2400;
 
   // Handler: Confirm Transport
-  const handleConfirmTransport = () => {
+  const handleConfirmTransport = async () => {
     if (!selectedVehicle || !selectedRoute) return;
 
     const bookingId = `TR-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -235,6 +317,26 @@ export const SmartTransportPage: React.FC = () => {
     setActiveBooking(newBooking);
     setActiveStep('confirmed');
     setSimulationProgress(15);
+
+    if (matchedOrder?.id) {
+      await dispatchOrder(matchedOrder.id, {
+        vehicleId: selectedVehicle.id,
+        vehicleName: selectedVehicle.name,
+        vehicleType: selectedVehicle.type,
+        vehicleNumber: selectedVehicle.vehicleNumber,
+        driverName: selectedVehicle.driverName,
+        driverPhone: selectedVehicle.driverPhone,
+        pickupLocation: newBooking.pickupLocation,
+        deliveryLocation: newBooking.deliveryLocation,
+        pickupNodeId,
+        deliveryNodeId,
+        routeId: selectedRoute.id,
+        estimatedDistanceKm: selectedRoute.totalDistanceKm,
+        estimatedDurationMinutes: selectedRoute.totalDurationMinutes,
+        estimatedTollCost: selectedRoute.totalTollCost
+      });
+      sendGpsTelemetry(15, newBooking.currentCheckpoint, 19.9975, 73.7898, 0);
+    }
 
     showToast(
       'Transport Confirmed! 🚚',
@@ -384,25 +486,77 @@ export const SmartTransportPage: React.FC = () => {
                     Matched dynamically for <strong>{quantityValue.toLocaleString('en-IN')} kg</strong> payload
                   </p>
                 </div>
-                <span className="text-xs text-primary font-bold">
-                  {availableVehicles.filter(v => v.availability !== 'Insufficient capacity').length} Suitable
+                <span className={cn(
+                  "text-xs font-bold px-2 py-0.5 rounded-full border",
+                  suitableCount > 0 
+                    ? "text-primary bg-[#F0FDF4] border-[#bbf7d0]" 
+                    : "text-amber-700 bg-amber-50 border-amber-200"
+                )}>
+                  {isLoadingTransport ? 'Matching...' : (suitableCount > 0 ? `${suitableCount} Suitable` : 'No Suitable Vehicles')}
                 </span>
               </div>
 
+              {/* Loading State */}
+              {isLoadingTransport && transportOptions.length === 0 && (
+                <div className="p-8 text-center bg-card rounded-card border border-border space-y-2">
+                  <RefreshCw className="w-5 h-5 text-primary animate-spin mx-auto" />
+                  <p className="text-xs text-secondary font-medium">Fetching real-time transport fleet & freight rates...</p>
+                </div>
+              )}
+
+              {/* Error State with Retry */}
+              {transportError && (
+                <div className="p-4 bg-error-light/50 border border-error-light rounded-card flex items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2 text-error">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{transportError}</span>
+                  </div>
+                  <button
+                    onClick={loadDynamicTransportOptions}
+                    className="px-3 py-1 bg-white border border-error text-error font-bold rounded-button hover:bg-error hover:text-white transition-colors flex items-center gap-1 shrink-0"
+                  >
+                    <RefreshCw className="w-3 h-3" /> Retry
+                  </button>
+                </div>
+              )}
+
+              {/* Empty State when no suitable vehicle exists */}
+              {!isLoadingTransport && suitableCount === 0 && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-card text-xs text-amber-900 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-800">
+                    <AlertCircle className="w-4 h-4 text-amber-600" />
+                    <span>No Suitable Transporter for {quantityValue.toLocaleString('en-IN')} kg</span>
+                  </div>
+                  <p className="text-[11px] text-amber-700 leading-relaxed">
+                    The requested payload exceeds standard direct vehicles in this corridor. Try adjusting cargo weight or contacting Fieldora logistics dispatch.
+                  </p>
+                </div>
+              )}
+
+              {/* Transport Vehicle Cards */}
               <div className="space-y-3">
-                {availableVehicles.map((vehicle) => {
-                  const tripCost = (vehicleCosts.get(vehicle.id) || 0) + selectedRoute.totalTollCost;
-                  const isRec = vehicle.id === availableVehicles.find(v => v.capacityKg >= quantityValue)?.id;
+                {(transportOptions.length > 0 ? transportOptions : availableVehicles).map((vehicle: any) => {
+                  const tripCost = vehicle.estimatedFreight !== undefined
+                    ? vehicle.estimatedFreight + (selectedRoute?.totalTollCost || 0)
+                    : (vehicleCosts.get(vehicle.id) || 0) + (selectedRoute?.totalTollCost || 0);
+
+                  const isRec = vehicle.isBestMatch !== undefined
+                    ? vehicle.isBestMatch
+                    : vehicle.id === availableVehicles.find(v => v.capacityKg >= quantityValue)?.id;
+
+                  const isSelected = selectedVehicle?.id === vehicle.id;
 
                   return (
                     <VehicleSelectionCard
                       key={vehicle.id}
                       vehicle={vehicle}
                       orderWeightKg={quantityValue}
-                      routeDistanceKm={selectedRoute.totalDistanceKm}
+                      routeDistanceKm={selectedRoute?.totalDistanceKm || 165}
                       calculatedCost={tripCost}
-                      isSelected={selectedVehicle.id === vehicle.id}
+                      isSelected={isSelected}
                       isRecommended={isRec}
+                      matchScore={vehicle.matchScore}
+                      loadingPercentage={vehicle.loadingPercentage}
                       onSelect={(veh) => setSelectedVehicle(veh)}
                     />
                   );
@@ -438,44 +592,68 @@ export const SmartTransportPage: React.FC = () => {
               />
             </div>
 
-            {/* 2. Route Metrics Dashboard */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Card className="p-3.5 space-y-1">
-                <span className="text-muted block text-[11px] font-semibold uppercase">Total Distance</span>
-                <div className="font-bold font-mono text-base text-main">
-                  {selectedRoute.totalDistanceKm} km
-                </div>
-                <span className="text-[10px] text-accent font-semibold">Direct corridor</span>
-              </Card>
+            {/* 2. Route Options Selection Cards */}
+            {calculatedRoutes.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {calculatedRoutes.slice(0, 2).map((route, idx) => {
+                  const isSelected = selectedRoute.id === route.id;
+                  const isOptimal = idx === 0;
+                  const routeTripCost = (selectedVehicle ? (vehicleCosts.get(selectedVehicle.id) || route.totalCostEstimate) : route.totalCostEstimate) + route.totalTollCost;
 
-              <Card className="p-3.5 space-y-1">
-                <span className="text-muted block text-[11px] font-semibold uppercase">Est. Travel Time</span>
-                <div className="font-bold font-mono text-base text-main">
-                  {formatDurationHoursMins(selectedRoute.totalDurationMinutes)}
-                </div>
-                <span className="text-[10px] text-secondary">Non-stop dispatch</span>
-              </Card>
+                  return (
+                    <div
+                      key={route.id}
+                      onClick={() => setSelectedRoute(route)}
+                      className={cn(
+                        "p-4 rounded-xl cursor-pointer transition-all border-2 space-y-2 bg-white",
+                        isSelected
+                          ? "border-[#166534] ring-1 ring-[#166534]/30 shadow-sm"
+                          : "border-border hover:border-gray-300"
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={cn(
+                            "w-2.5 h-2.5 rounded-full shrink-0",
+                            isOptimal ? "bg-[#22c55e]" : "bg-amber-500"
+                          )} />
+                          <span className="font-bold text-xs text-main">
+                            {isOptimal ? '(Direct Recommended Optimal)' : 'Alternative (Kalyan Bypass)'}
+                          </span>
+                        </div>
+                        <span className="font-mono font-bold text-sm text-main">
+                          ₹{routeTripCost.toLocaleString('en-IN')}
+                        </span>
+                      </div>
 
-              <Card className="p-3.5 space-y-1">
-                <span className="text-muted block text-[11px] font-semibold uppercase">Live Traffic</span>
-                <div className="font-bold text-base text-main flex items-center gap-1">
-                  <span className={cn(
-                    "w-2 h-2 rounded-full",
-                    selectedRoute.overallTraffic === 'Low' ? 'bg-accent' : selectedRoute.overallTraffic === 'Moderate' ? 'bg-warning-dark' : 'bg-error'
-                  )} />
-                  <span>{selectedRoute.overallTraffic}</span>
-                </div>
-                <span className="text-[10px] text-secondary">Minimal bottleneck</span>
-              </Card>
+                      <div className="flex items-center gap-3 text-xs text-secondary font-mono">
+                        <span className="flex items-center gap-1">
+                          <Navigation className="w-3 h-3 text-muted" />
+                          <span>{route.totalDistanceKm} km</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-muted" />
+                          <span>{formatDurationHoursMins(route.totalDurationMinutes)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            route.overallTraffic === 'Low' ? 'bg-accent' : route.overallTraffic === 'Moderate' ? 'bg-warning-dark' : 'bg-error'
+                          )} />
+                          <span>{route.overallTraffic} Traffic</span>
+                        </span>
+                      </div>
 
-              <Card className="p-3.5 space-y-1 bg-[#F4F9F5] border-[#166534]/40">
-                <span className="text-primary block text-[11px] font-semibold uppercase">Total Transport Cost</span>
-                <div className="font-bold font-mono text-lg text-primary">
-                  ₹{finalCost.toLocaleString('en-IN')}
-                </div>
-                <span className="text-[10px] text-muted">Incl. ₹{selectedRoute.totalTollCost} tolls</span>
-              </Card>
-            </div>
+                      <p className="text-[11px] text-muted leading-tight">
+                        {isOptimal 
+                          ? `${ROAD_NODES.find(n => n.id === pickupNodeId)?.name.split(' ')[0] || 'Nashik'} ➔ Igatpuri ➔ ${ROAD_NODES.find(n => n.id === deliveryNodeId)?.name.split(' ')[0] || 'Mumbai'} (Direct Highway)`
+                          : 'Bypasses urban bottleneck with higher distance'}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* 3. Fieldora Smart Recommendation Card */}
             <div className="p-5 bg-gradient-to-br from-[#166534] to-[#0d3b1e] text-white rounded-card shadow-card space-y-4 border border-[#22c55e]/30">
@@ -485,30 +663,28 @@ export const SmartTransportPage: React.FC = () => {
                 </div>
                 <div className="space-y-1">
                   <h4 className="font-heading font-extrabold text-base text-white flex items-center gap-2">
-                    <span>Fieldora Intelligent Recommendation</span>
+                    <span>Fieldora Recommendation</span>
                   </h4>
                   <p className="text-xs text-gray-200 leading-relaxed">
-                    This <strong>{selectedVehicle.name}</strong> has enough payload capacity ({selectedVehicle.capacityKg} kg) for your <strong>{quantityValue} kg</strong> order and provides the lowest estimated direct transport cost (<strong>₹{finalCost.toLocaleString('en-IN')}</strong>) along the optimal highway corridor without any warehouse delays.
+                    This vehicle has enough capacity for your order and provides the lowest estimated transportation cost while meeting the delivery deadline.
                   </p>
                 </div>
               </div>
 
-              {/* Action Button */}
+              {/* Action Button & Selected Info */}
               <div className="pt-2 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="text-xs text-gray-300 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#4ade80]" />
-                  <span>Driver: <strong>{selectedVehicle.driverName}</strong> ({selectedVehicle.vehicleNumber})</span>
+                <div className="text-xs text-gray-200 flex items-center gap-2">
+                  <span>Selected: <strong>{selectedVehicle.name}</strong></span>
                 </div>
 
                 <Button
                   variant="primary"
-                  size="lg"
+                  size="md"
                   onClick={handleConfirmTransport}
                   className="bg-[#22c55e] text-[#06240f] hover:bg-[#4ade80] font-bold shadow-lg flex items-center gap-2"
                 >
-                  <Truck className="w-5 h-5" />
+                  <Truck className="w-4 h-4" />
                   <span>Confirm Transport</span>
-                  <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             </div>

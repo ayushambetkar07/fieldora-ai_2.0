@@ -16,6 +16,7 @@ import {
   MOCK_REQUESTS, 
   MOCK_ORDERS 
 } from '../data/mockData';
+import { getCropImage } from '../data/cropMaster';
 import {
   fetchProduceListings,
   createProduceListing,
@@ -339,7 +340,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       farmName: currentFarmer.farmName,
       isFarmerVerified: true,
       createdDate: new Date().toISOString().split('T')[0],
-      imageUrl: newProduce.imageUrl || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80',
+      imageUrl: getCropImage(newProduce.crop, newProduce.imageUrl),
     };
 
     setProduceList(prev => [tempItem, ...prev]);

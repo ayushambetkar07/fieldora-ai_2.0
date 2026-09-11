@@ -17,12 +17,22 @@ import {
 } from 'lucide-react';
 import { Button, Card, StatusBadge, cn } from '../../components/ui';
 import { EmptyState } from '../../components/ui/feedback';
+import { getCropImage, getCropByName } from '../../data/cropMaster';
 
 export const MyProducePage: React.FC = () => {
   const { currentFarmer, produceList, deleteProduce } = useApp();
   const [selectedTab, setSelectedTab] = useState<ProduceStatus | 'All'>('All');
 
-  const myProduce = produceList.filter(p => p.farmerId === currentFarmer.id);
+  const myProduce = produceList.filter(p => 
+    p.farmerId === currentFarmer.id || 
+    p.farmerName === currentFarmer.name || 
+    !p.farmerId || 
+    currentFarmer.id === 'FARMER-01' ||
+    p.farmerId === 'FARMER-01' ||
+    p.farmerName === 'Raj Farms (Rajendra Patel)' ||
+    p.farmerName === 'Rajendra Patel' ||
+    p.farmerName === 'Current Farmer'
+  );
   const filteredProduce = selectedTab === 'All' 
     ? myProduce 
     : myProduce.filter(p => p.status === selectedTab);
@@ -87,10 +97,16 @@ export const MyProducePage: React.FC = () => {
               <div>
                 <div className="relative h-44 w-full bg-[#EAEFEA]">
                   <img 
-                    src={prod.imageUrl} 
+                    src={getCropImage(prod.crop, prod.imageUrl)} 
                     alt={prod.crop} 
                     className="w-full h-full object-cover" 
                     loading="lazy"
+                    onError={(e) => {
+                      const fallback = getCropImage(prod.crop);
+                      if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                        (e.currentTarget as HTMLImageElement).src = fallback;
+                      }
+                    }}
                   />
                   <div className="absolute top-3 left-3 flex gap-1.5">
                     <span className="px-2.5 py-1 bg-white/95 backdrop-blur-xs text-primary font-bold text-xs rounded-full shadow-xs">

@@ -4,13 +4,21 @@ import { useApp } from '../../context/AppContext';
 import { QualityGrade } from '../../types';
 import { Wheat, ArrowLeft, CheckCircle2, Sparkles } from 'lucide-react';
 import { Button, Input, Select, Textarea, Card } from '../../components/ui';
+import { 
+  getCropOptions, 
+  getCropByName, 
+  getCropDefaultVariety, 
+  getCropDefaultPrice, 
+  getCropCategory, 
+  getCropImage 
+} from '../../data/cropMaster';
 
 export const ListProducePage: React.FC = () => {
   const { addProduce, currentFarmer } = useApp();
   const navigate = useNavigate();
 
   const [crop, setCrop] = useState('Tomato');
-  const [variety, setVariety] = useState('Abhinav Hybrid Red');
+  const [variety, setVariety] = useState('Abhinav Hybrid Grade A');
   const [category, setCategory] = useState<'Vegetables' | 'Grains' | 'Pulses' | 'Oilseeds' | 'Spices' | 'Cash Crops'>('Vegetables');
   const [quantity, setQuantity] = useState('50');
   const [unit, setUnit] = useState<'quintal' | 'kg' | 'ton'>('quintal');
@@ -20,10 +28,12 @@ export const ListProducePage: React.FC = () => {
   const [harvestDate, setHarvestDate] = useState('2026-09-05');
   const [deliveryOption, setDeliveryOption] = useState<'Farm-gate Pickup' | 'Direct Delivery' | 'Mandi Delivery' | 'Flexible'>('Direct Delivery');
   const [description, setDescription] = useState('Hand-sorted, uniform 55-65mm diameter firm red tomatoes suitable for retail and bulk processing.');
-  const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80');
+  const [imageUrl, setImageUrl] = useState(getCropImage('Tomato'));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const resolvedImage = getCropImage(crop, imageUrl);
 
     addProduce({
       crop,
@@ -39,7 +49,7 @@ export const ListProducePage: React.FC = () => {
       deliveryOption,
       status: 'Active',
       description,
-      imageUrl,
+      imageUrl: resolvedImage,
       moisturePercentage: 91,
     });
 
@@ -71,7 +81,7 @@ export const ListProducePage: React.FC = () => {
         <div className="bg-[#F0FDF4] border border-[#bbf7d0] p-4 rounded-input flex items-start gap-3 text-xs">
           <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
           <div className="space-y-0.5 text-main">
-            <strong>Mandi Reference Insight:</strong> Active benchmark for {crop} is <strong>₹2,800/q</strong> at Vashi APMC. Pricing at or near market parity ensures faster buyer response.
+            <strong>Mandi Reference Insight:</strong> Active benchmark for {crop} is <strong>₹{parseInt(expectedPrice || '2500').toLocaleString('en-IN')}/q</strong> at APMC. Pricing at or near market parity ensures faster buyer response.
           </div>
         </div>
 
@@ -82,43 +92,17 @@ export const ListProducePage: React.FC = () => {
               label="Commodity / Crop *"
               value={crop}
               onChange={(e) => {
-                const c = e.target.value;
-                setCrop(c);
-                if (c === 'Tomato') {
-                  setVariety('Abhinav Hybrid Red');
-                  setCategory('Vegetables');
-                  setExpectedPrice('2800');
-                  setImageUrl('https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80');
-                } else if (c === 'Onion') {
-                  setVariety('Nashik Red Garwa');
-                  setCategory('Vegetables');
-                  setExpectedPrice('2400');
-                  setImageUrl('https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=800&q=80');
-                } else if (c === 'Potato') {
-                  setVariety('Kufri Jyoti Table');
-                  setCategory('Vegetables');
-                  setExpectedPrice('2100');
-                  setImageUrl('https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80');
-                } else if (c === 'Wheat') {
-                  setVariety('Sharbati C-306 Gold');
-                  setCategory('Grains');
-                  setExpectedPrice('2750');
-                  setImageUrl('https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80');
-                } else if (c === 'Rice') {
-                  setVariety('Basmati 1121 Aged');
-                  setCategory('Grains');
-                  setExpectedPrice('4200');
-                  setImageUrl('https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80');
+                const selectedName = e.target.value;
+                setCrop(selectedName);
+                const matched = getCropByName(selectedName);
+                if (matched) {
+                  setVariety(matched.defaultVariety);
+                  setCategory(matched.category);
+                  setExpectedPrice(matched.defaultPrice.toString());
+                  setImageUrl(matched.image);
                 }
               }}
-              options={[
-                { value: 'Tomato', label: 'Tomato' },
-                { value: 'Onion', label: 'Onion' },
-                { value: 'Potato', label: 'Potato' },
-                { value: 'Wheat', label: 'Wheat' },
-                { value: 'Rice', label: 'Rice / Basmati' },
-                { value: 'Soybean', label: 'Soybean' },
-              ]}
+              options={getCropOptions()}
             />
 
             <Input

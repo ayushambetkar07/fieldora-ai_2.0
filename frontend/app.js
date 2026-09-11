@@ -21,7 +21,45 @@ const AppState = {
 };
 
 // Initialize Application
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('http://localhost:5000/api/produce');
+    const data = await res.json();
+    if (data && data.length > 0) {
+      window.FIELDORA_DATA.produceItems = data.map(item => ({
+        id: item.id,
+        name: item.crop,
+        category: item.category || 'Commodity',
+        categoryKey: (item.category || 'Commodity').toLowerCase(),
+        grade: item.quality || 'Standard',
+        variety: item.variety || 'Standard',
+        isElite: true,
+        isOrganic: true,
+        pricePerQtl: item.expected_price,
+        minOrderQtl: 10,
+        availableQtl: item.quantity,
+        location: item.location || 'Unknown',
+        farmName: item.farm_name || 'Partner Farm',
+        farmerName: item.farmer_name || 'Verified Farmer',
+        farmerRating: 4.8,
+        farmerDeals: 5,
+        moisture: item.moisture_percentage ? item.moisture_percentage + '%' : '10%',
+        proteinContent: "12%",
+        harvestDate: item.harvest_date || 'Recent',
+        certifications: ["India Organic", "Fieldora QA"],
+        image: item.image_url || "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=400&q=80",
+        stats: { qualityScore: 95, marketParity: "Fair" },
+        verified: item.is_verified,
+        price: item.expected_price,
+        unit: item.unit || "quintal",
+        qty: item.quantity,
+        farmer: item.farmer_name || 'Verified Farmer'
+      }));
+    }
+  } catch (err) {
+    console.error('Failed to load from backend:', err);
+  }
+
   initRouter();
   initTicker();
   initRoleState();
@@ -1004,7 +1042,41 @@ function initForms() {
 
       const newId = `PROD-${Math.floor(100 + Math.random() * 900)}`;
 
-      window.FIELDORA_DATA.produceItems.unshift({
+      
+        const onlineImage = name.toLowerCase().includes('soya') || name.toLowerCase().includes('soybean') 
+          ? 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=800&q=80' 
+          : 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=400&q=80';
+
+        const payload = {
+          farmer_name: "Current Farmer",
+          farm_name: "My Farm",
+          is_farmer_verified: true,
+          crop: name,
+          variety: "Hybrid Standard",
+          category: category,
+          quantity: qty,
+          unit: "quintal",
+          expected_price: price,
+          market_reference_price: price,
+          location: location,
+          quality: "Grade A+ Certified",
+          harvest_date: new Date().toISOString().split('T')[0],
+          delivery_option: "Direct Delivery",
+          status: "Active",
+          description: "Added via Fieldora UI",
+          image_url: onlineImage,
+          moisture_percentage: 9
+        };
+
+        fetch('http://localhost:5000/api/produce', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(res => res.json()).then(data => {
+          console.log('Saved to backend:', data);
+        }).catch(err => console.error('Backend save failed:', err));
+
+        window.FIELDORA_DATA.produceItems.unshift({
         id: newId,
         name: name,
         category: category.charAt(0).toUpperCase() + category.slice(1),
@@ -1159,3 +1231,236 @@ window.toggleMobileMenu = toggleMobileMenu;
 window.closeMobileMenu = closeMobileMenu;
 window.resetMarketplaceFilters = resetMarketplaceFilters;
 window.showToast = showToast;
+
+// ==========================================
+// FIELDORA BACKEND INTEGRATION PATCH
+// ==========================================
+
+window.refreshProduceData = async function() {
+  try {
+    const res = await fetch('http://localhost:5000/api/produce');
+    const data = await res.json();
+    if (data && data.length > 0) {
+      window.FIELDORA_DATA.produceItems = data.map(item => ({
+        id: item.id,
+        name: item.crop,
+        category: item.category || 'Commodity',
+        categoryKey: (item.category || 'Commodity').toLowerCase(),
+        grade: item.quality || 'Standard',
+        variety: item.variety || 'Standard',
+        isElite: true,
+        isOrganic: true,
+        pricePerQtl: item.expected_price,
+        minOrderQtl: 10,
+        availableQtl: item.quantity,
+        location: item.location || 'Unknown',
+        farmName: item.farm_name || 'Partner Farm',
+        farmerName: item.farmer_name || 'Verified Farmer',
+        farmerRating: 4.8,
+        farmerDeals: 5,
+        moisture: item.moisture_percentage ? item.moisture_percentage + '%' : '10%',
+        proteinContent: "12%",
+        harvestDate: item.harvest_date || 'Recent',
+        certifications: ["India Organic", "Fieldora QA"],
+        image: item.image_url || resolveCropPhoto(item.crop),
+        stats: { qualityScore: 95, marketParity: "Fair" },
+        verified: item.is_verified,
+        price: item.expected_price,
+        unit: item.unit || "quintal",
+        qty: item.quantity,
+        farmer: item.farmer_name || 'Verified Farmer'
+      }));
+    }
+  } catch (err) {
+    console.warn('Produce data backend fallback to local storage:', err);
+  }
+
+  // Ensure window.FIELDORA_DATA.produceItems reflects window.FIELDORA_PRODUCE_DATA
+  if ((!window.FIELDORA_DATA.produceItems || window.FIELDORA_DATA.produceItems.length === 0) && window.FIELDORA_PRODUCE_DATA) {
+    window.FIELDORA_DATA.produceItems = window.FIELDORA_PRODUCE_DATA.map(item => ({
+      id: item.id,
+      name: item.crop,
+      category: item.category || 'Commodity',
+      categoryKey: (item.category || 'Commodity').toLowerCase(),
+      grade: item.grade || 'Grade A',
+      variety: item.variety || item.crop,
+      isElite: true,
+      isOrganic: true,
+      pricePerQtl: item.price,
+      minOrderQtl: 10,
+      availableQtl: item.qty,
+      location: item.location || 'Maharashtra',
+      farmName: 'Raj Farms',
+      farmerName: item.farmer || 'Raj Farms (Rajendra Patel)',
+      farmerRating: 4.8,
+      farmerDeals: 15,
+      moisture: '10%',
+      proteinContent: "12%",
+      harvestDate: item.date || 'Recent',
+      certifications: ["India Organic", "Fieldora QA"],
+      image: item.image || resolveCropPhoto(item.crop),
+      stats: { qualityScore: 95, marketParity: "Fair" },
+      verified: true,
+      price: item.price,
+      unit: item.unit || "quintal",
+      qty: item.qty,
+      farmer: item.farmer || 'Raj Farms (Rajendra Patel)'
+    }));
+  }
+};
+
+window.renderFarmerHarvestLots = function() {
+  const grid = document.getElementById('farmer-produce-grid') || document.querySelector('#f-view-produce .grid');
+  if (!grid) return;
+
+  const items = (window.FIELDORA_PRODUCE_DATA && window.FIELDORA_PRODUCE_DATA.length > 0)
+    ? window.FIELDORA_PRODUCE_DATA
+    : (window.FIELDORA_DATA.produceItems || []);
+
+  grid.innerHTML = items.map(item => `
+    <div class="ref-card overflow-hidden flex flex-col justify-between">
+      <div>
+        <img src="${item.image || item.image_url || resolveCropPhoto(item.crop || item.name)}" alt="${item.crop || item.name}" class="w-full h-40 object-cover" onerror="this.src='https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80'" />
+        <div class="p-4 space-y-2">
+          <div class="flex justify-between items-baseline">
+            <h4 class="font-bold text-base text-deep-forest">${item.variety || item.crop || item.name}</h4>
+            <span class="font-mono font-bold text-deep-forest">₹${Number(item.price || item.pricePerQtl || item.expected_price).toLocaleString('en-IN')}/q</span>
+          </div>
+          <div class="text-xs text-secondary-text">${item.qty || item.availableQtl || item.quantity} Quintals • Grade A • Harvest: ${item.date || item.harvestDate || 'Recent'}</div>
+          <span class="inline-block px-2.5 py-0.5 bg-[#dcfce7] text-[#166534] text-[10px] font-bold rounded-full">
+            Active on Marketplace
+          </span>
+        </div>
+      </div>
+      <div class="p-4 pt-0">
+        <button onclick="alert('Viewing live listing specs for ${item.variety || item.crop || item.name}!')" class="w-full py-2 bg-[#F8FAF9] border border-[#E6ECE6] text-xs font-bold rounded-lg text-deep-forest hover:bg-emerald-50 transition-colors">
+          View Live Details
+        </button>
+      </div>
+    </div>
+  `).join('');
+  
+  // Also update the sidebar count
+  const produceTab = document.getElementById('f-tab-produce');
+  if (produceTab) {
+    produceTab.innerHTML = `<i data-lucide="leaf" class="w-5 h-5"></i> My Produce Lots (${items.length})`;
+    if (window.lucide) lucide.createIcons();
+  }
+};
+
+function resolveCropPhoto(cName) {
+  const c = (cName || '').toLowerCase().trim();
+  if (c.includes('onion') || c.includes('pyaz') || c.includes('kanda')) return 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('potato') || c.includes('batata') || c.includes('aaloo')) return 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('tomato') || c.includes('tamatar')) return 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('capsicum') || c.includes('shimla') || c.includes('bell pepper')) return 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('chilli') || c.includes('chili') || c.includes('mirchi')) return 'https://images.unsplash.com/photo-1588252303782-cb80119abd6d?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('ginger') || c.includes('adrak') || c.includes('aale')) return 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('garlic') || c.includes('lahsun') || c.includes('lasun')) return 'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('lemon') || c.includes('nimbu') || c.includes('limbu') || c.includes('lime')) return 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('carrot') || c.includes('gajar')) return 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('rice') || c.includes('paddy') || c.includes('basmati') || c.includes('chawal')) return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('wheat') || c.includes('gehun')) return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('jowar') || c.includes('sorghum') || c.includes('maldandi')) return 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('bajra') || c.includes('millet')) return 'https://images.unsplash.com/photo-1607672632458-9eb56696346b?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('masoor') || c.includes('lentil') || c.includes('dal')) return 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=800&q=80';
+  if (c.includes('soya') || c.includes('soybean')) return 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=800&q=80';
+  return 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80';
+}
+window.resolveCropPhoto = resolveCropPhoto;
+
+// OVERRIDE the inline handleFarmerListProduce function from index.html
+window.handleFarmerListProduceAsync = async function(e) {
+  e.preventDefault();
+  const crop = document.getElementById('fp-crop')?.value || 'Tomato';
+  const variety = document.getElementById('fp-variety')?.value || 'Hybrid Grade A';
+  const qty = document.getElementById('fp-qty')?.value || '50';
+  const price = document.getElementById('fp-price')?.value || '2800';
+
+  const photoUrl = resolveCropPhoto(crop);
+
+  const payload = {
+    farmer_name: "Raj Farms (Rajendra Patel)",
+    farm_name: "Raj Farms",
+    is_farmer_verified: true,
+    crop: crop,
+    variety: variety,
+    category: crop,
+    quantity: parseInt(qty),
+    unit: "quintal",
+    expected_price: parseFloat(price),
+    market_reference_price: parseFloat(price),
+    location: "Nashik",
+    quality: "Grade A+ Certified",
+    harvest_date: new Date().toISOString().split('T')[0],
+    delivery_option: "Direct Delivery",
+    status: "Active",
+    description: "Added via Fieldora UI",
+    image_url: photoUrl,
+    moisture_percentage: 9
+  };
+
+  const newLocalItem = {
+    id: `prod-${Date.now()}`,
+    crop: crop,
+    variety: variety,
+    price: parseFloat(price),
+    qty: parseInt(qty),
+    unit: 'Quintals',
+    grade: 'Grade A',
+    date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    status: 'Active on Marketplace',
+    image: photoUrl,
+    farmer: 'Raj Farms (Rajendra Patel)',
+    location: 'Nashik Cluster, Maharashtra',
+    rating: '4.9',
+    score: 95
+  };
+
+  if (!window.FIELDORA_PRODUCE_DATA) window.FIELDORA_PRODUCE_DATA = [];
+  window.FIELDORA_PRODUCE_DATA.unshift(newLocalItem);
+  localStorage.setItem('fieldora_produce_items', JSON.stringify(window.FIELDORA_PRODUCE_DATA));
+
+  try {
+    const btn = e.target.querySelector('button[type="submit"]');
+    const oldText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.innerHTML = 'Publishing...';
+      btn.disabled = true;
+    }
+
+    await fetch('http://localhost:5000/api/produce', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    // Refresh all data
+    await window.refreshProduceData();
+    window.renderFarmerHarvestLots();
+    if (typeof renderFarmerProduceGrid === 'function') renderFarmerProduceGrid();
+    if (typeof renderMarketplace === 'function') renderMarketplace();
+    
+    if (btn) {
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+    }
+    
+    showToast('Success', 'Produce Lot Published to Verified Marketplace!', 'success');
+    showFarmerTab('farmer-produce');
+  } catch (err) {
+    console.warn('Backend save note, fallback to local storage successful:', err);
+    window.renderFarmerHarvestLots();
+    if (typeof renderFarmerProduceGrid === 'function') renderFarmerProduceGrid();
+    if (typeof renderMarketplace === 'function') renderMarketplace();
+    showFarmerTab('farmer-produce');
+  }
+};
+
+// Run on load
+setTimeout(async () => {
+  await window.refreshProduceData();
+  window.renderFarmerHarvestLots();
+  if (typeof renderMarketplace === 'function') renderMarketplace();
+}, 500);
+

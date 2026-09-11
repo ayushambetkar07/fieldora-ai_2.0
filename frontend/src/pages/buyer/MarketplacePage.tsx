@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button, Input, Select, Card } from '../../components/ui';
 import { EmptyState } from '../../components/ui/feedback';
+import { getCropOptions } from '../../data/cropMaster';
 
 export const MarketplacePage: React.FC = () => {
   const { produceList, sendPurchaseRequest } = useApp();
@@ -28,9 +29,10 @@ export const MarketplacePage: React.FC = () => {
   const [appliedParsed, setAppliedParsed] = useState<ParsedSearchQuery | null>(null);
 
   // Standard Filters State (matching reference layout)
+  const [selectedCrop, setSelectedCrop] = useState<string>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedLocation, setSelectedLocation] = useState<string>('All');
-  const [maxPrice, setMaxPrice] = useState<string>('5000');
+  const [maxPrice, setMaxPrice] = useState<string>('12000');
   const [onlyVerified, setOnlyVerified] = useState<boolean>(true);
   const [sortBy, setSortBy] = useState<string>('recommended');
 
@@ -70,9 +72,10 @@ export const MarketplacePage: React.FC = () => {
   const clearAllFilters = () => {
     setNlQuery('');
     setAppliedParsed(null);
+    setSelectedCrop('All');
     setSelectedCategory('All');
     setSelectedLocation('All');
-    setMaxPrice('5000');
+    setMaxPrice('12000');
     setOnlyVerified(false);
   };
 
@@ -94,6 +97,7 @@ export const MarketplacePage: React.FC = () => {
       }
 
       // 2. Standard Filters from Reference Panel
+      if (selectedCrop !== 'All' && p.crop.toLowerCase() !== selectedCrop.toLowerCase()) return false;
       if (selectedCategory !== 'All' && p.category !== selectedCategory) return false;
       if (selectedLocation !== 'All' && !p.location.toLowerCase().includes(selectedLocation.toLowerCase())) return false;
       if (maxPrice && p.expectedPrice > parseFloat(maxPrice)) return false;
@@ -101,7 +105,7 @@ export const MarketplacePage: React.FC = () => {
 
       return true;
     });
-  }, [produceList, appliedParsed, selectedCategory, selectedLocation, maxPrice, onlyVerified]);
+  }, [produceList, appliedParsed, selectedCrop, selectedCategory, selectedLocation, maxPrice, onlyVerified]);
 
   return (
     <div className="space-y-6 animate-fade-in max-w-7xl mx-auto">
@@ -194,6 +198,21 @@ export const MarketplacePage: React.FC = () => {
             >
               Reset
             </button>
+          </div>
+
+          {/* Commodity / Crop Filter */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-main">Commodity / Crop</label>
+            <select
+              value={selectedCrop}
+              onChange={(e) => setSelectedCrop(e.target.value)}
+              className="w-full px-3 py-2 bg-[#F7F8F3] border border-[#EAEFEA] rounded-input text-xs font-semibold text-main"
+            >
+              <option value="All">All 15 Crops</option>
+              {getCropOptions().map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
 
           {/* Category Filter */}

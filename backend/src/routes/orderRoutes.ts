@@ -5,6 +5,7 @@ import {
   confirmFarmerTransport,
   lockEscrowDeposit,
   dispatchOrderLogistics,
+  getOrderDispatch,
   recordGpsTelemetry,
   getLatestGpsTelemetry,
   markOrderArrived,
@@ -233,6 +234,20 @@ router.post('/:id/dispatch', requireAuth, async (req: AuthRequest, res: Response
   } catch (error: any) {
     const status = error.status || 400;
     res.status(status).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/:id/dispatch', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const dispatch = await getOrderDispatch(id);
+
+    res.json({
+      success: true,
+      data: dispatch
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 

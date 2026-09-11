@@ -18,6 +18,7 @@ import {
   X
 } from 'lucide-react';
 import { Button, Card, StatusBadge, Input } from '../../components/ui';
+import { getCropImage, getCropByName } from '../../data/cropMaster';
 
 export const ProduceDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -69,9 +70,15 @@ export const ProduceDetailPage: React.FC = () => {
         {/* Left Image Section */}
         <div className="lg:col-span-5 relative h-72 lg:h-full bg-[#EAEFEA] min-h-[300px]">
           <img
-            src={produce.imageUrl}
+            src={getCropImage(produce.crop, produce.imageUrl)}
             alt={produce.crop}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              const fallback = getCropByName(produce.crop)?.fallbackImage || '/images/crops/tomato.jpg';
+              if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                (e.currentTarget as HTMLImageElement).src = fallback;
+              }
+            }}
           />
           <div className="absolute top-4 left-4 flex gap-2">
             <span className="px-3 py-1 bg-white/95 backdrop-blur-xs text-primary font-bold text-xs rounded-full shadow-xs">

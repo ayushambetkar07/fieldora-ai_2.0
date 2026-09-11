@@ -108,22 +108,28 @@ export function haversineDistance(c1: LocationCoords, c2: LocationCoords): numbe
  * Uses exact Haversine if coordinates match, or a realistic heuristic default if unknown.
  */
 export function calculateDistanceKm(farmerLoc: string, buyerLoc: string): number {
+  const fLower = (farmerLoc || '').toLowerCase().trim();
+  const bLower = (buyerLoc || '').toLowerCase().trim();
+
+  // 1. Established Key Agri-Transport Corridors
+  if (fLower === bLower) return 15;
+  if ((fLower.includes('nashik') && bLower.includes('mumbai')) || (fLower.includes('mumbai') && bLower.includes('nashik'))) return 165;
+  if ((fLower.includes('lasalgaon') && bLower.includes('mumbai')) || (fLower.includes('mumbai') && bLower.includes('lasalgaon'))) return 195;
+  if ((fLower.includes('pimpalgaon') && bLower.includes('mumbai')) || (fLower.includes('mumbai') && bLower.includes('pimpalgaon'))) return 185;
+  if ((fLower.includes('sinnar') && bLower.includes('mumbai')) || (fLower.includes('mumbai') && bLower.includes('sinnar'))) return 150;
+  if ((fLower.includes('pune') && bLower.includes('mumbai')) || (fLower.includes('mumbai') && bLower.includes('pune'))) return 148;
+  if ((fLower.includes('nashik') && bLower.includes('pune')) || (fLower.includes('pune') && bLower.includes('nashik'))) return 210;
+  if ((fLower.includes('indore') && bLower.includes('mumbai')) || (fLower.includes('mumbai') && bLower.includes('indore'))) return 585;
+
+  // 2. Coordinate-based Haversine with highway road factor
   const c1 = resolveCoordinates(farmerLoc);
   const c2 = resolveCoordinates(buyerLoc);
 
   if (c1 && c2) {
     const d = haversineDistance(c1, c2);
-    // Road travel adjustment factor (crow-fly vs highway travel ~ 1.15x)
-    return Math.max(10, Math.round(d * 1.15));
+    // Road travel adjustment factor (crow-fly vs highway travel ~ 1.18x)
+    return Math.max(10, Math.round(d * 1.18));
   }
-
-  // Same region fallback
-  const fLower = (farmerLoc || '').toLowerCase();
-  const bLower = (buyerLoc || '').toLowerCase();
-  if (fLower === bLower) return 15;
-  if (fLower.includes('nashik') && bLower.includes('mumbai')) return 165;
-  if (fLower.includes('mumbai') && bLower.includes('nashik')) return 165;
-  if (fLower.includes('indore') && bLower.includes('mumbai')) return 585;
 
   return 120; // Standard regional corridor average fallback
 }
